@@ -1,0 +1,177 @@
+{
+ "bloki": {
+  "w": 314,
+  "h": 560,
+  "touch_edge": false
+ },
+ "gran": {
+  "w": 340,
+  "h": 560,
+  "touch_edge": false
+ },
+ "pixel": {
+  "w": 265,
+  "h": 420,
+  "touch_edge": false
+ },
+ "krivo": {
+  "w": 396,
+  "h": 600,
+  "touch_edge": false
+ },
+ "zombie": {
+  "w": 347,
+  "h": 520,
+  "touch_edge": false
+ },
+ "spider": {
+  "w": 574,
+  "h": 420,
+  "touch_edge": false
+ },
+ "b_left": {
+  "w": 321,
+  "h": 300,
+  "touch_edge": false
+ },
+ "b_right": {
+  "w": 319,
+  "h": 300,
+  "touch_edge": false
+ },
+ "b_up": {
+  "w": 320,
+  "h": 300,
+  "touch_edge": false
+ },
+ "b_dig": {
+  "w": 319,
+  "h": 300,
+  "touch_edge": false
+ },
+ "b_place": {
+  "w": 302,
+  "h": 300,
+  "touch_edge": false
+ },
+ "b_bow": {
+  "w": 302,
+  "h": 300,
+  "touch_edge": false
+ },
+ "b_home": {
+  "w": 303,
+  "h": 300,
+  "touch_edge": false
+ },
+ "b_ok": {
+  "w": 303,
+  "h": 300,
+  "touch_edge": false
+ },
+ "chest": {
+  "w": 243,
+  "h": 300,
+  "touch_edge": false
+ },
+ "chest_open": {
+  "w": 243,
+  "h": 300,
+  "touch_edge": false
+ },
+ "diamond": {
+  "w": 242,
+  "h": 300,
+  "touch_edge": false
+ },
+ "heart": {
+  "w": 243,
+  "h": 300,
+  "touch_edge": false
+ },
+ "armor": {
+  "w": 243,
+  "h": 300,
+  "touch_edge": false
+ },
+ "prot_small": {
+  "w": 243,
+  "h": 300,
+  "touch_edge": false
+ },
+ "torch": {
+  "w": 243,
+  "h": 300,
+  "touch_edge": false
+ },
+ "arrow": {
+  "w": 242,
+  "h": 300,
+  "touch_edge": false
+ },
+ "cart": {
+  "w": 242,
+  "h": 300,
+  "touch_edge": false
+ },
+ "star": {
+  "w": 243,
+  "h": 300,
+  "touch_edge": false
+ },
+ "board": {
+  "w": 711,
+  "h": 211,
+  "touch_edge": false
+ },
+ "tab_grey": {
+  "w": 288,
+  "h": 300,
+  "touch_edge": false
+ },
+ "tab_sand": {
+  "w": 292,
+  "h": 300,
+  "touch_edge": false
+ },
+ "tab_purple": {
+  "w": 293,
+  "h": 300,
+  "touch_edge": false
+ },
+ "protractor": {
+  "w": 617,
+  "h": 309,
+  "touch_edge": false
+ },
+ "anvil": {
+  "w": 390,
+  "h": 300,
+  "touch_edge": false
+ },
+ "stick": {
+  "w": 657,
+  "h": 91,
+  "touch_edge": false
+ },
+ "iron": {
+  "w": 626,
+  "h": 156,
+  "touch_edge": false
+ },
+ "beam": {
+  "w": 650,
+  "h": 170,
+  "touch_edge": false
+ },
+ "sword": {
+  "w": 684,
+  "h": 108,
+  "touch_edge": false
+ },
+ "rotate": {
+  "w": 900,
+  "h": 446,
+  "touch_edge": false
+ }
+}

@@ -1,0 +1,1 @@
+heroes krivolom monsters tiles bg_forest bg_mine bg_river bg_village bg_desert bg_castle ui_buttons ui_items ui_boards ui_items2 rotate

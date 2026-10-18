@@ -1,0 +1,27 @@
+{
+ "name": "Кубический мир",
+ "short_name": "Кубический мир",
+ "start_url": "./",
+ "scope": "./",
+ "display": "fullscreen",
+ "display_override": [
+  "fullscreen",
+  "standalone"
+ ],
+ "orientation": "landscape",
+ "background_color": "#1b2433",
+ "theme_color": "#1b2433",
+ "icons": [
+  {
+   "src": "assets/ui/icon192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "assets/ui/icon512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ]
+}
