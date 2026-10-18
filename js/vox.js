@@ -118,7 +118,7 @@ function applyState(){
  const pg=SV.z>=4?3:(SV.tr.desert||0);for(let i=0;i<pg;i++){const[x,y,z]=PYR.gaps[i];vsetRaw(x,y,z,B.pyr)}
  for(const k in SV.diff){const[x,y,z]=k.split(',').map(Number);const t=vget(x,y,z);if(!BT[t].hard||t===B.dia||t===0)vsetRaw(x,y,z,SV.diff[k])}
  if(SV.z>=5)ROOF.forEach(([x,y,z])=>vsetRaw(x,y,z,B.roof))}
-function deckSpan(s,raw){const x0=RIV.x0+s*3;for(let x=x0;x<x0+3&&x<=RIV.x1;x++)for(let z=TZ-2;z<=TZ+2;z++)(raw?vsetRaw:vset)(x,GY,z,B.deck)}
+function deckSpan(s,raw){const x0=RIV.x0+s*3;const xe=s>=2?RIV.x1:x0+2;for(let x=x0;x<=xe&&x<=RIV.x1;x++)for(let z=TZ-2;z<=TZ+2;z++)(raw?vsetRaw:vset)(x,GY,z,B.deck)}
 function openGate(x,raw){for(let z=TZ-2;z<=TZ+2;z++)for(let y=GY+1;y<=GY+3;y++)(raw?vsetRaw:vset)(x,y,z,0)}
 function setBlock(x,y,z,t){vset(x,y,z,t);SV.diff[x+','+y+','+z]=t;save()}
 // ---- чанки: только видимые грани, мягкие тени в углах (AO), освещение граней ----

@@ -176,7 +176,7 @@ G.tp=(x,z,y)=>{PL.p.set(x,y!=null?y:groundTop(x,z),z);PL.v.set(0,0,0);[GRN,DOG].
 G.P=()=>({x:PL.p.x,y:PL.p.y,z:PL.p.z,onG:PL.onG,inv:SV.inv,sel:SV.sel,z_:SV.z,dia:SV.dia,mw:SV.mw,placed:SV.placed.length,st:SV.st,house:SV.house});
 G.vget=(x,y,z)=>vget(x,y,z);G.aim=()=>AIM?{x:AIM.x,y:AIM.y,z:AIM.z,n:AIM.n,b:vget(AIM.x,AIM.y,AIM.z)}:null;
 G.look=(yaw,pitch)=>{CAMS.yaw=yaw;CAMS.pitch=pitch;stepCam(0,true)};
-G.blockXY=(x,y,z)=>{const p=new T3.Vector3(x+.5,y+.5,z+.5).project(CAM);return{x:(p.x+1)/2*W,y:(1-p.y)/2*H,vis:p.z<1}};
+G.blockXY=(x,y,z)=>{const c=CAM.position,ctr=[x+.5,y+.5,z+.5],cp=[c.x,c.y,c.z];let best=null,bd=-2;for(let a=0;a<3;a++)for(const sg of[-1,1]){const f=ctr.slice();f[a]+=sg*.48;const dv=[cp[0]-f[0],cp[1]-f[1],cp[2]-f[2]];const cs=dv[a]*sg/Math.hypot(...dv);if(cs>bd){bd=cs;best=f}}const p=new T3.Vector3(best[0],best[1],best[2]).project(CAM);return{x:(p.x+1)/2*W,y:(1-p.y)/2*H,vis:p.z<1}};
 G.roof=()=>ROOF.map(([x,y,z])=>{const p=new T3.Vector3(x+.5,y+.5,z+.5).project(CAM);return{x:(p.x+1)/2*W,y:(1-p.y)/2*H}});
 G.night=k=>{DAY.night=true;DAY.t=5;openTask(k);return G.task()};G.day=()=>{DAY.night=false;DAY.t=0};
 G.zone=k=>{SV=freshSV();SV.f={intro:1,t1:1,t2:1,t3:1,tut:1,m0:1,tl:1,tv:1,t4:1,mdone:1};SV.inv={2:6,3:4};SV.sel=2;if(k>=2){SV.mw=3;SV.dia=3;SV.z=1;SV.f.sp1=1}if(k>=3){SV.z=2;SV.f.zb1=1;SV.f.r0=1}if(k>=4){SV.z=3;SV.armor=1}if(k>=5)SV.z=4;
