@@ -161,7 +161,7 @@ const CQ={eq:[5,5,5],iso:[6,6,4],sc:[4,5,6]},CN={eq:'РАВНОСТОРОННИ�
 function triSides(a,b,c,box){// стороны: основание c, боковые a (слева), b (справа)
  const[x,y,w,h]=box;const px=(a*a-b*b+c*c)/(2*c),py=Math.sqrt(Math.max(0,a*a-px*px));const sc=Math.min(w*.84/c,h*.76/py);const ox=x+w/2-c*sc/2,oy=y+h*.84;return[[ox,oy],[ox+c*sc,oy],[ox+px*sc,oy-py*sc]]}
 TD.castle={enter(t){t.r=SV.tr.castle||0;if(!SV.f.ord){SV.f.ord=shuffle(['eq','iso','sc'])}t.ord=SV.f.ord;if(!SV.f.c0){SV.f.c0=1;say('c0').catch(()=>{})}say(t.r<3?'c_q':'c_roof').catch(()=>{})},
- focus(t){return t.r<3?[179.5*TS,GR*TS-TS*1.6]:[180*TS,5*TS]},
+ focus(t){return t.r<3?[179.5*TS,GR*TS-TS*1.6]:[180*TS,6.42*TS]},
  draw(t){if(t.r>=3){for(const[c,r]of ROOF)if(!tget(c,r)){X.save();X.globalAlpha=.35+.25*Math.sin(T*5);const i=IM.t_castle;if(ok(i))X.drawImage(i,wx(c*TS),wy(r*TS),TS,TS);X.strokeStyle='#ffe066';X.lineWidth=5;X.strokeRect(wx(c*TS)+3,wy(r*TS)+3,TS-6,TS-6);X.restore()}return}
   const L=layout();const pw=Math.min(L.pw*.62,760);const b=nine('tab_purple',L.s.x0+20+(L.cx-L.pw/2-L.s.x0-20)*.5,L.top,pw,L.ph);if(!b)return;const[x,y,w,h]=b;const k=t.ord[t.r],sd=CQ[k];const p=triSides(sd[0],sd[1],sd[2],[x+w*.1,y+h*.06,w*.8,h*.94]);
   if(t.brk&&T-t.brk<1)X.globalAlpha=1-(T-t.brk);triFill(p,'castle',{lw:12,st:'#ffe066'});X.globalAlpha=1;

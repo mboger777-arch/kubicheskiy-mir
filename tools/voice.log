@@ -212,3 +212,42 @@ Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
 63 c_ok 0.0  Ой! Ой! Мой щит разбит!
 manifest 66
 Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+64 c_roof 0.0  Последнее дело. Построй на башне треугольную крышу.  Ставь блоки на светлые места.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+65 c_win 0.083  Триугольная крыша. Её не сломать. Ладно, я сдаюсь. Теперь буду строить ровно.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+66 f1 0.0  Кубический мир спасен.  Углы и треугольники снова на месте.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+67 f2 0.0  Ты настоящий мастер углов.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+68 f3 0.0  Спасибо! Вместе мы построили целый мир!
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+69 f4 0.0  Гав, приходи ещё играть.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+70 ch 0.0  Сундук, а в нём загадка.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+71 s1 0.0  Сколько прямых углов у квадрата?
+manifest 74
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+72 s2 0.0  Сколько углов у треугольника?
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+73 s3 0.0  чему равна сумма углов треугольника.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+74 s4 0.0  Может ли у треугольника быть два прямых угла?
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+75 s_ok 0.0  Правильно. Это золотая звезда.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+76 s_bad 0.0  Подумай ещё и попробуй снова.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+77 b_yes 0.0  Получилось!
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+78 b_go 0.0  Вперёд!
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+79 lock 0.0  Сюда пока рано.  Иди по порядку.
+manifest 82
+manifest 82
+VOICEDONE

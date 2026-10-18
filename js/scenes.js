@@ -31,7 +31,7 @@ SC.fin={skipOnTalk:1,enter(){const c=ctxNow();run(async()=>{for(const k of['f1',
  ui(){const s=safeV();drawBtn('b_home',s.x0+80,s.y1-TS*1.6-80,130);btn('home',s.x0+80,s.y1-TS*1.6-80,130,130,()=>go('title'));
   drawBtn('b_ok',s.x1-80,s.y1-TS*1.6-80,130);btn('world',s.x1-80,s.y1-TS*1.6-80,130,130,()=>go('world'))}};
 // ---- мир ----
-function granSpot(){if(SV.z===0&&!SV.f.tut)return 9.5;if(SV.z===0)return SV.mw>=3?47.5:[27.5,37.5,48.5][SV.mw];return[0,63.5,92.5,133.5,172.5,172.5][SV.z]}
+function granSpot(){if(SV.z===0&&!SV.f.tut)return 9.5;if(SV.z===0)return SV.mw>=3?47.5:[27.5,37.5,48.5][SV.mw];return[0,61.2,92.5,133.5,172.5,172.5][SV.z]}
 let GRAN={x:9.5*TS,y:GR*TS},STIN={};
 function stations(){const L=[];if(SV.z===0&&SV.f.tut&&SV.mw<3){const c=MWALLS[SV.mw];L.push({id:'mw',arg:SV.mw,near:P.x>(c-1.5)*TS&&P.x<(c+.2)*TS&&P.y>GR*TS})}
  if(SV.z===1)L.push({id:'river',near:Math.abs(P.x-64.5*TS)<1.6*TS});if(SV.z===2)L.push({id:'forge',near:Math.abs(P.x-93*TS)<1.8*TS&&P.y<=GR*TS+2});

@@ -105,6 +105,6 @@ d.rectangle([10,14,58,42],fill=C('#141414'));d.rectangle([12,16,56,40],fill=C('#
 d.rectangle([74,6,94,50],fill=C('#141414'));d.rectangle([76,8,92,48],fill=C('#2a2a32'));d.rectangle([78,10,90,46],fill=C('#6ab8f5'))
 for i in range(0,60,3):
   a=math.radians(200+i*2.3);x=66+22*math.cos(a);y=30+18*math.sin(a)
-d.arc([42,4,90,40],200,330,fill=C('#ffffff'),width=3);d.polygon([(84,12),(92,20),(80,22)],fill=C('#ffffff'))
+d.arc([42,4,90,40],200,330,fill=C('#ffffff'),width=3);d.polygon([(37,11),(49,11),(42,21)],fill=C('#ffffff'))
 im=im.transpose(Image.FLIP_LEFT_RIGHT).resize((w*8,h*8),Image.NEAREST);im.save(OUT+'rotate.png')
 print('ui ok')
