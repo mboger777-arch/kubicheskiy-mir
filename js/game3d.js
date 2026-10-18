@@ -163,7 +163,7 @@ function lineup(names,x,z,yaw){const ents={bloki:PL,gran:GRN,pixel:DOG,krivo:KR}
 function showScene(names,x,z,camDist,camH){if(!WORLD_READY||!PL)setupWorld();const yaw=-Math.PI/2;lineup(names,x,z,yaw);CAMS.fp=false;focusAt(x,GY+1+(camH||1.25),z+.5,Math.PI/2,-.06,camDist||6.2);stepCam(0,true)}
 function idleScene(dt){for(const e of[PL,GRN,DOG,KR]){if(e.hide)continue;e.walk=0;e.ty=Math.atan2(CAM.position.x-e.p.x,CAM.position.z-e.p.z);if(talk&&({bloki:PL,gran:GRN,pixel:DOG,krivo:KR})[talk.who]===e){e.walk=.25}animEnt(e,dt)}stepCam(dt)}
 SC.title={enter(){showScene(['bloki','gran','pixel'],12.5,TZ,6.4,1.3)},update(dt){idleScene(dt);CAMS.focus.yaw=Math.PI/2+Math.sin(T*.25)*.25},draw(){render3d(DT);const s=safeV();
-  const lw=Math.min(860,s.x1-s.x0-40),lh=Math.min(170,lw*.2);const lb=nine('board',(s.x0+s.x1)/2-lw/2,s.y0,lw,lh);if(lb){fitText('Кубический мир',[lb[0],lb[1],lb[2],lb[3]*.62],86,'#ffe066',{one:1});fitText('тайна треугольников',[lb[0],lb[1]+lb[3]*.6,lb[2],lb[3]*.4],46,'#fff',{one:1})}},
+  const lw=Math.min(860,s.x1-s.x0-40),lh=Math.min(170,lw*.2);const lb=nine('board',(s.x0+s.x1)/2-lw/2,s.y0,lw,lh);if(lb){fitText('Кубический мир',[lb[0],lb[1],lb[2],lb[3]*.58],80,'#ffe066',{one:1});fitText('тайна треугольников',[lb[0],lb[1]+lb[3]*.6,lb[2],lb[3]*.38],42,'#fff',{one:1})}},
  ui(){const s=safeV();const cx=s.x1-130,cy=s.y1-190;drawBtn('b_ok',cx,cy,180,{pulse:1});btn('play',cx,cy,180,180,()=>{go(SV.f.intro?'world':'intro')});
   const tb=nine('board',cx-120,cy+96,240,80);if(tb)fitText(SV.z||SV.f.intro?'Дальше':'Играть',tb,44,'#fff',{one:1});
   if(SV.f.intro){const rx=s.x0+120,ry=s.y1-90;tabBtn('reset',rx,ry,220,96,'Заново',()=>{SV=freshSV();save(1);go('intro')},{fs:36,one:1})}}};
