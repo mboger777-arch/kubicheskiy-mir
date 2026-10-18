@@ -70,7 +70,7 @@ function sparks(x,y,n,col){for(let i=0;i<n;i++){const a=Math.random()*6.283,v=rn
 function stepParticles(){for(let i=PS.length-1;i>=0;i--){const p=PS[i];p.life-=p.dec*DT;if(p.life<=0){PS.splice(i,1);continue}if(p.g)p.vy+=1100*DT;else{p.vx*=.95;p.vy*=.95}p.x+=p.vx*DT;p.y+=p.vy*DT;p.rot+=p.vr*DT}}
 function drawParticles(ox,oy){for(const p of PS){X.globalAlpha=clamp(p.life*1.5,0,1);X.fillStyle=p.col;X.save();X.translate(p.x-ox,p.y-oy);X.rotate(p.rot);const s=p.s*(p.star?p.life:1);X.fillRect(-s/2,-s/2,s,s);X.restore()}X.globalAlpha=1}
 // ---- нарисованные доски: 9-срез (углы рамки не растягиваются), внутренний светлый прямоугольник для текста ----
-const NINE={board:{c:.26,ins:.95},tab_grey:{c:.17,ins:.85},tab_sand:{c:.17,ins:.85},tab_purple:{c:.17,ins:.85}};
+const NINE={board:{c:.13,ins:.9},tab_grey:{c:.1,ins:.85},tab_sand:{c:.1,ins:.85},tab_purple:{c:.1,ins:.85}};
 function nine(n,x,y,w,h,alpha){const i=IM[n],d=NINE[n];if(!ok(i)){return[x+w*.1,y+h*.15,w*.8,h*.7]}
  const iw=i.naturalWidth,ih=i.naturalHeight,cs=Math.min(iw,ih)*d.c,cd=Math.min(cs*Math.min(w/iw,h/ih)*2.2,Math.min(w,h)*.3,cs*1.4);
  const sx=[0,cs,iw-cs,iw],sy=[0,cs,ih-cs,ih],dx=[x,x+cd,x+w-cd,x+w],dy=[y,y+cd,y+h-cd,y+h];if(alpha!=null)X.globalAlpha=alpha;

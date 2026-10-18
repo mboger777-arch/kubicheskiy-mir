@@ -26,7 +26,8 @@ async def main():
           N+=1
           if not inside(t['b'],t['c']):F.append(f'{tag} {name}: «{t["t"]}» out of its board {[round(v) for v in t["b"]]} vs {[round(v) for v in t["c"]]}')
           if t['size']<13:F.append(f'{tag} {name}: «{t["t"]}» font {t["size"]:.1f}css too small')
-          if t['b'][0]<0 or t['b'][1]<0 or t['b'][2]>W or t['b'][3]>H:F.append(f'{tag} {name}: «{t["t"]}» off screen')
+          cb=t['c'];board_on=cb[0]>=0 and cb[1]>=0 and cb[2]<=W and cb[3]<=H
+          if board_on and (t['b'][0]<0 or t['b'][1]<0 or t['b'][2]>W or t['b'][3]>H):F.append(f'{tag} {name}: «{t["t"]}» off screen')
         for i,x in enumerate(a['t']):
           for y in a['t'][i+1:]:
             if ov(x['b'],y['b'])>4:F.append(f'{tag} {name}: «{x["t"]}» overlaps «{y["t"]}»')

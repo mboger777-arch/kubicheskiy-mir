@@ -1,0 +1,10 @@
+<!doctype html><meta charset=utf-8><body style="margin:0;background:#0000"><script type=module>
+import * as THREE from './vendor/three.module.js';import {ALL} from './chars.js';import {loadTex,renderBg} from './bg.js';
+const R=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});R.setPixelRatio(1);R.outputColorSpace=THREE.SRGBColorSpace;document.body.appendChild(R.domElement);
+window.renderSprite=(name,yaw=16,W=900,H=1100)=>{const sc=new THREE.Scene();const o=ALL[name]();sc.add(o);
+ sc.add(new THREE.HemisphereLight(0xffffff,0x8888aa,1.9));const d=new THREE.DirectionalLight(0xfff4e0,2.2);d.position.set(-30,50,60);sc.add(d);const d2=new THREE.DirectionalLight(0xc0d0ff,.7);d2.position.set(40,10,-20);sc.add(d2);
+ const bb=new THREE.Box3().setFromObject(o),c=bb.getCenter(new THREE.Vector3()),sz=bb.getSize(new THREE.Vector3());
+ const cam=new THREE.PerspectiveCamera(18,W/H,1,2000);const dist=Math.max(sz.y,sz.x*H/W)/(2*Math.tan(9*Math.PI/180))*1.25+sz.z;const a=yaw*Math.PI/180;
+ cam.position.set(c.x+Math.sin(a)*dist,c.y+dist*.16,c.z+Math.cos(a)*dist);cam.lookAt(c.x,c.y,c.z);R.setSize(W,H);R.setClearColor(0,0);R.render(sc,cam);return R.domElement.toDataURL('image/png')};
+window.bg=(z,W,H)=>renderBg(R,z,W,H);loadTex().then(()=>window.ready=1);
+</script>

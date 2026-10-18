@@ -26,8 +26,8 @@ SC.intro={skipOnTalk:1,enter(){const c=ctxNow();this.k=0;run(async()=>{for(let i
 // ---- финал ----
 SC.fin={skipOnTalk:1,enter(){const c=ctxNow();run(async()=>{for(const k of['f1','f2','f3','f4'])await say(k,c)})},
  update(){if(Math.random()<.06){const v=vis();sparks(rnd(v.x0+100,v.x0+v.w-100),rnd(v.y0+100,v.y0+v.h*.45),18,pick(['#ffe066','#ff7a3a','#7ad04a','#5fd0ff','#ff6ad0']))}},
- draw(){sceneBg('castle');const gy=groundStrip('castle','castle');castRow(['bloki','gran','pixel','krivo'],gy,.85);drawParticles(0,0);
-  const s=safeV();const w=Math.min(760,s.x1-s.x0-40),h=110;const b=nine('board',(s.x0+s.x1)/2-w/2,s.y0+150,w,h);if(b){const n=SV.st.reduce((a,b)=>a+b,0)+(SV.house?1:0);fitText('Звёзды: '+n+' из 5   Алмазы: '+SV.dia,b,44,'#ffe066',{one:1})}},
+ draw(){sceneBg('castle');const gy=groundStrip('castle','castle');castRow(['bloki','gran','pixel','krivo'],gy,.78);drawParticles(0,0);
+  const s=safeV();const w=Math.min(760,s.x1-s.x0-40),h=96;const b=nine('board',(s.x0+s.x1)/2-w/2,s.y0+140,w,h);if(b){const n=SV.st.reduce((a,b)=>a+b,0)+(SV.house?1:0);fitText('Победа!  Звёзды: '+n+' из 5   Алмазы: '+SV.dia,b,44,'#ffe066',{one:1})}},
  ui(){const s=safeV();drawBtn('b_home',s.x0+80,s.y1-TS*1.6-80,130);btn('home',s.x0+80,s.y1-TS*1.6-80,130,130,()=>go('title'));
   drawBtn('b_ok',s.x1-80,s.y1-TS*1.6-80,130);btn('world',s.x1-80,s.y1-TS*1.6-80,130,130,()=>go('world'))}};
 // ---- мир ----

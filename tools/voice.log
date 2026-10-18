@@ -139,3 +139,76 @@ Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
 manifest 42
 Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
 Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+40 r_tri 0.0  Треугольник держит, его не сложить, стороны не дают углам меняться.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+41 r2q 0.0  Второй пролет, квадрат, добавь одну балку, чтобы он стал крепким.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+42 r2_bad 0.0  Всё равно складывается.  Попробуй балку наискосок.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+43 r2_ok 0.3  Диагональ разделила квадрат на 2-3 угольника.  Теперь он не сложится.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+44 r3q 0.0  Последний пролет. Какая фигура не сложится?
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+45 r3_bad 0.0  Эта фигура тоже шатается. Ищи треугольник.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+46 r_done 0.0  Мост готов. Переходим реку.  Дальше деревня Кузнеца.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+47 v0 0.0  Это кузница. Кузнец перепутал кирки. Разложи их по сундукам. Острый, прямой и тупой угол.
+manifest 50
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+48 v_q 0.0  Нажми на кирку, а потом на сундук.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+49 v_r2 0.0  Теперь без чисел. Посмотри на угол и сравни его с прямым.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+50 v_done 0.0  Все кирки на месте.  Держи железную броню.  Ворота в пустыню открыты.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+51 house 0.091  Здесь можно построить свой домик из добытых блоков.  Стой, как хочешь.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+52 house_ok 0.0  Какой красивый домик! Гав, Гав!
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+53 d0 0.105  Пирамида разрушена.  В каждом треугольнике сумма углов равна 180 градусам.  Найди потерянный угол и блок встанет на место.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+54 d_q 0.0  Два угла известны.  Сколько градусов в третьем?
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+55 d_bad 0.2  Не сходится.  Сложи все три угла.  Должно получиться 180.
+manifest 58
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+56 d_ok 0.2  Точно, три угла вместе дают 180 градусов ровную линию.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+57 d_done 0.0  Пирамида целая, открылся путь к замку Криволома.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+58 c0 0.0  Вы дошли до моего замка, мои кривые щиты вам не разбить.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+59 c_q 0.0  Какой треугольник на щите?  Сравни его стороны.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+60 c_eq 0.0  Все три стороны равны. Это равносторонний треугольник.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+61 c_iso 0.0  Две стороны равны, а третья другая – это равнобедренный  треугольник.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+62 c_sc 0.0  Все стороны разные.  Это разносторонний треугольник.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+63 c_ok 0.0  Ой! Ой! Мой щит разбит!
+manifest 66
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
