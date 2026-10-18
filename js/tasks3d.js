@@ -15,7 +15,8 @@ function optRow(t,opts,fn,o){o=o||{};const L=layout();const n=opts.length,gap=26
  const cx0=o.cx!=null?o.cx:L.cx;opts.forEach((op,i)=>{const cx=cx0+(i-(n-1)/2)*(w+gap);tabBtn(op.id,cx,L.optY,w,h,op.label,()=>fn(op.id),{tab:o.tab,wob:t.wob[op.id],draw:op.draw,fs,one:1,sel:op.sel})})}
 function backBtn(){const s=safeV();drawBtn('b_left',s.x0+58,s.y0+58,104);btn('back',s.x0+58,s.y0+58,104,104,()=>{closeTask()})}
 // камера смотрит на место задания: t — точка, yaw/pitch — направление, dist — расстояние
-function focusAt(x,y,z,yaw,pitch,dist){CAMS.focus={t:[x,y,z],yaw,pitch,dist}}
+function focusAt(x,y,z,yaw,pitch,dist,alts){let best=null;for(const yw of[yaw].concat(alts||[])){const dir=new T3.Vector3(-Math.sin(yw)*Math.cos(pitch),-Math.sin(pitch),-Math.cos(yw)*Math.cos(pitch));const h=rayVox(new T3.Vector3(x,y,z),dir,dist,b=>opaqueT(b));const d=h?h.t:dist;if(!best||d>best.d+.4)best={yw,d};if(d>=dist*.85)break}
+ CAMS.focus={t:[x,y,z],yaw:best.yw,pitch,dist}}
 // экранная точка (дизайн-координаты) для точки мира
 function scr(x,y,z){const v=new T3.Vector3(x,y,z).project(CAM);return[((v.x+1)/2*W-OX)/S,((1-v.y)/2*H-OY)/S,v.z<1]}
 // простые 3D-предметы
@@ -62,7 +63,7 @@ TD.spider={enter(t,ent){const first=!SV.f.sp1;SV.f.sp1=1;save();t.a=first?pick([
 TD.zombie={enter(t,ent){const first=!SV.f.zb1;SV.f.zb1=1;save();const sets=[[60,90,120],[45,90,135],[75,90,105]];t.set=shuffle(sets[Math.floor(Math.random()*3)].slice());
   t.ent=ent||spawnMonster('zombie',PL.p.x+5,PL.p.z);t.ent.task=1;const d=new T3.Vector3(t.ent.p.x-PL.p.x,0,t.ent.p.z-PL.p.z);if(d.length()<.5)d.set(1,0,0);d.normalize();t.dir=d;
   t.wallAt=PL.p.clone().addScaledVector(d,1.7);t.wallAt.y=groundAt(t.wallAt.x,t.wallAt.z,PL.p.y+2);t.stop=3.4;t.dist=Math.max(3.6,Math.min(6,Math.hypot(t.ent.p.x-PL.p.x,t.ent.p.z-PL.p.z)));
-  const yaw=Math.atan2(d.x,d.z)+Math.PI/2;const mid=PL.p.clone().addScaledVector(d,1.8);focusAt(mid.x,PL.p.y+1.2,mid.z,yaw,-.12,7);t.wall=null;t.dead=0;say('zb_in').catch(()=>{})},
+  const yaw=Math.atan2(d.x,d.z)+Math.PI/2;const mid=PL.p.clone().addScaledVector(d,1.8);const by=Math.atan2(d.x,d.z);focusAt(mid.x,PL.p.y+1.2,mid.z,yaw,-.12,7,[yaw-Math.PI,by-.5,by+.5,by]);t.wall=null;t.dead=0;say('zb_in').catch(()=>{})},
  update(t,dt){const e=t.ent;if(t.dead)return;const tgt=t.wall&&t.wall.a===90?2.4:t.stop;t.dist+=(clamp(tgt-t.dist,-1,1))*(t.back?2.4:1.2)*dt*(Math.abs(tgt-t.dist)>.02?1:0);
   const p=PL.p.clone().addScaledVector(t.dir,t.dist);e.p.x=p.x;e.p.z=p.z;e.v.x=e.v.z=0;e.walk=Math.abs(tgt-t.dist)>.05?1:0;e.ty=Math.atan2(-t.dir.x,-t.dir.z);
   if(t.wm){const k=T-t.wall.t0;let a=t.wall.a;if(a!==90&&k>.35){const f=ease((k-.35)/.6);a=lerp(a,a<90?0:180,f)}t.wm.rotation.set(0,0,0);t.wm.rotateOnAxis(t.axis,(90-a)*R2D)}},
@@ -162,7 +163,7 @@ TD.desert={enter(t){t.r=SV.tr.desert||0;t.opts=shuffle(DQ[t.r].o.slice());focusA
 const CQ={eq:[5,5,5],iso:[6,6,4],sc:[4,5,6]},CN={eq:'РАВНОСТОРОННИЙ',iso:'РАВНОБЕДРЕННЫЙ',sc:'РАЗНОСТОРОННИЙ'},CHH={eq:'c_eq',iso:'c_iso',sc:'c_sc'};
 function triSides(a,b,c,box){const[x,y,w,h]=box;const px=(a*a-b*b+c*c)/(2*c),py=Math.sqrt(Math.max(0,a*a-px*px));const sc=Math.min(w*.84/c,h*.76/py);const ox=x+w/2-c*sc/2,oy=y+h*.84;return[[ox,oy],[ox+c*sc,oy],[ox+px*sc,oy-py*sc]]}
 TD.castle={enter(t){t.r=SV.tr.castle||0;if(!SV.f.ord){SV.f.ord=shuffle(['eq','iso','sc'])}t.ord=SV.f.ord;if(!SV.f.c0){SV.f.c0=1;say('c0').catch(()=>{})}say(t.r<3?'c_q':'c_roof').catch(()=>{});TD.castle.cam(t);if(t.r>=3)TD.castle.ghosts(t)},
- cam(t){if(t.r<3)focusAt(166,GY+2.4,TZ+.5,Math.PI/2,-.1,8.5);else focusAt(164.5,TOWER.top+.6,TZ+.5,Math.PI*.62,-.3,8.5)},
+ cam(t){if(t.r<3)focusAt(158.6,GY+2.6,TZ+1.6,Math.PI/2,-.12,7.5);else focusAt(164.5,TOWER.top+2.2,TZ+.5,Math.PI*.62,-.32,9)},
  ghosts(t){GHOSTS.forEach(m=>SCENE.remove(m));GHOSTS=[];for(const[x,y,z]of ROOF){const m=new T3.Mesh(new T3.BoxGeometry(1,1,1),new T3.MeshBasicMaterial({color:0xffe066,transparent:true,opacity:.35,depthWrite:false}));m.position.set(x+.5,y+.5,z+.5);m.userData.c=[x,y,z];SCENE.add(m);GHOSTS.push(m)}},
  update(t){for(const g of GHOSTS){const[x,y,z]=g.userData.c;g.visible=vget(x,y,z)!==B.roof;g.material.opacity=.25+.2*Math.sin(T*5)}},
  draw(t){if(t.r>=3)return;const L=layout();const pw=Math.min(L.pw*.62,760);const b=nine('tab_purple',L.s.x0+20+(L.cx-L.pw/2-L.s.x0-20)*.5,L.top,pw,L.ph,.95);if(!b)return;const[x,y,w,h]=b;const k=t.ord[t.r],sd=CQ[k];const p=triSides(sd[0],sd[1],sd[2],[x+w*.1,y+h*.06,w*.8,h*.94]);

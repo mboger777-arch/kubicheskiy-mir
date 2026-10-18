@@ -175,7 +175,7 @@ async def run(b,W,H,F,R):
   if p['dia']<3 or p['z_']<1:F.append(f'{tag} mine: dia={p["dia"]} z={p["z_"]}')
   await shot('mine_done')
   # ---- монстры ночью: сами приходят
-  await E("G.zone(2);G.close();DAY.night=true;DAY.t=5;DAY.spawn=0.1;SV.f.zb1=1");await pg.wait_for_timeout(500);await E('G.tp(58.5,23.5);talk=null')
+  await E("G.zone(2);G.close();DAY.night=true;DAY.t=5;DAY.spawn=0.1;SV.f.zb1=1");await pg.wait_for_timeout(500);await E('G.tp(58.5,23.5,13);talk=null')
   t0=time.time()
   while time.time()-t0<25 and not await task():await pg.wait_for_timeout(300)
   t=await task()

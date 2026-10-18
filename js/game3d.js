@@ -63,15 +63,20 @@ function doPlace(){if(TASK)return;const h=AIM;if(!h){hint('t_far');return}const 
 function undoBlock(){if(TASK)return;const q=SV.placed.pop();if(!q){SFX.bad();return}const[x,y,z,t]=q;if(vget(x,y,z)===t){cubeBurst(x,y,z,t,6);setBlock(x,y,z,0);invAdd(t,1);SFX.dig()}save();EV('undo')}
 const EVL={};function EV(k,a){(EVL[k]||[]).forEach(f=>f(a))}function onEV(k,f){(EVL[k]=EVL[k]||[]).push(f)}
 // ---- монстры ночью ----
-function spawnMonster(kind,x,z){const e=mkEnt(kind,x,z,{h:kind==='spider'?.9:1.8,hw:kind==='spider'?.45:.3});e.speed=1.7;MON.push(e);return e}
+function spawnMonster(kind,x,z,y){const e=mkEnt(kind,x,z,{h:kind==='spider'?.9:1.8,hw:kind==='spider'?.45:.3});if(y!=null){e.p.y=y;placeEnt(e)}e.speed=1.7;MON.push(e);return e}
 function monsterDone(){DAY.kills++;DAY.spawn=10}
 function stepMonsters(dt){for(const e of MON.slice()){if(!ENTS.includes(e)){MON.splice(MON.indexOf(e),1);continue}if(e.task)continue;
   const dx=PL.p.x-e.p.x,dz=PL.p.z-e.p.z,d=Math.hypot(dx,dz)||1;let mx=dx/d,mz=dz/d;if(e.flee>0){e.flee-=dt;mx=-mx;mz=-mz}
   if(!DAY.night&&!e.fixed){mx=-mx;mz=-mz;e.gone=(e.gone||0)+dt;if(e.gone>3){rmEnt(e);continue}}
   physEnt(e,dt,d>2.6||e.flee>0?mx:0,d>2.6||e.flee>0?mz:0,false);animEnt(e,dt);
   if(d<3.2&&!TASK&&!(e.flee>0)&&(DAY.night||e.fixed)&&Math.abs(PL.p.y-e.p.y)<2.5)openTask(e.kind,e)}}
+// место для монстра: на том же уровне, что и Блоки (в туннеле — по туннелю), 6–10 блоков, есть место над головой, не в воде
+function spawnSpot(){const py=Math.round(PL.p.y);for(let i=0;i<40;i++){const a=i<8?(i%2?0:Math.PI)+(Math.random()-.5)*.3:Math.random()*6.28,r=6+Math.random()*4;
+  const x=clamp(PL.p.x+Math.sin(a)*r,1,barrierX()-1),z=clamp(PL.p.z+Math.cos(a)*r,2,WZ-3);if(x>RIV.x0-1&&x<RIV.x1+1)continue;
+  const y=groundAt(x,z,py+1.5);if(Math.abs(y-PL.p.y)>1.01)continue;const X_=Math.floor(x),Z_=Math.floor(z);if(vget(X_,y,Z_)||vget(X_,y+1,Z_)||BT[vget(X_,y-1,Z_)].fluid)continue;
+  let ok=true;const n=Math.ceil(r);for(let k=1;k<n;k++){const qx=Math.floor(PL.p.x+(x-PL.p.x)*k/n),qz=Math.floor(PL.p.z+(z-PL.p.z)*k/n);const gy=groundAt(qx+.5,qz+.5,py+1.5);if(Math.abs(gy-PL.p.y)>1.01||vget(qx,gy+1,qz)){ok=false;break}}if(ok)return[x+0,y,z]}return null}
 function stepDay(dt){if(SV.mw<1){DAY.night=false;return}DAY.t+=dt;const L=DAY.night?NIGHTLEN:DAYLEN;if(DAY.t>L){DAY.t=0;DAY.night=!DAY.night;if(DAY.night)say('n1').catch(()=>{});else say('n2').catch(()=>{})}
- if(DAY.night&&!TASK){DAY.spawn-=dt;if(DAY.spawn<=0&&MON.filter(m=>!m.fixed).length<1){DAY.spawn=18;const a=Math.random()*6.28;let x=clamp(PL.p.x+Math.cos(a)*9,1,barrierX()-1),z=clamp(PL.p.z+Math.sin(a)*9,2,WZ-3);if(x>RIV.x0-1&&x<RIV.x1+1&&SV.z<2)x=RIV.x0-3;spawnMonster(DAY.next,x,z);DAY.next=DAY.next==='spider'?'zombie':'spider'}}}
+ if(DAY.night&&!TASK){DAY.spawn-=dt;if(DAY.spawn<=0&&MON.filter(m=>!m.fixed).length<1){const sp=spawnSpot();if(sp){DAY.spawn=18;spawnMonster(DAY.next,sp[0],sp[2],sp[1]);DAY.next=DAY.next==='spider'?'zombie':'spider'}else DAY.spawn=1}}}
 function nightK(){if(!DAY.night){const k=DAY.t>DAYLEN-6?(DAY.t-(DAYLEN-6))/6:0;return clamp(k,0,1)*.9}const k=DAY.t<4?DAY.t/4:DAY.t>NIGHTLEN-5?(NIGHTLEN-DAY.t)/5:1;return .9*clamp(k,0,1)+.0}
 // ---- спутники: идут следом, при разговоре поворачиваются к ребёнку ----
 function follow(e,off,dt){const ty=PL.yaw;const tx=PL.p.x-Math.sin(ty)*off[0]+Math.cos(ty)*off[1],tz=PL.p.z-Math.cos(ty)*off[0]-Math.sin(ty)*off[1];
@@ -102,7 +107,7 @@ function stepStory(){const f=SV.f;
 onEV('dig',()=>{if(!SV.f.t3){SV.f.t3=1;save();say('t3').catch(()=>{})}});
 onEV('place',()=>{if(!SV.f.tv){SV.f.tv=1;say('t_view').catch(()=>{});say('t_undo').catch(()=>{});setTimeout(()=>{if(!SV.f.t4){SV.f.t4=1;SV.f.tut=1;save();say('t4').catch(()=>{})}},200)}});
 // ---- рендер мира + HUD ----
-function render3d(dt){if(!REN)return;stepSky(dt,nightK());stepChunks(2);stepCubes(dt);
+function render3d(dt){if(!REN)return;for(const e of ENTS){if(e.hide)continue;const dx=e.p.x-CAM.position.x,dy=e.p.y+e.h*.5-CAM.position.y,dz=e.p.z-CAM.position.z;e.obj.visible=Math.hypot(dx,dy,dz)>1.5}stepSky(dt,nightK());stepChunks(2);stepCubes(dt);
  for(const c of CHUNK){if(!c)continue;const cx=c.cx*CH+8,cz=c.cz*CH+8;const d=Math.hypot(cx-CAM.position.x,cz-CAM.position.z);const v=d<62;c.m.visible=v;if(c.w)c.w.visible=v}
  OUTL.visible=!!AIM&&scene==='world'&&!TASK;if(AIM)OUTL.position.set(AIM.x+.5,AIM.y+.5,AIM.z+.5);
  CHESTM.forEach((m,i)=>{m.visible=!SV.st[i];m.userData.lid.rotation.x=0});
@@ -176,10 +181,11 @@ G.tp=(x,z,y)=>{PL.p.set(x,y!=null?y:groundTop(x,z),z);PL.v.set(0,0,0);[GRN,DOG].
 G.P=()=>({x:PL.p.x,y:PL.p.y,z:PL.p.z,onG:PL.onG,inv:SV.inv,sel:SV.sel,z_:SV.z,dia:SV.dia,mw:SV.mw,placed:SV.placed.length,st:SV.st,house:SV.house});
 G.vget=(x,y,z)=>vget(x,y,z);G.aim=()=>AIM?{x:AIM.x,y:AIM.y,z:AIM.z,n:AIM.n,b:vget(AIM.x,AIM.y,AIM.z)}:null;
 G.look=(yaw,pitch)=>{CAMS.yaw=yaw;CAMS.pitch=pitch;stepCam(0,true)};
-G.blockXY=(x,y,z)=>{const c=CAM.position,ctr=[x+.5,y+.5,z+.5],cp=[c.x,c.y,c.z];let best=null,bd=-2;for(let a=0;a<3;a++)for(const sg of[-1,1]){const f=ctr.slice();f[a]+=sg*.48;const dv=[cp[0]-f[0],cp[1]-f[1],cp[2]-f[2]];const cs=dv[a]*sg/Math.hypot(...dv);if(cs>bd){bd=cs;best=f}}const p=new T3.Vector3(best[0],best[1],best[2]).project(CAM);return{x:(p.x+1)/2*W,y:(1-p.y)/2*H,vis:p.z<1}};
+G.blockXY=(x,y,z)=>{const c=CAM.position,ctr=[x+.5,y+.5,z+.5],cp=[c.x,c.y,c.z];let best=null,bd=-2;for(let a=0;a<3;a++)for(const sg of[-1,1]){const nb=[x,y,z];nb[a]+=sg;if(solidT(vget(nb[0],nb[1],nb[2])))continue;const f=ctr.slice();f[a]+=sg*.48;const dv=[cp[0]-f[0],cp[1]-f[1],cp[2]-f[2]];const cs=dv[a]*sg/Math.hypot(...dv);if(cs>bd){bd=cs;best=f}}const p=new T3.Vector3(best[0],best[1],best[2]).project(CAM);return{x:(p.x+1)/2*W,y:(1-p.y)/2*H,vis:p.z<1}};
 G.roof=()=>ROOF.map(([x,y,z])=>{const p=new T3.Vector3(x+.5,y+.5,z+.5).project(CAM);return{x:(p.x+1)/2*W,y:(1-p.y)/2*H}});
 G.night=k=>{DAY.night=true;DAY.t=5;openTask(k);return G.task()};G.day=()=>{DAY.night=false;DAY.t=0};
 G.zone=k=>{SV=freshSV();SV.f={intro:1,t1:1,t2:1,t3:1,tut:1,m0:1,tl:1,tv:1,t4:1,mdone:1};SV.inv={2:6,3:4};SV.sel=2;if(k>=2){SV.mw=3;SV.dia=3;SV.z=1;SV.f.sp1=1}if(k>=3){SV.z=2;SV.f.zb1=1;SV.f.r0=1}if(k>=4){SV.z=3;SV.armor=1}if(k>=5)SV.z=4;
  const sp={1:[30,TZ+.5],2:[61,TZ+.5],3:[88,TZ+.5],4:[116,TZ+.5],5:[150,TZ+.5]}[k];SV.px=sp;save(1);go('world');G.tp(sp[0],sp[1]);return SV.z};
-G.ents=()=>ENTS.map(e=>({k:e.kind,x:e.p.x,y:e.p.y,z:e.p.z,onG:e.onG,hide:e.hide,gnd:groundAt(e.p.x,e.p.z,e.p.y+.5),sc:[e.m.scale.x,e.m.scale.y,e.m.scale.z]}));
+G.ents=()=>ENTS.map(e=>({k:e.kind,x:e.p.x,y:e.p.y,z:e.p.z,onG:e.onG,hide:e.hide,gnd:Math.max(...[[-1,-1],[-1,1],[1,-1],[1,1],[0,0]].map(([a,b])=>groundAt(e.p.x+a*e.hw*.95,e.p.z+b*e.hw*.95,e.p.y+.5))),sc:[e.m.scale.x,e.m.scale.y,e.m.scale.z]}));
 G.chunks=()=>CHUNK.filter(Boolean).length;G.tris=()=>REN?REN.info.render.triangles:0;
+G.go=n=>go(n);

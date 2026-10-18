@@ -16,7 +16,7 @@ const BT=[{n:'air'},
  {n:'dia',t:['diamond_ore'],d:.8,drop:'dia'},{n:'gold',t:['gold_ore'],d:.8},{n:'bed',t:['bedrock'],hard:1},{n:'sand',t:['sand'],d:.35},{n:'sst',t:['sandstone'],d:.6},
  {n:'plank',t:['planks'],d:.5},{n:'log',t:['log','log_top'],d:.6},{n:'leaf',t:['leaves'],d:.15},{n:'castle',t:['castle'],d:.8},{n:'brick',t:['brick'],d:.7},
  {n:'water',t:['water'],fluid:1,hard:1},{n:'iron',t:['iron'],hard:1},{n:'crystal',t:['crystal'],hard:1,cw:1},{n:'rock',t:['stone'],hard:1},{n:'hcastle',t:['castle'],hard:1},
- {n:'hcob',t:['cobble'],hard:1},{n:'deck',t:['planks'],hard:1},{n:'pyr',t:['sandstone'],hard:1},{n:'roof',t:['castle'],hard:1},{n:'cactus',t:['cactus','cactus_top'],d:.3},{n:'ghost',t:['castle'],ghost:1}];
+ {n:'hcob',t:['cobble'],hard:1},{n:'deck',t:['planks'],hard:1},{n:'pyr',t:['sandstone'],hard:1},{n:'roof',t:['brick'],hard:1},{n:'cactus',t:['cactus','cactus_top'],d:.3},{n:'ghost',t:['castle'],ghost:1}];
 const solidT=t=>t!==0&&!BT[t].fluid&&!BT[t].ghost;
 const opaqueT=t=>t!==0&&!BT[t].fluid&&!BT[t].ghost;
 // ---- атлас 8×4 клеток по 16 пикселей (точно, без размытия) ----
@@ -48,7 +48,7 @@ const TOWER={x0:162,x1:166,z0:21,z1:25,top:16};
 const ROOF=[];for(let k=0;k<3;k++)for(let z=TOWER.z0+k;z<=TOWER.z1-k;z++)ROOF.push([164,TOWER.top+1+k,z]);
 const CHESTS=[{x:14,y:9,z:31,z_:0},{x:104,y:18,z:36,z_:3},{x:120,y:11,z:12,z_:4},{x:150,y:13,z:40,z_:5}];
 const HOUSEP={x0:82,x1:89,z0:29,z1:37};
-const SPOTS={start:[6.5,TZ+.5],gran0:[10.5,TZ+.5],river:[63,TZ+.5],forge:[93.5,26.5],desert:[121,TZ+.5],castle:[157,TZ+.5],krivo:[171.5,TZ+.5]};
+const SPOTS={start:[6.5,TZ+.5],gran0:[10.5,TZ+.5],river:[63,TZ+.5],forge:[93.5,26.5],desert:[121,TZ+.5],castle:[155,TZ+.5],krivo:[157.8,TZ+3.6]};
 function surfH(x,z){const zn=zoneAt(x);let h=GY;
  if(zn==='forest'||zn==='village')h=GY+Math.round((vnoise(x,z,9,1)-.5)*3*(Math.abs(z-TZ)>4?1.6:.4));
  if(zn==='desert')h=GY+Math.round((vnoise(x,z,7,3)-.5)*2.4*(Math.abs(z-TZ)>3?1.4:.3));
