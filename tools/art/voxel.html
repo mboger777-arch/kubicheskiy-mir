@@ -1,5 +1,5 @@
 <!doctype html><meta charset=utf-8><body style="margin:0;background:#0000"><script type=module>
-import * as THREE from './vendor/three.module.js';import {ALL} from './chars.js';import {loadTex,renderBg} from './bg.js';
+import * as THREE from '../../js/vendor/three.module.js';import {ALL} from '../../js/chars.js';import {loadTex,renderBg} from './bg.js';
 const R=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});R.setPixelRatio(1);R.outputColorSpace=THREE.SRGBColorSpace;document.body.appendChild(R.domElement);
 window.renderSprite=(name,yaw=16,W=900,H=1100)=>{const sc=new THREE.Scene();const o=ALL[name]();sc.add(o);
  sc.add(new THREE.HemisphereLight(0xffffff,0x8888aa,1.9));const d=new THREE.DirectionalLight(0xfff4e0,2.2);d.position.set(-30,50,60);sc.add(d);const d2=new THREE.DirectionalLight(0xc0d0ff,.7);d2.position.set(40,10,-20);sc.add(d2);

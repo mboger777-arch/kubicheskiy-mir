@@ -16,6 +16,8 @@ export function box(s,faces,pos,rot){const[w,h,d]=s;const get=k=>faces[k]||faces
   return new THREE.MeshLambertMaterial({map:tex(Math.max(1,Math.round(tw)),Math.max(1,Math.round(th)),v||solidF('#ff00ff'))})});
  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mats);if(pos)m.position.set(...pos);if(rot)m.rotation.set(...rot.map(a=>a*Math.PI/180));return m}
 const grp=(...a)=>{const g=new THREE.Group();a.forEach(x=>g.add(x));return g};
+// метка для анимации ходьбы: s — знак качания, arm — рука
+const sw=(g,s,arm)=>{g.userData.sw=s;g.userData.arm=!!arm;g.userData.r0=g.rotation.x;return g};
 const at=(o,pos,rot)=>{const g=new THREE.Group();g.add(o);g.position.set(...pos);if(rot)g.rotation.set(...rot.map(a=>a*Math.PI/180));return g};
 // ---------- общие части ----------
 function face(skin,eyes,o={}){return({p,f,w,h})=>{f(0,0,w-1,h-1,skin,7);
@@ -39,7 +41,7 @@ export function bloki(){const skin='#e9b48a',hair='#5a3a1e';
   ...[[-4,7.2],[-2.6,7.9],[-1,8.2],[0,8.3],[1,8.2],[2.6,7.9],[4,7.2]].map(([x,y],i)=>box([1.8,1.8,1.6],{all:i%2?'#a0a0a8':'#c4c4cc'},[x,y,0],[0,0,-x*7])));
  const armR=at(grp(arm(0,'#2f5fc4',skin,4),at(pick,[0,-10,1.5],[90,0,0])),[-6,24,0],[-35,0,8]);
  const armL=at(arm(0,'#2f5fc4',skin,4),[6,24,0],[0,0,-6]);
- return grp(head,helm,brim,lamp,body,L,R,armR,armL)}
+ sw(L,1);sw(R,-1);sw(armR,-1,1);sw(armL,1,1);return grp(head,helm,brim,lamp,body,L,R,armR,armL)}
 // ---------- Грань: фиолетовые волосы, очки, золотой транспортир ----------
 export function gran(){const skin='#f2c39c',hair=['#7a3fc4','#8a4ad4','#6a34ac'];
  const head=box([8,8,8],{front:face(skin,'#3a2a5a',{ey:4,blush:'#f5a0a0',mouthC:'#c0506a'}),side:skin,back:skin,top:skin,bottom:skin},[0,28,0]);
@@ -57,7 +59,7 @@ export function gran(){const skin='#f2c39c',hair=['#7a3fc4','#8a4ad4','#6a34ac']
  for(let a=0;a<=180;a+=15){const r=4.6,x=Math.cos(a*Math.PI/180)*r,y=Math.sin(a*Math.PI/180)*r;prot.add(box([.6,.9,1],{all:'#9a6a10'},[x,y,.1],[0,0,a-90]))}
  prot.add(box([14,1.3,1],{all:gold},[0,-.2,0]));prot.add(box([.7,4.6,.8],{all:'#9a6a10'},[0,2.3,.15]));
  const armR=at(arm(0,'#1f8f8a',skin,10),[-6,24,0],[-48,0,14]),armL=at(arm(0,'#1f8f8a',skin,10),[6,24,0],[-48,0,-14]);
- return grp(head,hairTop,hairBack,...hairSides,fringe,strap,lens(-2),lens(2),body,L,R,shoe(-2),shoe(2),armR,armL,at(prot,[0,14.5,8.6],[-8,0,0]))}
+ sw(L,1);sw(R,-1);sw(armR,-1,1);sw(armL,1,1);const sL=shoe(-2),sR=shoe(2);L.add(at(sL,[2,-12,0]));R.add(at(sR,[-2,-12,0]));return grp(head,hairTop,hairBack,...hairSides,fringe,strap,lens(-2),lens(2),body,L,R,armR,armL,at(prot,[0,14.5,8.6],[-8,0,0]))}
 // ---------- Пиксель: песочный пёс с красным ошейником (сидит) ----------
 export function pixel(){const fur=['#e2c07a','#d8b46a','#e8c886'],dark='#c79f55';
  const body=box([7,9,7],{all:({f,p})=>{f(0,0,6,8,fur);p(1,2,dark);p(5,5,dark)},front:({f})=>{f(0,0,6,8,fur);f(2,1,4,6,'#f0d8a0')}},[0,6.5,-0.5],[-12,0,0]);
@@ -83,7 +85,8 @@ export function krivo(){const arm_=['#2b2433','#352c40','#241d2b'],cr=['#b04ce0'
  // посох: ломаный зигзаг с кристаллом
  const staff=new THREE.Group();let y=0,x=0;[[0,8],[25,5],[-30,5],[20,5]].forEach(([a,l])=>{staff.add(box([1.3,l+.6,1.3],{all:['#3a2a1a','#4a3622']},[x,y+l/2,0],[0,0,a]));x-=Math.sin(a*Math.PI/180)*l;y+=Math.cos(a*Math.PI/180)*l});
  staff.add(box([2.6,3.4,2.6],{all:cr},[x,y+1.5,0],[0,45,20]));
- return grp(head,crown,body,shoulder(-7),shoulder(7),cape,legK(-2.5),legK(2.5),armK(-7.5,[-20,0,6]),at(staff,[-7.5,10,4],[0,0,8]),armK(7.5,[0,0,-6]))}
+ const lL=sw(at(legK(0),[-2.5,14,0]),1),lR=sw(at(legK(0),[2.5,14,0]),-1);lL.children[0].position.y=-7;lR.children[0].position.y=-7;const aR=sw(armK(-7.5,[-20,0,6]),-1,1),aL=sw(armK(7.5,[0,0,-6]),1,1);
+ return grp(head,crown,body,shoulder(-7),shoulder(7),cape,lL,lR,aR,at(staff,[-7.5,10,4],[0,0,8]),aL)}
 // ---------- Зомби-«тупоугольник»: руки вытянуты под тупым углом ----------
 export function zombie(){const skin=['#5e9e4a','#6aac54','#548c42'];
  const head=box([8,8,8],{front:({f,p})=>{f(0,0,7,7,skin);f(1,3,2,4,'#1a1a1a',0);f(5,3,6,4,'#1a1a1a',0);f(2,6,5,6,'#2e5a24');p(3,1,'#3e7a32')},all:skin},[0,28,0]);
@@ -91,12 +94,13 @@ export function zombie(){const skin=['#5e9e4a','#6aac54','#548c42'];
   g.fillStyle='#ffffff';g.fillRect(1,6,6,1);g.fillRect(1,5,1,1);g.fillRect(2,4,1,1);g.fillRect(3,3,1,1);g.fillStyle='#ffe060';g.fillRect(1,5,1,1)},side:'#2aa8a8',top:'#2aa8a8',bottom:'#3b4fa0'},[0,18,0]);
  const L=at(leg('#3b4fa0','#4a4a6a',2),[-2,12,0]),R=at(leg('#3b4fa0','#4a4a6a',2),[2,12,0]);
  const armZ=(x,ry)=>at(box([4,12,4],{all:({f,w,h})=>{f(0,0,w-1,3,'#2aa8a8');f(0,4,w-1,h-1,skin)}},[0,-6,0]),[x,24,0],[-80,ry,0]);
- return grp(head,body,L,R,armZ(-6,8),armZ(6,-8))}
+ sw(L,1);sw(R,-1);return grp(head,body,L,R,armZ(-6,8),armZ(6,-8))}
 // ---------- Паук-«острые углы»: лапы согнуты острым углом ----------
 export function spider(){const blk=['#2a2230','#342a3c','#221a28'];
  const body=box([10,7,11],{all:({f,p,w,h})=>{f(0,0,w-1,h-1,blk);for(let i=0;i<6;i++)p(Math.floor(rnd()*w),Math.floor(rnd()*h),'#4a3a58')}},[0,7,-4]);
  const head=box([8,7,6],{front:({f,p})=>{f(0,0,7,6,blk);[[1,2],[6,2],[2,3],[5,3]].forEach(([x,y])=>{p(x,y,'#ff2a2a',0)});p(1,1,'#ff9090',0);p(6,1,'#ff9090',0);f(2,5,2,6,'#d8d0c0',0);f(5,5,5,6,'#d8d0c0',0)},all:blk},[0,7,3.2]);
  const legs=new THREE.Group();[-1,1].forEach(sd=>[3.5,1,-2,-5].forEach((z,i)=>{const up=box([9,1.6,1.6],{all:blk},[4.5,0,0]);const lo=box([1.6,10,1.6],{all:blk},[0,-5,0]);
-  const knee=at(lo,[9,0,0],[0,0,sd*0+ (-28)]);const g=grp(up,knee);g.position.set(sd*4.2,8.5,z);g.rotation.set(0,sd>0?(i-1.5)*-14*Math.PI/180:Math.PI+(i-1.5)*14*Math.PI/180,38*Math.PI/180);legs.add(g)}));
+  const knee=at(lo,[9,0,0],[0,0,sd*0+ (-28)]);const g=grp(up,knee);g.userData.sp=i%2?1:-1;g.userData.rz=38*Math.PI/180;g.position.set(sd*4.2,8.5,z);g.rotation.set(0,sd>0?(i-1.5)*-14*Math.PI/180:Math.PI+(i-1.5)*14*Math.PI/180,38*Math.PI/180);legs.add(g)}));
  return grp(body,head,legs)}
+export {THREE};
 export const ALL={bloki,gran,pixel,krivo,zombie,spider};

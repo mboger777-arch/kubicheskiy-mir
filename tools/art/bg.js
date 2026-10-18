@@ -1,5 +1,5 @@
 // Воксельные фоны зон (рендер three.js): блоки с нарисованными текстурами, туман для глубины.
-import * as THREE from './vendor/three.module.js';
+import * as THREE from '../../js/vendor/three.module.js';
 let S=7;const rnd=()=>{S=(S*16807)%2147483647;return S/2147483647};
 const L=new THREE.TextureLoader();const TX={};
 const names=['grass','dirt','cobble','stone','diamond_ore','gold_ore','bedrock','sand','sandstone','planks','log','leaves','castle','brick','water','iron'];

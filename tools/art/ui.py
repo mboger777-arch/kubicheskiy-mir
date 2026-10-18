@@ -36,6 +36,8 @@ PROT=['................','................','.....kkkkkk.....','...kkyyyyyykk...
 ANVIL=['....................','.kkkkkkkkkkkkkkkkk..','kSssssssssssssssssk.','kSssvvvvvvvvvvvvssSk','.kSSSSSSSSSSSSSSSSk.','..kkkkksssssskkkkk..','......kssssSk.......','......kssssSk.......','.....kksssssSkk.....','....kssssssssssk....','...kSsssssssssSSk...','...kkkkkkkkkkkkkk...']
 SWORD=['....................................','kk..............................kk..','kgkk..........................kkxk..','kggsskkkkkkkkkkkkkkkkkkkkkkkkkksssxk.','kgkk..........................kkxk..','kk..............................kk..']
 SWORD=['......................','..kk..............kkk.','.kbBk.kk.......kkkxxk.','kbbBkkSSkkkkkkkcccccxk','kbBBkSccccccccccccccCk','.kbBk.kkkkkkkkkkCCCCk.','..kk..............kk..']
+EYE=['................','................','................','.....kkkkkk.....','...kkwwwwwwkk...','..kwwwkkkkwwwk..','.kwwwkuuUUkwwwk.','kwwwkuukkUUkwwwk','kwwwkuukkUUkwwwk','.kwwwkuUUUkwwwk.','..kwwwkkkkwwwk..','...kkwwwwwwkk...','.....kkkkkk.....','................','................','................']
+UNDO=['................','....k...........','...kwk..........','..kwwk..........','.kwwwkkkkkkk....','kwwwwwwwwwwwkk..','.kwwwkkkkkkwwwk.','..kwwk.....kwwwk','...kwk......kwwk','....k.......kwwk','............kwwk','...........kwwwk','.....kkkkkkwwwk.','....kwwwwwwwwk..','.....kkkkkkkk...','................']
 def btn(icon_im,n):
   W=300;im=Image.new('RGBA',(W,W),(0,0,0,0));d=ImageDraw.Draw(im)
   # каменная кнопка с фаской
@@ -57,7 +59,7 @@ def btn(icon_im,n):
   im.save(OUT+n+'.png')
 a=icon(ARROW,1)
 btn(a,'b_left');btn(a.transpose(Image.FLIP_LEFT_RIGHT),'b_right');btn(a.rotate(-90,expand=True),'b_up')
-btn(icon(PICK,1),'b_dig');btn(icon(GRASSB,1),'b_place');btn(icon(BOW,1),'b_bow');btn(icon(HOUSE,1),'b_home');btn(icon(CHECK,1),'b_ok')
+btn(icon(PICK,1),'b_dig');btn(icon(GRASSB,1),'b_place');btn(icon(BOW,1),'b_bow');btn(icon(HOUSE,1),'b_home');btn(icon(CHECK,1),'b_ok');btn(icon(EYE,1),'b_eye');btn(icon(UNDO,1),'b_undo')
 def item(rows,n,size=256):ic=icon(rows,1);s=size//max(ic.width,ic.height);ic=ic.resize((ic.width*s,ic.height*s),Image.NEAREST);bb=ic.getbbox();ic.crop(bb).save(OUT+n+'.png')
 for rows,n in [(CHEST,'chest'),(CHESTO,'chest_open'),(DIA,'diamond'),(HEART,'heart'),(ARMOR,'armor'),(TORCH,'torch'),(ARROWI,'arrow'),(CART,'cart'),(STAR,'star'),(PROT,'prot_small'),(ANVIL,'anvil')]:item(rows,n)
 ic=icon(SWORD,1);ic.resize((ic.width*30,ic.height*30),Image.NEAREST).crop(ic.resize((ic.width*30,ic.height*30)).getbbox()).save(OUT+'sword.png')

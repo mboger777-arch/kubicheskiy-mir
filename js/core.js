@@ -9,7 +9,7 @@ function vpWH(){const v=window.visualViewport;let w=innerWidth,h=innerHeight;VVX
 // весь экран = сцена (без полос); дизайн 1280x720 вписан по меньшей стороне, мир/фон рисуются на всю видимую область
 function rs(){DPR=Math.min(2,window.devicePixelRatio||1);if(window.scrollX||window.scrollY)window.scrollTo(0,0);[W,H]=vpWH();C.style.left=VVX+'px';C.style.top=VVY+'px';C.style.width=W+'px';C.style.height=H+'px';C.width=Math.round(W*DPR);C.height=Math.round(H*DPR);
  const cs=getComputedStyle(_sp);SAFE.t=parseFloat(cs.paddingTop)||0;SAFE.r=parseFloat(cs.paddingRight)||0;SAFE.b=parseFloat(cs.paddingBottom)||0;SAFE.l=parseFloat(cs.paddingLeft)||0;
- S=Math.min(W/1280,H/720);OX=(W-1280*S)/2;OY=(H-720*S)/2}
+ S=Math.min(W/1280,H/720);OX=(W-1280*S)/2;OY=(H-720*S)/2;if(typeof resize3d==='function')resize3d()}
 const FS_OK=!!(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen);const isFS=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
 function goFS(){if(!FS_OK||isFS())return;const e=document.documentElement;try{const p=(e.requestFullscreen||e.webkitRequestFullscreen).call(e,{navigationUI:'hide'});const lk=()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})}catch(_){}};if(p&&p.then)p.then(lk).catch(()=>{});else lk()}catch(_){}}
 const TOUCHDEV=('ontouchstart' in window)||navigator.maxTouchPoints>0;
@@ -31,9 +31,9 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 function vis(){return{x0:-OX/S,y0:-OY/S,w:W/S,h:H/S}}
 function safeV(){const v=vis();const l=SAFE.l/S,r=SAFE.r/S,t=SAFE.t/S,b=SAFE.b/S;return{x0:v.x0+l+14,y0:v.y0+t+10,x1:v.x0+v.w-r-14,y1:v.y0+v.h-b-10}}
 // ---- сохранение ----
-const SKEY='kubmir1';let SV;try{SV=JSON.parse(localStorage.getItem(SKEY))}catch(e){}
-function freshSV(){return{z:0,mw:0,dia:0,armor:0,st:[0,0,0,0],house:0,inv:{},f:{},diff:{},tr:{},px:null}}
-if(!SV||typeof SV.z!=='number')SV=freshSV();
+const SKEY='kubmir3d1';let SV;try{SV=JSON.parse(localStorage.getItem(SKEY))}catch(e){}
+function freshSV(){return{z:0,mw:0,dia:0,armor:0,st:[0,0,0,0],house:0,inv:{},f:{},diff:{},tr:{},px:null,placed:[],sel:null}}
+if(!SV||typeof SV.z!=='number')SV=freshSV();if(!SV.placed)SV.placed=[];
 let _svT=0;function save(now){if(!now&&performance.now()-_svT<1500){clearTimeout(save._t);save._t=setTimeout(()=>save(1),1600);return}_svT=performance.now();try{localStorage.setItem(SKEY,JSON.stringify(SV))}catch(e){}}
 // ---- звук ----
 var AC=null;function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
@@ -102,6 +102,7 @@ function hitBtn(x,y){const mh=28/S;let best=null,bd=1e9;
 const toD=e=>[(e.clientX-VVX-OX)/S,(e.clientY-VVY-OY)/S];
 C.addEventListener('pointerdown',e=>{if(PORTRAIT())return;e.preventDefault();ac();const[x,y]=toD(e);PX=x;PY=y;
  const b=hitBtn(x,y);
+ if(!b&&SCN&&SCN.down&&SCN.down(x,y,e.pointerId,e))return;
  if(b&&b.hold){if(b.dis)return;HOLD[e.pointerId]=b.id;if(b.fn)b.fn(true);return}
  const now=performance.now();if(now-_lastTap.t<170&&Math.hypot(e.clientX-_lastTap.x,e.clientY-_lastTap.y)<24)return;_lastTap={t:now,x:e.clientX,y:e.clientY};
  if(b){if(b.dis)return;if(locked()&&!b.always)return;SFX.click();b.fn();return}

@@ -1,0 +1,43 @@
+jobs 12
+/bin/sh: 1: sox: not found
+SoX could not be found!
+
+    If you do not have SoX, proceed here:
+     - - - http://sox.sourceforge.net/ - - -
+
+    If you do (or think that you should) have SoX, double-check your
+    path variables.
+    
+
+********
+Warning: flash-attn is not installed. Will only run the manual PyTorch version. Please install flash-attn for faster inference.
+********
+ 
+Fetching 4 files:   0%|          | 0/4 [00:00<?, ?it/s]Fetching 4 files: 100%|██████████| 4/4 [00:00<00:00, 1978.45it/s]
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+0 t1 0.0  Двигай джойстик слева и блоки пойдет.  Кнопка со стрелкой вверх прыжок.  Иди ко мне.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+1 t2 0.0  Наведи белую рамку на блок и держи кнопку с киркой.  Так ты его выкопаешь.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+2 t3 0.0  Блок в сумке. Нажми кнопку с блоком и он встанет в рамку.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+3 t_look 0.0  Проведи пальцем по экрану справа, чтобы оглядеться.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+4 t_view 0.0  Нажми на глаз, и ты увидишь мир глазами блоки.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+5 t_undo 0.0  Ошибся? Кнопка со стрелкой назад уберет последний блок.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+6 t4 0.0  Отлично! Иди к горе, там вход в шахту. Там спрятаны алмазы.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+7 m_done 0.0  Алмазы добыты. Шахта пройдена. Выходи наверх и иди к реке.
+manifest 81
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+8 v0 0.0  Это кузница. Кузнец перепутал кирки и мечи. Разложи их по сундукам. Острый, прямой и тупой угол.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+9 v_q 0.0  Нажми на предмет, а потом на сундук.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+10 v_done 0.0  Всё на месте. Держи железную броню. Ворота в пустыню открыты.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+11 c_roof 0.067  Последнее дело – построи на башне треугольную крышу.  Наведи рамку на светлое место и ставь блок.
+manifest 85
+VOICEDONE
