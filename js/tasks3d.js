@@ -15,6 +15,8 @@ function optRow(t,opts,fn,o){o=o||{};const L=layout();const n=opts.length,gap=26
  const cx0=o.cx!=null?o.cx:L.cx;opts.forEach((op,i)=>{const cx=cx0+(i-(n-1)/2)*(w+gap);tabBtn(op.id,cx,L.optY,w,h,op.label,()=>fn(op.id),{tab:o.tab,wob:t.wob[op.id],draw:op.draw,fs,one:1,sel:op.sel})})}
 function backBtn(){const s=safeV();drawBtn('b_left',s.x0+58,s.y0+58,104);btn('back',s.x0+58,s.y0+58,104,104,()=>{closeTask()})}
 // камера смотрит на место задания: t — точка, yaw/pitch — направление, dist — расстояние
+// паук виден даже сквозь стену туннеля (во время задания)
+function xray(e,on){e.obj.traverse(c=>{if(!c.material)return;if(on&&!c._xr){c._xr=1;c.material=Array.isArray(c.material)?c.material.map(q=>q.clone()):c.material.clone()}if(c._xr)(Array.isArray(c.material)?c.material:[c.material]).forEach(m=>{m.depthTest=!on;m.needsUpdate=true});c.renderOrder=on?10:0})}
 function focusAt(x,y,z,yaw,pitch,dist,alts){let best=null;for(const yw of[yaw].concat(alts||[])){const dir=new T3.Vector3(-Math.sin(yw)*Math.cos(pitch),-Math.sin(pitch),-Math.cos(yw)*Math.cos(pitch));const h=rayVox(new T3.Vector3(x,y,z),dir,dist,b=>opaqueT(b));const d=h?h.t:dist;if(!best||d>best.d+.4)best={yw,d};if(d>=dist*.85)break}
  CAMS.focus={t:[x,y,z],yaw:best.yw,pitch,dist}}
 // экранная точка (дизайн-координаты) для точки мира
@@ -36,7 +38,7 @@ TD.mw={enter(t,i){t.i=i;t.type=['ac','ob','rt'][i];t.a=t.type==='ac'?pick([40,50
 // ===================== НОЧЬ: паук «острый угол» — лук и транспортир =====================
 // паук висит в плоскости экрана под углом a от Блоки; лук поворачивается шагами по 15°
 TD.spider={enter(t,ent){const first=!SV.f.sp1;SV.f.sp1=1;save();t.a=first?pick([45,60]):pick([30,45,60,120,135,150]);t.aim=90;t.arrow=null;t.D=4.2;
-  t.ent=ent||spawnMonster('spider',PL.p.x+3,PL.p.z);t.ent.task=1;const o=TD.spider.org(t);focusAt(o.x,o.y+1.4,o.z,CAMS.yaw,-.05,7.5,[CAMS.yaw+Math.PI,CAMS.yaw+Math.PI/2,CAMS.yaw-Math.PI/2]);t.yaw=CAMS.focus.yaw;
+  t.ent=ent||spawnMonster('spider',PL.p.x+3,PL.p.z);t.ent.task=1;xray(t.ent,true);const o=TD.spider.org(t);focusAt(o.x,o.y+1.4,o.z,CAMS.yaw,-.05,7.5,[CAMS.yaw+Math.PI,CAMS.yaw+Math.PI/2,CAMS.yaw-Math.PI/2]);t.yaw=CAMS.focus.yaw;
   if(!t.thread){t.thread=new T3.Line(new T3.BufferGeometry().setFromPoints([new T3.Vector3(),new T3.Vector3(0,20,0)]),new T3.LineBasicMaterial({color:0xe8e8ff}));SCENE.add(t.thread)}
   if(first)say('sp_in').catch(()=>{});say('sp_'+t.a).catch(()=>{})},
  org(t){return new T3.Vector3(PL.p.x,PL.p.y+1.1,PL.p.z)},
@@ -57,7 +59,7 @@ TD.spider={enter(t,ent){const first=!SV.f.sp1;SV.f.sp1=1;save();t.a=first?pick([
   if(t.aim===t.a){win(t,async c=>{await wait(320,c);t.dead=1;SFX.pop();const p=t.ent.p;cubeBurst(Math.floor(p.x),Math.floor(p.y),Math.floor(p.z),B.bed,16);rmEnt(t.ent);
     await say(t.a<90?'sp_ac':'sp_ob',c).catch(()=>{});await wait(300,c);closeTask();monsterDone()})}
   else{const up=t.aim<t.a;t.mist++;setTimeout(()=>{if(!alive(c))return;t.D=Math.min(t.D+.35,5.4);SFX.bad();sayNow(up?'sp_up':'sp_dn')},250)}},
- leave(t){if(t.thread)SCENE.remove(t.thread);if(!t.dead&&t.ent){t.ent.task=0;t.ent.flee=4}},
+ leave(t){if(t.thread)SCENE.remove(t.thread);if(!t.dead&&t.ent){xray(t.ent,false);t.ent.task=0;t.ent.flee=4}},
  ans(t,good){if(!good)return['fire'];const n=Math.round((t.a-t.aim)/15);const r=[];for(let i=0;i<Math.abs(n);i++)r.push(n>0?'rl':'rr');r.push('fire');return r}};
 // ===================== НОЧЬ: зомби-тупоугольник — стена под прямым углом =====================
 TD.zombie={enter(t,ent){const first=!SV.f.zb1;SV.f.zb1=1;save();const sets=[[60,90,120],[45,90,135],[75,90,105]];t.set=shuffle(sets[Math.floor(Math.random()*3)].slice());
