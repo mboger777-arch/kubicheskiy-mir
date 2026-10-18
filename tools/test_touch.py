@@ -177,7 +177,7 @@ async def run(b,W,H,F,R):
   await play_task('forge',2,'forge')
   if (await pg.evaluate('G.P()'))['z']<3:F.append(f'{tag} forge not completed')
   # ---- 4. пустыня
-  await pg.evaluate("G.zone(4);DAY.night=false");await pg.wait_for_timeout(900);await pg.evaluate("if(G.task())G.close();G.open('desert')");await play_task('desert',3,'desert')
+  await pg.evaluate("G.zone(4);DAY.night=false");await pg.wait_for_timeout(900);await pg.evaluate("if(G.task())G.close();G.open('desert')");await pg.wait_for_timeout(300);await play_task('desert',3,'desert')
   if (await pg.evaluate('G.P()'))['z']<4:F.append(f'{tag} desert not completed')
   # ---- сундуки
   for i in range(4):
