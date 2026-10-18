@@ -8,7 +8,7 @@ function drawSpr(n,x,y,h,o){o=o||{};const i=IM[n];if(!ok(i))return null;const w=
  X.save();X.translate(x,y);if(o.rot)X.rotate(o.rot);const k=o.k||1;if(k!==1)X.scale(k,k);if(o.alpha!=null)X.globalAlpha=o.alpha;
  if(o.shadow!==0){X.save();X.globalAlpha=(o.alpha!=null?o.alpha:1)*.28;X.fillStyle='#000';X.beginPath();X.ellipse(0,0,w*.42,h*.035+4,0,0,6.283);X.fill();X.restore()}
  if(o.flash){X.filter='brightness(1.8)'}X.drawImage(i,-w/2,-h,w,h);X.restore();
- if(o.gnd)GND.push({n,x,feet:y,w,h:h,nr:i.naturalWidth/i.naturalHeight,gls:[o.gnd===true?y:o.gnd]});
+ if(o.gnd!=null&&o.gnd!==false)GND.push({n,x,feet:y,w,h:h,nr:i.naturalWidth/i.naturalHeight,gls:[o.gnd===true?y:o.gnd],k:o.k||1});
  if(AUD&&o.hero)AUD.h.push({n,b:[OX+(x-w/2)*S,OY+(y-h)*S,OX+(x+w/2)*S,OY+y*S]});
  return[x-w/2,y-h,w,h]}
 function drawImg(n,cx,cy,w,o){o=o||{};const i=IM[n];if(!ok(i))return;const h=w*i.naturalHeight/i.naturalWidth;X.save();X.translate(cx,cy);if(o.rot)X.rotate(o.rot);if(o.alpha!=null)X.globalAlpha=o.alpha;if(o.glow){X.shadowColor=o.glow;X.shadowBlur=24}X.drawImage(i,-w/2,-h/2,w,h);X.restore();return h}

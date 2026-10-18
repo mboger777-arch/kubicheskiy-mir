@@ -19,3 +19,123 @@ Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
 Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
 1 i4 0.0  Гав, я пёс пиксель, я бегаю рядом и подсказываю.
 Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+2 i5 0.0  Ха-ха! Я криволом! Я сломал все углы в этом мире. Ночью мои монстры придут за вами.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+3 i6 0.0  Не бойся. Монстры Криволома боятся точных углов. Вперед!
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+4 t1 0.222  Ходи стрелками, опрыгай кнопкой вверх, иди ко мне.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+5 t2 0.0  Нажми на кирку, а потом на блок рядом с собой.  Так ты его выкопаешь.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+6 t3 0.0  Блок в сумке. Теперь нажми на кнопку с блоком и поставь его куда хочешь.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+7 t4 0.0  Отлично! Вход в шахту дальше, справа. Там спрятаны алмазы.
+manifest 10
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+8 t_far 0.0  Подойди поближе. Отсюда не достать.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+9 t_hard 0.0  Эту скалу киркой не пробить.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+10 t_noblk 0.0  В сумке нет блоков. Сначала выкопай что-нибудь.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+11 t_water 0.0  Ой, вода. Без моста реку не перейти.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+12 t_gate 0.0  Ворота закрыты. Сначала выполни задание грани.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+13 m0 0.0  Это шахта. Путь закрыт кристальными стенами.  Стена откроется, если угадать угол поворота туннеля.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+14 m_q 0.0  Туннель поворачивает.  Какой это угол?  Острый, прямой или тупой?
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+15 h_ac 0.1  Посмотри на транспортир. Угол меньше 90 градусов. Значит он острый.
+manifest 18
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+16 h_ob 0.143  Угол больше 90 градусов, значит он тупой.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+17 h_rt 0.1  Ровно 90 градусов, как уголок у книжки, это прямой угол.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+18 m_ok 0.0  Верно, стена рассыпалась, выкопай алмазы.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+19 m_dia 0.0  Алмаз блестит!
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+20 m_done 0.0  Три алмаза. Шахта пройдена. Выход наверх к реке.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+21 sp_in 0.0  Осторожно, паук, острый угол.  Наведи лук, точно на него и стреляй.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+22 sp_30 0.182  Паук висит под углом 30 градусов, поверни лук на 30 градусов.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+23 sp_45 0.308  Паук висит под углом 45 градусов, поверни лук на 45 градусов.
+manifest 26
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+24 sp_60 0.182  Паук висит под углом 60 градусов.  Поверни лук на 60 градусов.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+25 sp_120 0.308  Паук висит под углом 120 градусов.  Поверни лук на 120 градусов.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+26 sp_135 0.4  Паук висит под углом 135 градусов.  Поверни лук на 135 градусов.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+27 sp_150 0.308  Паук висит под углом 150 градусов, поверни лук на 150 градусов.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+28 sp_up 0.0  Мимо, подними лук выше, угол нужен больше.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+29 sp_dn 0.0  мимо.  Опусти лук ниже, угол нужен меньше.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+30 sp_ac 0.0  Попал. Это острый угол, он меньше прямого.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+31 sp_ob 0.0  Попал. Это тупой угол. Он больше прямого.
+manifest 34
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+32 zb_in 0.0  Идёт зомби, тупоугольник, поставь стену под прямым углом к земле и он не пройдёт.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+33 zb_bad 0.111  Стена наклонилась и упала. Нужен прямой угол 90 градусов.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+34 zb_ok 0.0  Стена стоит крепко. Прямой угол победил зомби.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+35 n1 0.0  Наступает ночь. Берегись монстров.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+36 n2 0.0  Ура, утро. Монстры убежали.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+37 r0 0.0  река. Построим мост из балок. Но какая форма крепче?
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+38 r1q 0.0  Выбери ферму для первого пролета, квадрат или треугольник.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+39 r_sq 0.0  Квадрат сложился как гармошка. Его углы меняются.
+manifest 42
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:2150 for open-end generation.

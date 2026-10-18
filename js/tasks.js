@@ -10,10 +10,11 @@ function mistake(t,id,hk){t.mist++;t.wob[id]=T;SFX.bad();shake=5;if(hk)sayNow(hk
 const TYPEN={ac:'ОСТРЫЙ',rt:'ПРЯМОЙ',ob:'ТУПОЙ'},HINT={ac:'h_ac',rt:'h_rt',ob:'h_ob'};
 const typeOf=a=>a<90?'ac':a>90?'ob':'rt';
 // ---- раскладка: панель по центру, ряд ответов внизу ----
-function layout(){const s=safeV();const top=s.y0+150,bot=s.y1-190;const pw=Math.min(1120,s.x1-s.x0-40);return{s,cx:(s.x0+s.x1)/2,top,bot,pw,ph:bot-top,optY:s.y1-92}}
+function layout(){const s=safeV();const top=s.y0+128,bot=s.y1-166;const pw=Math.min(1120,s.x1-s.x0-40);return{s,cx:(s.x0+s.x1)/2,top,bot,pw,ph:bot-top,optY:s.y1-92}}
 function panel(n){const L=layout();return nine(n||'tab_grey',L.cx-L.pw/2,L.top,L.pw,L.ph)}
 function optRow(t,opts,fn,o){o=o||{};const L=layout();const n=opts.length,gap=26,w=Math.min(o.w||360,(L.s.x1-L.s.x0-80-gap*(n-1))/n),h=o.h||128;
- opts.forEach((op,i)=>{const cx=L.cx+(i-(n-1)/2)*(w+gap);tabBtn(op.id,cx,L.optY,w,h,op.label,()=>fn(op.id),{tab:o.tab,wob:t.wob[op.id],draw:op.draw,fs:o.fs||48,one:o.one,sel:op.sel})})}
+ const inW=w*.8-8,inH=h*.62;const fs=Math.min(o.fs||48,...opts.filter(op=>op.label!=null).map(op=>oneSize(op.label,inW,inH,o.fs||48)));
+ opts.forEach((op,i)=>{const cx=L.cx+(i-(n-1)/2)*(w+gap);tabBtn(op.id,cx,L.optY,w,h,op.label,()=>fn(op.id),{tab:o.tab,wob:t.wob[op.id],draw:op.draw,fs,one:1,sel:op.sel})})}
 function backBtn(){const s=safeV();drawBtn('b_left',s.x0+58,s.y0+58,104);btn('back',s.x0+58,s.y0+58,104,104,()=>{closeTask()})}
 // ===================== 1. ШАХТА: угол поворота туннеля =====================
 TD.mw={enter(t,i){t.i=i;t.type=['ac','ob','rt'][i];t.a=t.type==='ac'?pick([40,50,60,70]):t.type==='ob'?pick([110,120,130,140]):90;t.a0=pick([0,10,20]);say('m_q').catch(()=>{})},
@@ -60,9 +61,9 @@ TD.zombie={enter(t){const first=!SV.f.zb1;SV.f.zb1=1;save();const sets=[[60,90,1
   if(t.wall){const[bx,by]=TD.zombie.wallPts(t);let a=t.wall.a;const k=T-t.wall.t0;if(a!==90&&k>.35){const fall=ease((k-.35)/.6);a=lerp(a,a<90?0:180,fall)}
    const ang=(t.dir>0?a:180-a)*R2D;for(let i=0;i<3;i++){const cx=bx+Math.cos(-ang)*TS*(i+.5),cy=by+Math.sin(-ang)*TS*(i+.5);const im=IM.t_cobble;if(ok(im)){X.save();X.translate(wx(cx),wy(cy));X.rotate(-ang+Math.PI/2);X.drawImage(im,-TS/2,-TS/2,TS,TS);X.restore()}}
    if(t.wall.a===90||k<.35){X.save();X.translate(wx(bx),wy(by));angleRays(0,0,TS*1.2,t.dir>0?0:180-t.wall.a,t.dir>0?t.wall.a:180,{rod:'iron',th:0.01,ar:TS*.7});X.restore()}}},
- ui(t){optRow(t,t.set.map(a=>({id:'w'+a,label:null,draw:b=>{const[x,y,w,h]=b;const gx=x+w*.18,gy=y+h*.84;rod('stick',x+w*.05,gy,x+w*.95,gy,12);const L=Math.min(h*.72,w*.4);
-   rod('iron',gx+w*.2,gy,gx+w*.2+Math.cos(-a*R2D)*L,gy+Math.sin(-a*R2D)*L,16);X.save();X.fillStyle='rgba(255,214,64,.5)';X.beginPath();X.moveTo(gx+w*.2,gy);X.arc(gx+w*.2,gy,L*.38,-a*R2D,0);X.closePath();X.fill();X.restore();
-   const lb=[x+w*.56,y+h*.08,w*.42,h*.56];fitText(a+'°',lb,52,'#fff',{one:1})}})),id=>TD.zombie.pick(t,+id.slice(1)),{w:300,h:150})},
+ ui(t){optRow(t,t.set.map(a=>({id:'w'+a,label:null,draw:b=>{const[x,y,w,h]=b;const gy=y+h*.92,vx=x+w*.3;rod('stick',x-4,gy,x+w+4,gy,14);const L=h*.95;
+   X.save();X.fillStyle='rgba(255,214,64,.55)';X.beginPath();X.moveTo(vx,gy);X.arc(vx,gy,L*.42,-a*R2D,0);X.closePath();X.fill();X.restore();rod('iron',vx,gy,vx+Math.cos(-a*R2D)*L,gy+Math.sin(-a*R2D)*L,24);
+   const lb=[x+w*.52,y,w*.48,h*.62];fitText(a+'°',lb,58,'#fff',{one:1})}})),id=>TD.zombie.pick(t,+id.slice(1)),{w:300,h:150})},
  pick(t,a){if(t.dead)return;SFX.place();t.wall={a,t0:T};const c={ep:t.ep};
   if(a===90){win(t,async c=>{await wait(1100,c);SFX.crash();shake=8;t.dead=1;const zy=groundY(t.zx,P.y-TS*.6);burst(t.zx,zy-TS,26,['#4a8a3a','#2a5a9a','#9ad06a'],1.1);
     await say('zb_ok',c).catch(()=>{});await wait(300,c);closeTask();monsterDone()})}
@@ -99,8 +100,8 @@ TD.river={enter(t){t.r=SV.tr.river||0;t.b=null;t.opts=shuffle(RQ[t.r].o.slice())
   // вагонетка с грузом проверяет пролёт
   const cx=b.rig?lerp(s.x0-TS,s.x1+TS*.6,clamp((k-.4)/1.6,0,1)):lerp(s.x0-TS,s.m,clamp((k-.4)/.6,0,1));const cy=s.y+(b.rig?0:dy);
   if(k>.3&&dy<TS*5)drawImg('cart',wx(cx),wy(cy)-TS*.42,TS*1.15)},
- ui(t){backBtn();optRow(t,t.opts.map(k=>({id:k,label:null,draw:bx=>{const[x,y,w,h]=bx;const S0={x0:0,x1:3*TS,y:0,m:1.5*TS};const sh=SHAPES[k](S0);const sc=Math.min(w*.8/(3*TS),h*.8/(3*TS));
-   X.save();X.translate(x+w/2-1.5*TS*sc,y+h*.92);X.scale(sc,sc);for(const[a,c]of sh.e){X.strokeStyle='#7a4a1a';X.lineWidth=26;X.lineCap='round';X.beginPath();X.moveTo(...sh.p[a]);X.lineTo(...sh.p[c]);X.stroke();X.strokeStyle='#c08a4a';X.lineWidth=14;X.stroke()}X.restore()}})),id=>TD.river.pick(t,id),{w:300,h:150})},
+ ui(t){backBtn();optRow(t,t.opts.map(k=>({id:k,label:null,draw:bx=>{const[x,y,w,h]=bx;const S0={x0:0,x1:3*TS,y:0,m:1.5*TS};const sh=SHAPES[k](S0);const sc=Math.min(w*.95/(3*TS),h*1.0/(3*TS));
+   X.save();X.translate(x+w/2-1.5*TS*sc,y+h*.98);X.scale(sc,sc);for(const[a,c]of sh.e){X.strokeStyle='#7a4a1a';X.lineWidth=26;X.lineCap='round';X.beginPath();X.moveTo(...sh.p[a]);X.lineTo(...sh.p[c]);X.stroke();X.strokeStyle='#c08a4a';X.lineWidth=14;X.stroke()}X.restore()}})),id=>TD.river.pick(t,id),{w:300,h:150})},
  pick(t,id){const q=RQ[t.r];t.b={kind:id,t0:T,rig:SHAPES[id](SPAN(0)).rig};SFX.place();
   if(id!==q.ok){t.mist++;t.wob[id]=T;const c={ep:t.ep},b=t.b;setTimeout(()=>{if(alive(c)&&t.b===b){SFX.crash();sayNow(q.bad)}},1100);setTimeout(()=>{if(alive(c)&&t.b===b)t.b=null},2700);return}
   win(t,async c=>{await say(q.good,c).catch(()=>{});await wait(Math.max(0,2300-(T-t.b.t0)*1000),c);SFX.ok();const s=SPAN(t.r);for(let cc=RX0+3*t.r;cc<RX0+3*t.r+3;cc++)tset(cc,GR,B.deck);
@@ -119,13 +120,12 @@ TD.forge={enter(t){t.r=SV.tr.forge||0;TD.forge.deal(t);if(!SV.f.v0){SV.f.v0=1;sa
    const hx=cx-L*.25+Math.cos(-(a0+it.a)*R2D)*L,hy=cy+Math.sin(-(a0+it.a)*R2D)*L;rod('iron',cx-L*.25,cy,hx,hy,30);
    if(t.r===0)txt(it.a+'°',cx-L*.25+Math.cos(-(a0+it.a/2)*R2D)*L*.62,cy+Math.sin(-(a0+it.a/2)*R2D)*L*.62,Math.max(34,L*.3),'#fff');
    btn(it.id,cx,y+h*.5,w/n*.9,h*.9,()=>TD.forge.tapItem(t,it.id))})},
- ui(t){backBtn();const L=layout();const n=3,gap=30,w=Math.min(330,(L.s.x1-L.s.x0-120-gap*2)/3);
-  ['ac','rt','ob'].forEach((k,i)=>{const cx=L.cx+(i-1)*(w+gap),cy=L.optY+8;const inn=t.items.filter(it=>it.loc===k).length;
+ ui(t){backBtn();const L=layout();const gap=26,w=Math.min(380,(L.s.x1-L.s.x0-80-gap*2)/3),h=128;const fs=Math.min(...['ac','rt','ob'].map(k=>oneSize(TYPEN[k],w*.56,h*.5,44)));
+  ['ac','rt','ob'].forEach((k,i)=>{const cx=L.cx+(i-1)*(w+gap),cy=L.optY;const inn=t.items.filter(it=>it.loc===k).length;
    const wob=t.wob['ch_'+k]?Math.sin((T-t.wob['ch_'+k])*40)*Math.max(0,1-(T-t.wob['ch_'+k])*2.5)*10:0;
-   drawImg(inn?'chest_open':'chest',cx-w*.3+wob,cy-6,Math.min(118,w*.36),{glow:t.sel?'rgba(255,230,120,.8)':null});
-   const tb=nine('tab_grey',cx-w*.08+wob,cy-56,w*.58,112);if(tb)fitText(TYPEN[k],tb,40,'#fff',{one:1});
-   if(inn)txt('×'+inn,cx-w*.3,cy+40,34,'#ffe066');
-   btn('ch_'+k,cx,cy,w,130,()=>TD.forge.tapChest(t,k))})},
+   X.save();if(t.sel){X.shadowColor='rgba(255,230,120,.9)';X.shadowBlur=26}const tb=nine('tab_grey',cx-w/2+wob,cy-h/2,w,h);X.restore();
+   if(tb){const cw=Math.min(tb[3]*1.25,tb[2]*.36);drawImg(inn?'chest_open':'chest',tb[0]+cw/2,cy,cw);if(inn)txt('×'+inn,tb[0]+cw*.8,cy+tb[3]*.36,30,'#ffe066');fitText(TYPEN[k],[tb[0]+cw+6,tb[1],tb[2]-cw-6,tb[3]],fs,'#fff',{one:1})}
+   btn('ch_'+k,cx,cy,w,h,()=>TD.forge.tapChest(t,k))})},
  tapItem(t,id){t.sel=t.sel===id?null:id},
  tapChest(t,k){if(!t.sel){const it=t.items.slice().reverse().find(it=>it.loc===k);if(it){it.loc=null;SFX.click()}return}// исправить: забрать кирку обратно
   const it=t.items.find(q=>q.id===t.sel);t.sel=null;if(it.type!==k)return mistake(t,'ch_'+k,HINT[it.type]);it.loc=k;SFX.ok();sparks(layout().cx,layout().optY,8);
@@ -140,15 +140,15 @@ function triPts(a,b,box){const[x,y,w,h]=box;const A=a*R2D,Bb=b*R2D;// основ
  const minx=Math.min(0,px),maxx=Math.max(1,px),sc=Math.min(w*.86/(maxx-minx),h*.78/py);const ox=x+w/2-(minx+maxx)/2*sc,oy=y+h*.9;return[[ox,oy],[ox+sc,oy],[ox+px*sc,oy-py*sc]]}
 TD.desert={enter(t){t.r=SV.tr.desert||0;t.opts=shuffle(DQ[t.r].o.slice());if(!SV.f.d0){SV.f.d0=1;say('d0').catch(()=>{})}say('d_q').catch(()=>{})},
  focus(){return[140*TS,GR*TS-TS*2.4]},
- draw(t){const b=panel('tab_sand');if(!b)return;const[x,y,w,h]=b;const q=DQ[t.r],c=180-q.a-q.b;const tb=[x+w*.04,y+h*.04,w*.6,h*.9];const p=triPts(q.a,q.b,tb);
-  triFill(p,'sandstone',{lw:10});const fs=Math.max(34,h*.13),rr=Math.min(h*.16,70);
+ draw(t){const b=panel('tab_sand');if(!b)return;const[x,y,w,h]=b;const q=DQ[t.r],c=180-q.a-q.b;const tb=[x+w*.02,y+h*.02,w*.6,h*.96];const p=triPts(q.a,q.b,tb);
+  triFill(p,'sandstone',{lw:10});const fs=Math.max(32,h*.12),rr=Math.min(h*.13,60);
   arcAt(p[0],p[1],p[2],rr,'#ff7a3a',q.a+'°',fs);arcAt(p[1],p[2],p[0],rr,'#3ab0ff',q.b+'°',fs);
   const done=t.win;arcAt(p[2],p[0],p[1],rr*.85,'#7ad04a',done?c+'°':'?',fs*1.1);
-  // справа: «ровная линия» — 180° (после ответа углы складываются в полукруг)
-  const lx=x+w*.82,ly=y+h*.62,R=Math.min(w*.14,h*.36);rod('stick',lx-R*1.2,ly,lx+R*1.2,ly,10);
-  if(done){const k=ease((T-t.win)/1.1);const segs=[[q.a,'#ff7a3a'],[q.b,'#3ab0ff'],[c,'#7ad04a']];let st=0;for(const[s,col]of segs){X.save();X.globalAlpha=.85;X.fillStyle=col;X.beginPath();X.moveTo(lx,ly);X.arc(lx,ly,R,-(st+s)*k*R2D,-st*k*R2D);X.closePath();X.fill();X.restore();st+=s}
-   const eb=nine('tab_grey',lx-R*1.3,y+h*.06,R*2.6,h*.26);if(eb)fitText(q.a+'+'+q.b+'+'+c+'=180',eb,40,'#fff',{one:1})}
-  else{const eb=nine('tab_grey',lx-R*1.3,y+h*.06,R*2.6,h*.26);if(eb)fitText('= 180°',eb,48,'#fff',{one:1})}},
+  // справа: углы складываются в развёрнутый угол 180° (ровная линия) и равенство на табличке
+  const cw=w*.34,lx=x+w*.82,R=Math.min(cw*.42,h*.3),ly=y+h*.5;rod('stick',lx-R*1.18,ly,lx+R*1.18,ly,12);
+  const k=done?ease((T-t.win)/1.1):0;const segs=[[q.a,'#ff7a3a'],[q.b,'#3ab0ff'],[c,'#7ad04a']];let st=0;
+  for(const[s0,col]of segs){const show=done||st+s0<=q.a+q.b;if(show||done){X.save();X.globalAlpha=done?.85:.5;X.fillStyle=col;X.beginPath();X.moveTo(lx,ly);X.arc(lx,ly,R,-(st+s0)*R2D,-st*R2D);X.closePath();X.fill();X.restore()}else{X.save();X.setLineDash([10,8]);X.strokeStyle='#7ad04a';X.lineWidth=5;X.beginPath();X.moveTo(lx,ly);X.arc(lx,ly,R,-(st+s0)*R2D,-st*R2D);X.closePath();X.stroke();X.restore()}st+=s0}
+  const eb=nine('tab_grey',lx-cw/2,ly+h*.06,cw,h*.4);if(eb)fitText(q.a+'° + '+q.b+'° + '+(done?c+'°':'?')+' = 180°',eb,44,'#fff')},
  ui(t){backBtn();optRow(t,t.opts.map(v=>({id:'o'+v,label:v+'°'})),id=>TD.desert.pick(t,+id.slice(1)),{tab:'tab_sand',w:280,fs:60})},
  pick(t,v){const q=DQ[t.r];if(v!==180-q.a-q.b)return mistake(t,'o'+v,'d_bad');SFX.ok();t.win=T;
   win(t,async c=>{say('d_ok',c).catch(()=>{});await wait(2300,c);const[gc,gr]=PYR.gaps[t.r];tset(gc,gr,B.pyr);burst((gc+.5)*TS,(gr+.5)*TS,16,tileCol(B.sst),.8);
@@ -159,11 +159,11 @@ TD.desert={enter(t){t.r=SV.tr.desert||0;t.opts=shuffle(DQ[t.r].o.slice());if(!SV
 // ===================== 5. ЗАМОК: виды треугольников + треугольная крыша =====================
 const CQ={eq:[5,5,5],iso:[6,6,4],sc:[4,5,6]},CN={eq:'РАВНОСТОРОННИЙ',iso:'РАВНОБЕДРЕННЫЙ',sc:'РАЗНОСТОРОННИЙ'},CH={eq:'c_eq',iso:'c_iso',sc:'c_sc'};
 function triSides(a,b,c,box){// стороны: основание c, боковые a (слева), b (справа)
- const[x,y,w,h]=box;const px=(a*a-b*b+c*c)/(2*c),py=Math.sqrt(Math.max(0,a*a-px*px));const sc=Math.min(w*.8/c,h*.72/py);const ox=x+w/2-c*sc/2,oy=y+h*.86;return[[ox,oy],[ox+c*sc,oy],[ox+px*sc,oy-py*sc]]}
+ const[x,y,w,h]=box;const px=(a*a-b*b+c*c)/(2*c),py=Math.sqrt(Math.max(0,a*a-px*px));const sc=Math.min(w*.84/c,h*.76/py);const ox=x+w/2-c*sc/2,oy=y+h*.84;return[[ox,oy],[ox+c*sc,oy],[ox+px*sc,oy-py*sc]]}
 TD.castle={enter(t){t.r=SV.tr.castle||0;if(!SV.f.ord){SV.f.ord=shuffle(['eq','iso','sc'])}t.ord=SV.f.ord;if(!SV.f.c0){SV.f.c0=1;say('c0').catch(()=>{})}say(t.r<3?'c_q':'c_roof').catch(()=>{})},
- focus(t){return t.r<3?[180*TS,GR*TS-TS*1.6]:[180*TS,5*TS]},
+ focus(t){return t.r<3?[179.5*TS,GR*TS-TS*1.6]:[180*TS,5*TS]},
  draw(t){if(t.r>=3){for(const[c,r]of ROOF)if(!tget(c,r)){X.save();X.globalAlpha=.35+.25*Math.sin(T*5);const i=IM.t_castle;if(ok(i))X.drawImage(i,wx(c*TS),wy(r*TS),TS,TS);X.strokeStyle='#ffe066';X.lineWidth=5;X.strokeRect(wx(c*TS)+3,wy(r*TS)+3,TS-6,TS-6);X.restore()}return}
-  const b=panel('tab_purple');if(!b)return;const[x,y,w,h]=b;const k=t.ord[t.r],sd=CQ[k];const p=triSides(sd[0],sd[1],sd[2],[x+w*.18,y+h*.02,w*.64,h*.96]);
+  const L=layout();const pw=Math.min(L.pw*.62,760);const b=nine('tab_purple',L.s.x0+20+(L.cx-L.pw/2-L.s.x0-20)*.5,L.top,pw,L.ph);if(!b)return;const[x,y,w,h]=b;const k=t.ord[t.r],sd=CQ[k];const p=triSides(sd[0],sd[1],sd[2],[x+w*.1,y+h*.06,w*.8,h*.94]);
   if(t.brk&&T-t.brk<1)X.globalAlpha=1-(T-t.brk);triFill(p,'castle',{lw:12,st:'#ffe066'});X.globalAlpha=1;
   const lab=(a,b2,v)=>{const mx=(a[0]+b2[0])/2,my=(a[1]+b2[1])/2,cx=(p[0][0]+p[1][0]+p[2][0])/3,cy=(p[0][1]+p[1][1]+p[2][1])/3;const d=Math.hypot(mx-cx,my-cy)||1;const fs=Math.max(40,h*.15);txt(String(v),mx+(mx-cx)/d*fs*.95,my+(my-cy)/d*fs*.85,fs,'#fff')};
   lab(p[0],p[2],sd[0]);lab(p[1],p[2],sd[1]);lab(p[0],p[1],sd[2]);

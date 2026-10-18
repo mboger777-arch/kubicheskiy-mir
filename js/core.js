@@ -85,6 +85,8 @@ function fitText(t,box,maxSize,col,o){o=o||{};const[bx,by,bw,bh]=box;let size=ma
  lines.forEach((l,i)=>{const y=cy+i*lh;if(o.st!==0){X.lineWidth=o.lw||Math.max(3,size*.18);X.strokeStyle=o.st||'rgba(20,12,4,.92)';X.strokeText(l,bx+bw/2,y)}X.fillStyle=col||'#fff';X.fillText(l,bx+bw/2,y)});
  if(AUD){const mw=Math.max(...lines.map(l=>X.measureText(l).width));const tb=[bx+bw/2-mw/2,cy-lh/2,bx+bw/2+mw/2,cy+(lines.length-.5)*lh];AUD.t.push({t,b:tb.map((v,i)=>i%2?OY+v*S:OX+v*S),c:[bx,by,bx+bw,by+bh].map((v,i)=>i%2?OY+v*S:OX+v*S),size:size*S})}
  return size}
+// размер, при котором однострочная надпись влезает в w×h (для одинакового шрифта на соседних табличках)
+function oneSize(t,w,h,max){X.font=max+'px '+FONT;const m=X.measureText(t).width||1;return Math.max(14,Math.floor(Math.min(max,h/1.2,max*w/m)))}
 // одиночная надпись (числа на транспортире и т.п.)
 function txt(t,x,y,size,col,o){o=o||{};X.font=size+'px '+FONT;X.textAlign=o.al||'center';X.textBaseline='middle';if(o.st!==0){X.lineJoin='round';X.lineWidth=o.lw||Math.max(3,size*.2);X.strokeStyle=o.st||'rgba(20,12,4,.92)';X.strokeText(t,x,y)}X.fillStyle=col||'#fff';X.fillText(t,x,y)}
 // ---- кнопки и касания (несколько пальцев: держать «вправо» и жать «прыжок») ----
@@ -94,7 +96,7 @@ function drawBtn(n,x,y,s,o){o=o||{};const i=IM[n];if(!ok(i))return;const pressed
  X.save();if(o.alpha!=null)X.globalAlpha=o.alpha;if(o.glow){X.shadowColor=o.glow;X.shadowBlur=26}else{X.shadowColor='rgba(0,0,0,.45)';X.shadowBlur=10;X.shadowOffsetY=5}X.drawImage(i,x-w/2,y-h/2,w,h);X.restore();
  if(o.sel){X.save();X.strokeStyle='#ffe066';X.lineWidth=7;X.shadowColor='#ffe066';X.shadowBlur=16;X.strokeRect(x-w/2-4,y-h/2-4,w+8,h+8);X.restore()}}
 function locked(){return typeof TASK!=='undefined'&&TASK&&TASK.lock}
-G.locked=locked;let _lastTap={t:0,x:-99,y:-99};
+G.locked=locked;G.tapId=id=>{const b=PUI.find(b=>b.id===id);if(b&&!b.dis)b.fn();return !!b};let _lastTap={t:0,x:-99,y:-99};
 function hitBtn(x,y){const mh=28/S;let best=null,bd=1e9;
  for(let i=PUI.length-1;i>=0;i--){const b=PUI[i];const dx=Math.abs(x-b.x),dy=Math.abs(y-b.y);if(dx<Math.max(b.w/2+6,mh)&&dy<Math.max(b.h/2+6,mh)){const inside=dx<b.w/2+6&&dy<b.h/2+6;const d=(inside?0:1e5)+Math.hypot(dx,dy);if(d<bd){bd=d;best=b}}}return best}
 const toD=e=>[(e.clientX-VVX-OX)/S,(e.clientY-VVY-OY)/S];

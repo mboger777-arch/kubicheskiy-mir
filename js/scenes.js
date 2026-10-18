@@ -2,7 +2,7 @@
 // ===== Сцены: заставка, знакомство, мир, финал =====
 const WHO={bloki:'Блоки',gran:'Грань',pixel:'Пиксель',krivo:'Криволом',narrator:''};
 // табличка с репликой (наверху; текст всегда внутри нарисованной доски)
-function drawTalk(){if(!talk||scene==='load')return;const s=safeV();const left=(scene==='world')?s.x0+(TASK?130:320):s.x0+20;const w=Math.min(1180,s.x1-left-20),h=140;const x=left+((s.x1-left-20)-w)/2,y=s.y0;
+function drawTalk(){if(!talk||scene==='load')return;const s=safeV();const left=(scene==='world')?s.x0+(TASK?130:320):s.x0+20;const w=Math.min(1180,s.x1-left-20),h=120;const x=left+((s.x1-left-20)-w)/2,y=s.y0;
  const box=nine('board',x,y,w,h);talk.box=[x,y,w,h];if(!box)return;const nm=WHO[talk.who];const t=(nm?nm+': ':'')+talk.text;fitText(t,box,40,'#fff',{min:20})}
 // земля для сцен-картинок: два ряда блоков внизу экрана, герои стоят ступнями на верхней грани
 function groundStrip(top,sub){const v=vis();const y=v.y0+v.h-TS*1.6;const c0=Math.floor(v.x0/TS)-1,c1=Math.ceil((v.x0+v.w)/TS)+1;for(let c=c0;c<=c1;c++){const a=IM['t_'+top],b=IM['t_'+sub];if(ok(a))X.drawImage(a,c*TS,y,TS+.6,TS+.6);if(ok(b))X.drawImage(b,c*TS,y+TS,TS+.6,TS+.6)}return y}
@@ -65,19 +65,19 @@ function drawWorld(){drawBgAll();drawBridge();drawTiles();
  drawChests();
  if(scene==='world'&&TASK&&TASK.def.drawWorld)TASK.def.drawWorld(TASK);
  // Криволом в замке
- if(SV.z<5&&P.x>150*TS){drawSpr('krivo',wx(185*TS),wy(GR*TS),HGT.krivo*TS,{gnd:true,rot:Math.sin(T*1.5)*.02})}
+ if(SV.z<5&&P.x>150*TS){drawSpr('krivo',wx(185*TS),wy(GR*TS),HGT.krivo*TS,{gnd:wy(groundY(185*TS,GR*TS-TS*.5)),rot:Math.sin(T*1.5)*.02})}
  // Грань
  const gx=granSpot()*TS;if(Math.abs(gx-GRAN.x)>1){sparks(GRAN.x,GRAN.y-TS,8);GRAN.x=gx;GRAN.y=groundY(gx,(SV.z===0&&SV.f.tut?GR:GR-1)*TS);sparks(GRAN.x,GRAN.y-TS,12,'#d8a0ff')}else GRAN.y=groundY(GRAN.x,(SV.z===0&&SV.f.tut?GR:GR-1)*TS);
- drawSpr('gran',wx(GRAN.x),wy(GRAN.y),HGT.gran*TS,{gnd:true,rot:talk&&talk.who==='gran'?Math.sin(T*6)*.02:0});
+ drawSpr('gran',wx(GRAN.x),wy(GRAN.y),HGT.gran*TS,{gnd:wy(groundY(GRAN.x,GRAN.y-TS*.5)),rot:talk&&talk.who==='gran'?Math.sin(T*6)*.02:0});
  const avail=stations().find(s=>s.id!=='chest');if(avail&&!TASK){drawImg('star',wx(GRAN.x),wy(GRAN.y-HGT.gran*TS)-34+Math.sin(T*4)*6,58,{glow:'#ffe066'})}
  // Пиксель и Блоки
- drawSpr('pixel',wx(DOG.x),wy(DOG.y),HGT.pixel*TS,{gnd:true,rot:DOG.walk?Math.sin(DOG.walk)*.05:0});
- drawSpr('bloki',wx(P.x),wy(P.y),HGT.bloki*TS,{gnd:P.onG?true:null,rot:P.walk?Math.sin(P.walk)*.05:(DIG?Math.sin(T*30)*.03:0)});
+ drawSpr('pixel',wx(DOG.x),wy(DOG.y),HGT.pixel*TS,{gnd:wy(groundY(DOG.x,DOG.y-TS*.5)),rot:DOG.walk?Math.sin(DOG.walk)*.05:0});
+ drawSpr('bloki',wx(P.x),wy(P.y),HGT.bloki*TS,{gnd:P.onG?wy(groundY(P.x,P.y-TS*.5)):null,rot:P.walk?Math.sin(P.walk)*.05:(DIG?Math.sin(T*30)*.03:0)});
  if(scene==='world'&&TASK&&TASK.def.draw&&!TASK.def.overlay){}
  drawParticles(CAM.x-vis().x0,CAM.y-vis().y0);
  // ночь / подземелье: темнее, вокруг Блоки светит фонарь на каске
- const v=vis();const under=P.y>GR*TS+2&&P.x>20*TS&&P.x<56*TS;const dark=Math.max(NIGHT*.62,under?.38:0);
- if(dark>.01){const lx=wx(P.x),ly=wy(P.y-TS*1.6);const g=X.createRadialGradient(lx,ly,TS*1.6,lx,ly,TS*6.5);g.addColorStop(0,'rgba(8,10,30,0)');g.addColorStop(1,`rgba(8,10,30,${dark})`);X.fillStyle=g;X.fillRect(v.x0,v.y0,v.w,v.h)}}
+ const v=vis();const under=P.y>GR*TS+2&&P.x>20*TS&&P.x<56*TS;const dark=Math.max(NIGHT*.5,under?.34:0);
+ if(dark>.01){const lx=wx(P.x),ly=wy(P.y-TS*1.6);const g=X.createRadialGradient(lx,ly,TS*2.2,lx,ly,TS*8);g.addColorStop(0,'rgba(8,10,30,0)');g.addColorStop(1,`rgba(8,10,30,${dark})`);X.fillStyle=g;X.fillRect(v.x0,v.y0,v.w,v.h)}}
 // ---- интерфейс мира ----
 function hud(){const s=safeV();
  if(!TASK){drawBtn('b_home',s.x0+58,s.y0+58,104);btn('home',s.x0+58,s.y0+58,104,104,()=>go('title'))}
@@ -93,9 +93,9 @@ function hud(){const s=safeV();
  if(MODE==='place'&&SEL!=null&&SV.inv[SEL]){const ti=IM['t_'+TT[SEL].n];if(ok(ti))X.drawImage(ti,s.x1-232-22,by+8-82,44,44)}
  drawBtn('b_dig',s.x1-372,by+8,124,{sel:MODE==='dig'});btn('dig',s.x1-372,by+8,124,124,()=>{MODE='dig'});
  // сумка с блоками
- const keys=Object.keys(SV.inv).filter(k=>SV.inv[k]>0&&TT[k]&&TT[k].n).map(Number);const x0=s.x0+340,x1=s.x1-440;const nmax=Math.max(0,Math.floor((x1-x0)/96));const ks=keys.slice(0,nmax);
- ks.forEach((k,i)=>{const sx=(x0+x1)/2+(i-(ks.length-1)/2)*96,sy=by+14;const b=nine('tab_grey',sx-44,sy-44,88,88);const ti=IM['t_'+TT[k].n];if(ok(ti))X.drawImage(ti,sx-28,sy-32,56,56);txt(String(SV.inv[k]),sx+22,sy+26,28,'#fff');
-  if(MODE==='place'&&SEL===k){X.save();X.strokeStyle='#ffe066';X.lineWidth=6;X.strokeRect(sx-46,sy-46,92,92);X.restore()}btn('inv'+k,sx,sy,88,88,()=>{SEL=k;MODE='place'})})}
+ const keys=Object.keys(SV.inv).filter(k=>SV.inv[k]>0&&TT[k]&&TT[k].n).map(Number);const x0=s.x0+340,x1=s.x1-440;const nmax=Math.max(0,Math.floor((x1-x0)/118));const ks=keys.slice(0,nmax);
+ ks.forEach((k,i)=>{const sx=(x0+x1)/2+(i-(ks.length-1)/2)*118,sy=by+10;nine('tab_grey',sx-54,sy-54,108,108);const ti=IM['t_'+TT[k].n];if(ok(ti))X.drawImage(ti,sx-34,sy-38,68,68);txt(String(SV.inv[k]),sx+28,sy+30,32,'#fff');
+  if(MODE==='place'&&SEL===k){X.save();X.strokeStyle='#ffe066';X.lineWidth=7;X.strokeRect(sx-56,sy-56,112,112);X.restore()}btn('inv'+k,sx,sy,108,108,()=>{SEL=k;MODE='place'})})}
 SC.world={enter(){genWorld();if(SV.px){P.x=SV.px[0];P.y=SV.px[1]}else{P.x=3.5*TS;P.y=GR*TS}if(boxHits(P.x,P.y,P.hw,P.h)){P.x=3.5*TS;P.y=GR*TS}P.vx=P.vy=0;DOG.x=P.x-1.2*TS;DOG.y=groundY(DOG.x,P.y-TS*.5);
   GRAN.x=granSpot()*TS;GRAN.y=groundY(GRAN.x,(SV.z===0&&SV.f.tut?GR:GR-1)*TS);STIN={};stations().forEach(s=>{STIN[s.key||s.id]=s.near});stepCam(0,true);BGA=zoneHere();BGB=null;
   const k=Object.keys(SV.inv).find(k=>SV.inv[k]>0);SEL=k!=null?+k:null},

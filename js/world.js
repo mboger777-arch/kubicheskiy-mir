@@ -3,21 +3,21 @@
 const TS=96,WT=192,HT=16,GR=10; // размер блока (дизайн-пиксели), ширина/высота мира в блоках, ряд поверхности
 // типы блоков (картинки — нарисованные текстуры assets/tiles)
 const TT=[{n:null},{n:'grass',drop:2},{n:'dirt'},{n:'cobble'},{n:'stone',drop:3},{n:'diamond_ore',drop:'dia'},{n:'gold_ore'},{n:'bedrock',hard:1},{n:'sand'},{n:'sandstone'},{n:'planks'},{n:'log'},{n:'leaves'},{n:'castle'},{n:'brick'},{n:'water',fluid:1,hard:1},{n:'iron',hard:1},
- {n:'diamond_ore',hard:1,cw:1},{n:'stone',hard:1},{n:'castle',hard:1},{n:'cobble',hard:1},{n:'planks',hard:1},{n:'sandstone',hard:1},{n:'castle',hard:1,roof:1}];
-const B={air:0,grass:1,dirt:2,cobble:3,stone:4,dia:5,gold:6,bed:7,sand:8,sst:9,plank:10,log:11,leaf:12,castle:13,brick:14,water:15,iron:16,cwall:17,rock:18,hcastle:19,hcob:20,deck:21,pyr:22,roof:23};
+ {n:'diamond_ore',hard:1,cw:1},{n:'stone',hard:1},{n:'castle',hard:1},{n:'cobble',hard:1},{n:'planks',hard:1},{n:'sandstone',hard:1},{n:'castle',hard:1,roof:1},{n:'log',pass:1,drop:11},{n:'leaves',pass:1,drop:12}];
+const B={air:0,grass:1,dirt:2,cobble:3,stone:4,dia:5,gold:6,bed:7,sand:8,sst:9,plank:10,log:11,leaf:12,castle:13,brick:14,water:15,iron:16,cwall:17,rock:18,hcastle:19,hcob:20,deck:21,pyr:22,roof:23,tlog:24,tleaf:25};
 ['grass','dirt','cobble','stone','diamond_ore','gold_ore','bedrock','sand','sandstone','planks','log','leaves','castle','brick','water','iron'].forEach(n=>img('t_'+n,'assets/tiles/'+n+'.png'));
 const TCOL={};// средний цвет текстуры для крошек
 let WORLD=new Uint8Array(WT*HT);
 const tget=(c,r)=>(c<0||c>=WT||r<0||r>=HT)?B.bed:WORLD[r*WT+c];
 const tset=(c,r,v)=>{if(c>=0&&c<WT&&r>=0&&r<HT)WORLD[r*WT+c]=v};
-const solid=t=>t!==0&&!TT[t].fluid;
+const solid=t=>t!==0&&!TT[t].fluid&&!TT[t].pass; // деревья — сквозные (можно рубить, но они не загораживают дорогу)
 // ---- зоны ----
 const ZONES=[{n:'forest',x0:0,x1:21},{n:'mine',x0:21,x1:56},{n:'river',x0:56,x1:86},{n:'village',x0:86,x1:120},{n:'desert',x0:120,x1:156},{n:'castle',x0:156,x1:WT}];
 const RX0=66,RX1=75;// река: 9 блоков = 3 пролёта по 3
 const PLOT=[99,111];// участок для домика
 const PYR={x0:136,gaps:[[139,8],[142,6],[145,8]]};// пирамида и 3 выбитых блока
 const ROOF=[[178,5],[179,5],[180,5],[181,5],[182,5],[179,4],[180,4],[181,4],[180,3]];
-const CHESTS=[{c:13,r:11,z:0},{c:114,r:5,z:3},{c:128,r:11,z:4},{c:163,r:9,z:5}];// клад: клетка сначала закрыта блоком, выкопал — нашёл
+const CHESTS=[{c:13,r:11,z:0},{c:118,r:5,z:3},{c:128,r:11,z:4},{c:163,r:9,z:5}];// клад: клетка сначала закрыта блоком, выкопал — нашёл
 const MWALLS=[29,40,50];// кристальные стены шахты (x), ряды 10-12
 function genWorld(){WORLD=new Uint8Array(WT*HT);const F=(c0,c1,r0,r1,t)=>{for(let c=c0;c<=c1;c++)for(let r=r0;r<=r1;r++)tset(c,r,t)};
  // базовая земля
@@ -26,7 +26,7 @@ function genWorld(){WORLD=new Uint8Array(WT*HT);const F=(c0,c1,r0,r1,t)=>{for(le
   tset(c,top,surf);F(c,c,top+1,top+2,sub);F(c,c,top+3,HT-2,z==='desert'?B.sst:B.stone);tset(c,HT-1,B.bed)}
  F(0,0,0,HT-1,B.bed);F(WT-1,WT-1,0,HT-1,B.bed);
  // лес: деревья, золото глубоко под землёй
- const tree=(c,h)=>{F(c,c,GR-h,GR-1,B.log);F(c-1,c+1,GR-h-2,GR-h,B.leaf);tset(c,GR-h-3,B.leaf)};tree(5,3);tree(16,4);
+ const tree=(c,h)=>{F(c,c,GR-h,GR-1,B.tlog);F(c-1,c+1,GR-h-2,GR-h,B.tleaf);tset(c,GR-h-3,B.tleaf)};tree(5,3);tree(16,4);
  F(10,11,GR+3,GR+4,B.gold);
  // гора над шахтой (непробиваемая скала), туннель рядов 10-12 (3 блока высотой), спуск и подъём ступеньками
  F(23,51,1,GR-1,B.rock);F(23,51,1,1,B.grass);
@@ -37,16 +37,16 @@ function genWorld(){WORLD=new Uint8Array(WT*HT);const F=(c0,c1,r0,r1,t)=>{for(le
  MWALLS.forEach(c=>F(c,c,GR,GR+2,B.cwall));
  // река
  F(RX0,RX1-1,GR,GR,B.air);F(RX0,RX1-1,GR+1,HT-2,B.water);
- // деревня: столб с сундуком (надо достроить лесенку), стена с воротами
- F(114,114,GR-4,GR-1,B.hcob);F(119,119,0,GR-1,B.hcob);F(119,119,GR-2,GR-1,B.iron);
+ // деревня: полка у стены с сундуком (надо построить лесенку), под ней проход к воротам
+ F(118,118,GR-4,GR-3,B.hcob);F(119,119,0,GR-1,B.hcob);F(119,119,GR-2,GR-1,B.iron);
  // пустыня: пирамида
  for(let k=0;k<7;k++)F(PYR.x0+k,PYR.x0+12-k,GR-1-k,GR-1-k,B.pyr);
  PYR.gaps.forEach(([c,r])=>tset(c,r,B.air));F(155,155,0,GR-1,B.hcastle);F(155,155,GR-2,GR-1,B.iron);
  // замок: башня, лестница, тайник за кирпичами
  F(178,182,6,GR-1,B.hcastle);F(175,175,GR-1,GR-1,B.castle);F(176,176,GR-2,GR-1,B.castle);F(177,177,GR-3,GR-1,B.castle);
- F(162,164,8,9,B.brick);
+ F(162,164,9,9,B.brick);
  // кактусы
- [124,131,151].forEach(c=>F(c,c,GR-2,GR-1,B.leaf));
+ [124,131,151].forEach(c=>F(c,c,GR-2,GR-1,B.tleaf));
  applyState()}
 function zoneOf(c){for(const z of ZONES)if(c>=z.x0&&c<z.x1)return z.n;return 'castle'}
 // состояние прохождения → мир (стены открыты, мост, ворота) + изменения игрока
@@ -121,7 +121,7 @@ function setT(c,r,v){tset(c,r,v);SV.diff[c+','+r]=v;save()}
 function tapTile(c,r){const t=tget(c,r);
  if(TASK&&TASK.def.tapTile&&TASK.def.tapTile(TASK,c,r))return true;
  if(MODE==='dig'){if(!t||TT[t].fluid)return false;if(TT[t].hard){if(TT[t].cw)return false;hint(t===B.iron?'t_gate':'t_hard');return true}
-  if(!reachOK(c,r)){hint('t_far');return true}if(DIG)return true;DIG={c,r,t:0,d:t===B.leaf?.12:.22};SFX.dig();return true}
+  if(!reachOK(c,r)){hint('t_far');return true}if(DIG)return true;DIG={c,r,t:0,d:(t===B.leaf||t===B.tleaf)?.12:.22};SFX.dig();return true}
  else{if(t&&!TT[t].fluid)return false;if(!reachOK(c,r)){hint('t_far');return true}
   if(SEL==null||!SV.inv[SEL]){hint('t_noblk');return true}
   if(c>=RX0&&c<RX1&&SV.z<2&&r>=GR-6){hint('t_water');return true}
