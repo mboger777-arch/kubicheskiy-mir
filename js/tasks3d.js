@@ -36,13 +36,13 @@ TD.mw={enter(t,i){t.i=i;t.type=['ac','ob','rt'][i];t.a=t.type==='ac'?pick([40,50
 // ===================== НОЧЬ: паук «острый угол» — лук и транспортир =====================
 // паук висит в плоскости экрана под углом a от Блоки; лук поворачивается шагами по 15°
 TD.spider={enter(t,ent){const first=!SV.f.sp1;SV.f.sp1=1;save();t.a=first?pick([45,60]):pick([30,45,60,120,135,150]);t.aim=90;t.arrow=null;t.D=4.2;
-  t.ent=ent||spawnMonster('spider',PL.p.x+3,PL.p.z);t.ent.task=1;t.yaw=CAMS.yaw;const o=TD.spider.org(t);focusAt(o.x,o.y+1.4,o.z,t.yaw,-.05,7.5);
+  t.ent=ent||spawnMonster('spider',PL.p.x+3,PL.p.z);t.ent.task=1;const o=TD.spider.org(t);focusAt(o.x,o.y+1.4,o.z,CAMS.yaw,-.05,7.5,[CAMS.yaw+Math.PI,CAMS.yaw+Math.PI/2,CAMS.yaw-Math.PI/2]);t.yaw=CAMS.focus.yaw;
   if(!t.thread){t.thread=new T3.Line(new T3.BufferGeometry().setFromPoints([new T3.Vector3(),new T3.Vector3(0,20,0)]),new T3.LineBasicMaterial({color:0xe8e8ff}));SCENE.add(t.thread)}
   if(first)say('sp_in').catch(()=>{});say('sp_'+t.a).catch(()=>{})},
  org(t){return new T3.Vector3(PL.p.x,PL.p.y+1.1,PL.p.z)},
  right(t){return new T3.Vector3(Math.cos(t.yaw),0,-Math.sin(t.yaw))},
  spPos(t){const o=TD.spider.org(t),r=TD.spider.right(t);const a=t.a*R2D;return o.addScaledVector(r,-Math.cos(a)*t.D).add(new T3.Vector3(0,Math.sin(a)*t.D-.4,0))},
- update(t,dt){const p=TD.spider.spPos(t);const e=t.ent;if(!t.dead){e.p.lerp(p,Math.min(1,dt*4));e.v.set(0,0,0);e.ty=t.yaw+Math.PI;e.walk=.6}
+ update(t,dt){const p=TD.spider.spPos(t);const e=t.ent;if(!t.dead){e.p.lerp(p,Math.min(1,dt*4));e.v.set(0,0,0);e.ty=e.yaw=t.yaw+Math.PI;e.walk=.6;placeEnt(e);animEnt(e,dt)}
   t.thread.position.copy(e.p).add(new T3.Vector3(0,.6,0));t.thread.visible=!t.dead},
  draw(t){const o=TD.spider.org(t);const[ox,oy]=scr(o.x,o.y,o.z);const R=150;
   protractor(ox,oy,R,{alpha:.85});const a=t.aim*R2D;rod('stick',ox,oy,ox+Math.cos(-a)*R*1.25,oy+Math.sin(-a)*R*1.25,14);drawImg('arrow',ox+Math.cos(-a)*R*1.3,oy+Math.sin(-a)*R*1.3,96,{rot:-a});
@@ -65,7 +65,7 @@ TD.zombie={enter(t,ent){const first=!SV.f.zb1;SV.f.zb1=1;save();const sets=[[60,
   t.wallAt=PL.p.clone().addScaledVector(d,1.7);t.wallAt.y=groundAt(t.wallAt.x,t.wallAt.z,PL.p.y+2);t.stop=3.4;t.dist=Math.max(3.6,Math.min(6,Math.hypot(t.ent.p.x-PL.p.x,t.ent.p.z-PL.p.z)));
   const yaw=Math.atan2(d.x,d.z)+Math.PI/2;const mid=PL.p.clone().addScaledVector(d,1.8);const by=Math.atan2(d.x,d.z);focusAt(mid.x,PL.p.y+1.2,mid.z,yaw,-.12,7,[yaw-Math.PI,by-.5,by+.5,by]);t.wall=null;t.dead=0;say('zb_in').catch(()=>{})},
  update(t,dt){const e=t.ent;if(t.dead)return;const tgt=t.wall&&t.wall.a===90?2.4:t.stop;t.dist+=(clamp(tgt-t.dist,-1,1))*(t.back?2.4:1.2)*dt*(Math.abs(tgt-t.dist)>.02?1:0);
-  const p=PL.p.clone().addScaledVector(t.dir,t.dist);e.p.x=p.x;e.p.z=p.z;e.v.x=e.v.z=0;e.walk=Math.abs(tgt-t.dist)>.05?1:0;e.ty=Math.atan2(-t.dir.x,-t.dir.z);
+  const p=PL.p.clone().addScaledVector(t.dir,t.dist);e.p.x=p.x;e.p.z=p.z;e.v.x=e.v.z=0;e.walk=Math.abs(tgt-t.dist)>.05?1:0;e.ty=Math.atan2(-t.dir.x,-t.dir.z);physEnt(e,dt,0,0,false);animEnt(e,dt);
   if(t.wm){const k=T-t.wall.t0;let a=t.wall.a;if(a!==90&&k>.35){const f=ease((k-.35)/.6);a=lerp(a,a<90?0:180,f)}t.wm.rotation.set(0,0,0);t.wm.rotateOnAxis(t.axis,(90-a)*R2D)}},
  mkWall(t,a){if(t.wm)SCENE.remove(t.wm);const g=new T3.Group();for(let i=0;i<3;i++)for(let j=-1;j<=1;j++){const m=new T3.Mesh(new T3.BoxGeometry(.98,.98,.98),texMat('cobble'));m.position.set(0,i+.5,0);g.add(m);const side=new T3.Vector3(-t.dir.z,0,t.dir.x);m.position.addScaledVector(side,j)}
   const piv=new T3.Group();piv.position.copy(t.wallAt).sub(new T3.Vector3(.5*t.dir.x,0,.5*t.dir.z));g.position.set(.5*t.dir.x,0,.5*t.dir.z);piv.add(g);t.axis=new T3.Vector3(-t.dir.z,0,t.dir.x).normalize();SCENE.add(piv);t.wm=piv},

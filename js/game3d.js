@@ -71,8 +71,9 @@ function stepMonsters(dt){for(const e of MON.slice()){if(!ENTS.includes(e)){MON.
   physEnt(e,dt,d>2.6||e.flee>0?mx:0,d>2.6||e.flee>0?mz:0,false);animEnt(e,dt);
   if(d<3.2&&!TASK&&!(e.flee>0)&&(DAY.night||e.fixed)&&Math.abs(PL.p.y-e.p.y)<2.5)openTask(e.kind,e)}}
 // место для монстра: на том же уровне, что и Блоки (в туннеле — по туннелю), 6–10 блоков, есть место над головой, не в воде
-function spawnSpot(){const py=Math.round(PL.p.y);for(let i=0;i<40;i++){const a=i<8?(i%2?0:Math.PI)+(Math.random()-.5)*.3:Math.random()*6.28,r=6+Math.random()*4;
-  const x=clamp(PL.p.x+Math.sin(a)*r,1,barrierX()-1),z=clamp(PL.p.z+Math.cos(a)*r,2,WZ-3);if(x>RIV.x0-1&&x<RIV.x1+1)continue;
+function spawnSpot(){const py=Math.round(PL.p.y);let roof=false;for(let k=2;k<6;k++)if(solidT(vget(Math.floor(PL.p.x),Math.floor(PL.p.y)+k,Math.floor(PL.p.z))))roof=true;
+ for(let i=0;i<40;i++){const a=roof?(i%2?1:-1)*Math.PI/2:i<8?(i%2?1:-1)*Math.PI/2+(Math.random()-.5)*.3:Math.random()*6.28,r=roof?5+Math.random()*3:6+Math.random()*4;
+  const x=clamp(PL.p.x+Math.sin(a)*r,1,barrierX()-1),z=roof?PL.p.z:clamp(PL.p.z+Math.cos(a)*r,2,WZ-3);if(x>RIV.x0-1&&x<RIV.x1+1)continue;
   const y=groundAt(x,z,py+1.5);if(Math.abs(y-PL.p.y)>1.01)continue;const X_=Math.floor(x),Z_=Math.floor(z);if(vget(X_,y,Z_)||vget(X_,y+1,Z_)||BT[vget(X_,y-1,Z_)].fluid)continue;
   let ok=true;const n=Math.ceil(r);for(let k=1;k<n;k++){const qx=Math.floor(PL.p.x+(x-PL.p.x)*k/n),qz=Math.floor(PL.p.z+(z-PL.p.z)*k/n);const gy=groundAt(qx+.5,qz+.5,py+1.5);if(Math.abs(gy-PL.p.y)>1.01||vget(qx,gy+1,qz)){ok=false;break}}if(ok)return[x+0,y,z]}return null}
 function stepDay(dt){if(SV.mw<1){DAY.night=false;return}DAY.t+=dt;const L=DAY.night?NIGHTLEN:DAYLEN;if(DAY.t>L){DAY.t=0;DAY.night=!DAY.night;if(DAY.night)say('n1').catch(()=>{});else say('n2').catch(()=>{})}
