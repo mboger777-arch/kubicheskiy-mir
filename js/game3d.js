@@ -94,7 +94,7 @@ function stations(){const L=[],p=PL.p;const near=(x,z,r)=>Math.hypot(p.x-x,p.z-z
  if(SV.z===3)L.push({id:'desert',near:near(SPOTS.desert[0],SPOTS.desert[1],2.6)});if(SV.z===4)L.push({id:'castle',near:near(SPOTS.castle[0],SPOTS.castle[1],2.8)});
  CHESTS.forEach((c,i)=>{if(SV.st[i])return;const open=[[0,1,0],[1,0,0],[-1,0,0],[0,0,1],[0,0,-1]].some(([a,b,d])=>!opaqueT(vget(c.x+a,c.y+b,c.z+d)))&&vget(c.x,c.y,c.z)===0;
   L.push({id:'chest',arg:i,key:'chest'+i,near:open&&Math.hypot(c.x+.5-p.x,c.z+.5-p.z)<2.2&&Math.abs(c.y-p.y)<2.2})});return L}
-function stepStations(){for(const s of stations()){const k=s.key||s.id;const was=STIN[k];STIN[k]=s.near;if(s.near&&!was&&!TASK)openTask(s.id,s.arg)}}
+function stepStations(){for(const s of stations()){const k=s.key||s.id;if(TASK)continue;const was=STIN[k];STIN[k]=s.near;if(s.near&&!was)openTask(s.id,s.arg)}}
 // сюжетные подсказки
 function stepStory(){const f=SV.f;
  if(!f.t1){f.t1=1;say('t1').catch(()=>{});setTimeout(()=>{if(!SV.f.tl&&scene==='world'){SV.f.tl=1;say('t_look').catch(()=>{})}},9000)}
