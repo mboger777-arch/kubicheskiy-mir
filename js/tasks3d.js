@@ -90,30 +90,35 @@ const SHAPES={sq:{p:[[0,0],[3,0],[3,3],[0,3]],e:[[0,1],[1,2],[2,3],[3,0]],rig:0}
 const RQ=[{o:['sq','tri'],ok:'tri',q:'r1q',bad:'r_sq',good:'r_tri'},{o:['diag','hmid','vmid'],ok:'diag',q:'r2q',bad:'r2_bad',good:'r2_ok'},{o:['tri','rect','pent'],ok:'tri',q:'r3q',bad:'r3_bad',good:'r_tri'}];
 function shear(p,phi){return[p[0]+p[1]*Math.sin(phi),p[1]*Math.cos(phi)]}
 // ферма из балок по обеим сторонам пролёта s
-function trussMesh(kind,s,phi,dy){const sh=SHAPES[kind];const g=new T3.Group();const x0=RIV.x0+s*3;const pts=sh.p.map(q=>phi?shear(q,phi):q);
- for(const zz of[TZ-2.45,TZ+3.45]){for(const[a,b]of sh.e){const A=new T3.Vector3(x0+pts[a][0],GY+1+pts[a][1]+(dy||0),zz),Bv=new T3.Vector3(x0+pts[b][0],GY+1+pts[b][1]+(dy||0),zz);g.add(beam(A,Bv,.22,texMat('planks')))}}
+function trussMesh(kind,s,phi,dy,prog){const sh=SHAPES[kind];const g=new T3.Group();const x0=RIV.x0+s*3;const pts=sh.p.map(q=>phi?shear(q,phi):q);const ne=sh.e.length;const pr=prog==null?ne:prog*ne;
+ for(const zz of[TZ-2.45,TZ+3.45]){sh.e.forEach(([a,b],i)=>{if(i>=pr)return;const f=Math.min(1,pr-i);const A=new T3.Vector3(x0+pts[a][0],GY+1+pts[a][1]+(dy||0),zz),B0=new T3.Vector3(x0+pts[b][0],GY+1+pts[b][1]+(dy||0),zz);const Bv=A.clone().lerp(B0,ease(f));if(A.distanceTo(Bv)>.05)g.add(beam(A,Bv,.3,texMat('planks')))});
+  for(const q of pts)if(pr>=ne-.01){const n=new T3.Mesh(new T3.BoxGeometry(.34,.34,.34),texMat('iron'));n.position.set(x0+q[0],GY+1+q[1]+(dy||0),zz);g.add(n)}}
  if(dy==null){}return g}
 let TRUSS=[];function buildTrusses(){TRUSS.forEach(m=>SCENE.remove(m));TRUSS=[];const n=SV.z>=2?3:(SV.tr.river||0);for(let s=0;s<n;s++){const m=trussMesh(RQ[s].ok,s);SCENE.add(m);TRUSS.push(m)}}
-TD.river={enter(t){t.r=SV.tr.river||0;t.b=null;t.opts=shuffle(RQ[t.r].o.slice());if(!SV.f.r0){SV.f.r0=1;say('r0').catch(()=>{})}say(RQ[t.r].q).catch(()=>{});TD.river.cam(t);if(t.r===1)TD.river.show(t,'sq')},
- cam(t){focusAt(RIV.x0+t.r*3+1.5,GY+2.3,TZ+.5,Math.PI*.82,-.18,9.5)},
- show(t,kind,phi,dy){if(t.mesh)SCENE.remove(t.mesh);t.mesh=trussMesh(kind,t.r,phi,dy);SCENE.add(t.mesh)},
- update(t,dt){const b=t.b;if(!b)return;const k=T-b.t0;let phi=0,dy=0;
-  if(!b.rig&&k>1.0)phi=Math.min(40*R2D,(k-1.0)*1.3);if(!b.rig&&k>1.6){const f=k-1.6;dy=-f*f*9}
-  if(!b.rig&&k>1.9&&!b.spl){b.spl=1;SFX.splash();cubeBurst(RIV.x0+t.r*3+1,GY-1,TZ,B.water,16)}
-  if(k<2.6||b.rig)TD.river.show(t,b.kind,phi,dy);else if(t.mesh){SCENE.remove(t.mesh);t.mesh=null}
+TD.river={enter(t){if(PL&&PL.p.x<RIV.x0-1.4&&Math.abs(PL.p.x-RIV.x0)<5){PL.p.x=RIV.x0-1.4;PL.p.z=TZ+.5;PL.p.y=groundAt(PL.p.x,PL.p.z,PL.p.y+2);PL.ty=Math.PI/2}t.r=SV.tr.river||0;t.b=null;t.opts=shuffle(RQ[t.r].o.slice());if(!SV.f.r0){SV.f.r0=1;say('r0').catch(()=>{})}say(RQ[t.r].q).catch(()=>{});TD.river.cam(t);if(t.r===1)TD.river.show(t,'sq')},
+ cam(t){CAMS.focus={t:[(PL.p.x+RIV.x0+t.r*3+1.5)/2+.3,GY+2,TZ+.2],yaw:.72-Math.PI,pitch:-.2,dist:6.8}},
+ show(t,kind,phi,dy,prog){if(t.mesh)SCENE.remove(t.mesh);t.mesh=trussMesh(kind,t.r,phi,dy,prog);SCENE.add(t.mesh)},
+ update(t,dt){if(t.cross)TD.river.walk(t,dt);const b=t.b;if(!b)return;const k=T-b.t0;let phi=0,dy=0;const prog=clamp(k/.85,0,1);const nb=Math.floor(prog*SHAPES[b.kind].e.length);if(nb!==b.nb){b.nb=nb;if(nb>0)SFX.click()}
+  if(!b.rig&&k>1.0)phi=Math.min(42*R2D,(k-1.0)*.95);if(!b.rig&&k>1.85){const f=k-1.85;dy=-f*f*9}
+  if(!b.rig&&k>2.1&&!b.spl){b.spl=1;SFX.splash();const sx=RIV.x0+t.r*3+1;for(const zz of[TZ-2,TZ,TZ+3])cubeBurst(sx,GY-1,zz,B.water,12);for(let i=0;i<4;i++)dustPuff(sx-1+i,GY-1,TZ-2+i*1.5,B.water,6)}
+  if(k<2.8||b.rig)TD.river.show(t,b.kind,phi,dy,prog);else if(t.mesh){SCENE.remove(t.mesh);t.mesh=null}
   if(!t.cart){t.cart=cartMesh();SCENE.add(t.cart)}const x0=RIV.x0+t.r*3;const cx=b.rig?lerp(x0-1,x0+3.6,clamp((k-.4)/1.6,0,1)):lerp(x0-1,x0+1.5,clamp((k-.4)/.6,0,1));
   t.cart.position.set(cx,GY+1+(b.rig?0:Math.min(0,dy)),TZ+.5);t.cart.visible=k>.3&&dy>-6},
  draw(t){},
  ui(t){backBtn();optRow(t,t.opts.map(k=>({id:k,label:null,draw:bx=>{const[x,y,w,h]=bx;const sh=SHAPES[k];const sc=Math.min(w*.95/3,h*1.0/3);
    X.save();X.translate(x+w/2-1.5*sc,y+h*.98);X.scale(sc,-sc);for(const[a,c]of sh.e){X.strokeStyle='#7a4a1a';X.lineWidth=26/sc*1.0;X.lineCap='round';X.beginPath();X.moveTo(...sh.p[a]);X.lineTo(...sh.p[c]);X.stroke();X.strokeStyle='#c08a4a';X.lineWidth=14/sc;X.stroke()}X.restore()}})),id=>TD.river.pick(t,id),{w:300,h:150})},
- pick(t,id){const q=RQ[t.r];t.b={kind:id,t0:T,rig:SHAPES[id].rig};SFX.place();
-  if(id!==q.ok){t.mist++;t.wob[id]=T;const c={ep:t.ep},b=t.b;setTimeout(()=>{if(alive(c)&&t.b===b){SFX.crash();sayNow(q.bad)}},1100);setTimeout(()=>{if(alive(c)&&t.b===b){t.b=null;if(t.cart)t.cart.visible=false;if(t.r===1)TD.river.show(t,'sq');else if(t.mesh){SCENE.remove(t.mesh);t.mesh=null}}},2700);return}
-  win(t,async c=>{await say(q.good,c).catch(()=>{});await wait(Math.max(0,2300-(T-t.b.t0)*1000),c);SFX.ok();deckSpan(t.r,false);
+ pick(t,id){if(t.cross||(t.b&&t.b.rig))return;const q=RQ[t.r];const bb=t.b={kind:id,t0:T,rig:SHAPES[id].rig};SFX.place();
+  if(id!==q.ok){t.mist++;t.wob[id]=T;const c={ep:t.ep},b=t.b;setTimeout(()=>{if(alive(c)&&t.b===b){SFX.crash();sayNow(q.bad)}},1300);setTimeout(()=>{if(alive(c)&&t.b===b){t.b=null;if(t.cart)t.cart.visible=false;if(t.r===1)TD.river.show(t,'sq');else if(t.mesh){SCENE.remove(t.mesh);t.mesh=null}}},3000);return}
+  win(t,async c=>{await say(q.good,c).catch(()=>{});await wait(Math.max(0,2300-(T-bb.t0)*1000),c);SFX.ok();deckSpan(t.r,false);
    SV.tr.river=t.r+1;save(1);t.b=null;if(t.mesh){SCENE.remove(t.mesh);t.mesh=null}if(t.cart)t.cart.visible=false;buildTrusses();
-   if(t.r+1>=3){SV.z=Math.max(SV.z,2);save(1);closeTask();say('r_done').catch(()=>{});return}
+   if(t.r+1>=3){SV.z=Math.max(SV.z,2);save(1);t.r=2;t.cross=T;say('r_done',c).catch(()=>{});for(let i=0;i<400&&PL.p.x<RIV.x1+2.3&&T-t.cross<9;i++)await wait(100,c);await wait(900,c);t.cross=0;closeTask();return}
    t.r++;t.opts=shuffle(RQ[t.r].o.slice());TD.river.cam(t);if(t.r===1)TD.river.show(t,'sq');say(RQ[t.r].q,c).catch(()=>{})})},
+ // мост готов: герои идут по нему на другой берег, камера провожает их
+ walk(t,dt){const k=T-t.cross;if(k<.6)return;PL.p.x=Math.min(PL.p.x+dt*3.1,RIV.x1+2.5);PL.p.z+=(TZ+.5-PL.p.z)*Math.min(1,dt*3);PL.walk=PL.p.x<RIV.x1+2.4?1:0;PL.ty=Math.PI/2;
+  [[GRN,-1.4,.9],[DOG,-2.4,-.6]].forEach(([e,dx,dz])=>{if(!e)return;const tx=PL.p.x+dx,tz=TZ+.5+dz;e.p.x+=(tx-e.p.x)*Math.min(1,dt*4);e.p.z+=(tz-e.p.z)*Math.min(1,dt*4);e.p.y=groundAt(e.p.x,e.p.z,e.p.y+1.5);e.walk=PL.walk;e.ty=Math.PI/2});
+  CAMS.focus={t:[PL.p.x+.6,GY+1.9,TZ+.5],yaw:.55-Math.PI,pitch:-.18,dist:7}},
  leave(t){if(t.mesh)SCENE.remove(t.mesh);if(t.cart)SCENE.remove(t.cart)},
- ans(t,good){const q=RQ[t.r];return[good?q.ok:t.opts.find(k=>k!==q.ok)]}};
+ ans(t,good){if(t.r>=RQ.length||t.cross)return[];const q=RQ[t.r];return[good?q.ok:t.opts.find(k=>k!==q.ok)]}};
 function cartMesh(){const g=new T3.Group();const iron=texMat('iron');const b=(w,h,d,x,y,z,m)=>{const q=new T3.Mesh(new T3.BoxGeometry(w,h,d),m||iron);q.position.set(x,y,z);g.add(q)};
  b(1,.12,.8,0,.32,0);b(1,.5,.1,0,.6,.4);b(1,.5,.1,0,.6,-.4);b(.1,.5,.8,.5,.6,0);b(.1,.5,.8,-.5,.6,0);b(.7,.4,.6,0,.55,0,texMat('gold_ore'));
  for(const x of[-.3,.3])for(const z of[-.42,.42])b(.24,.24,.06,x,.14,z,texMat('bedrock'));return g}

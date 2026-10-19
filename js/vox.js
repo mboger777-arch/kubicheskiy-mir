@@ -8,14 +8,14 @@ function vget(x,y,z){if(y<0)return B.bed;if(y>=WY)return 0;if(x<0||x>=WX||z<0||z
 function vset(x,y,z,t){if(x<0||x>=WX||y<0||y>=WY||z<0||z>=WZ)return;VOX[vi(x,y,z)]=t;markDirty(x,z)}
 function vsetRaw(x,y,z,t){if(x<0||x>=WX||y<0||y>=WY||z<0||z>=WZ)return;VOX[vi(x,y,z)]=t}
 // ---- блоки: текстуры в атласе (бок, верх, низ), твёрдость (время копания), непробиваемые ----
-const B={air:0,grass:1,dirt:2,cobble:3,stone:4,dia:5,gold:6,bed:7,sand:8,sst:9,plank:10,log:11,leaf:12,castle:13,brick:14,water:15,iron:16,crystal:17,rock:18,hcastle:19,hcob:20,deck:21,pyr:22,roof:23,cactus:24,ghost:25,tgrass:26,flower:27,torch:28,glass:29,banner:30,goldb:31,rail:32};
+const B={air:0,grass:1,dirt:2,cobble:3,stone:4,dia:5,gold:6,bed:7,sand:8,sst:9,plank:10,log:11,leaf:12,castle:13,brick:14,water:15,iron:16,crystal:17,rock:18,hcastle:19,hcob:20,deck:21,pyr:22,roof:23,cactus:24,ghost:25,tgrass:26,flower:27,torch:28,glass:29,banner:30,goldb:31,rail:32,lily:33,mush:34,lava:35,fence:36,door:37,bush:38};
 const BT=[{n:'air'},
  {n:'grass',t:['grass','grass_top','dirt'],d:.45,drop:2},{n:'dirt',t:['dirt'],d:.4},{n:'cobble',t:['cobble'],d:.7},{n:'stone',t:['stone'],d:.7,drop:3},
  {n:'dia',t:['diamond_ore'],d:.8,drop:'dia'},{n:'gold',t:['gold_ore'],d:.8},{n:'bed',t:['bedrock'],hard:1},{n:'sand',t:['sand'],d:.35},{n:'sst',t:['sandstone'],d:.6},
  {n:'plank',t:['planks'],d:.5},{n:'log',t:['log','log_top'],d:.6},{n:'leaf',t:['leaves'],d:.15,cut:1},{n:'castle',t:['castle'],d:.8},{n:'brick',t:['brick'],d:.7},
  {n:'water',t:['water'],fluid:1,hard:1},{n:'iron',t:['iron'],hard:1},{n:'crystal',t:['crystal'],hard:1,cw:1},{n:'rock',t:['stone'],hard:1},{n:'hcastle',t:['castle'],hard:1},
  {n:'hcob',t:['cobble'],hard:1},{n:'deck',t:['planks'],hard:1},{n:'pyr',t:['sandstone'],hard:1},{n:'roof',t:['brick'],hard:1},{n:'cactus',t:['cactus','cactus_top'],d:.3},{n:'ghost',t:['castle'],ghost:1},
- {n:'tgrass',t:['tallgrass'],deco:1},{n:'flower',t:['flower_red','flower_yel','flower_blu'],deco:1},{n:'torch',t:['torch'],deco:1,lit:1},{n:'glass',t:['glass'],cut:1,hard:1},{n:'banner',t:['banner'],deco:2},{n:'goldb',t:['gold_block'],hard:1},{n:'rail',t:['rail'],deco:3}];
+ {n:'tgrass',t:['tallgrass'],deco:1},{n:'flower',t:['flower_red','flower_yel','flower_blu'],deco:1},{n:'torch',t:['torch'],deco:1,lit:1},{n:'glass',t:['glass'],cut:1,hard:1},{n:'banner',t:['banner'],deco:2},{n:'goldb',t:['gold_block'],hard:1},{n:'rail',t:['rail'],deco:3},{n:'lily',t:['lily'],deco:3},{n:'mush',t:['mush_red','mush_brown'],deco:1},{n:'lava',t:['lava'],hard:1,lit:1},{n:'fence',t:['planks'],fence:1,cut:1,hard:1},{n:'door',t:['door_top','door_bot'],deco:4},{n:'bush',t:['deadbush'],deco:1}];
 const solidT=t=>t!==0&&!BT[t].fluid&&!BT[t].ghost&&!BT[t].deco;// стоим/упираемся
 const opaqueT=t=>solidT(t)&&!BT[t].cut;// закрывает соседнюю грань (листья и стекло — сквозные)
 const aoT=t=>opaqueT(t)||t===B.leaf;
@@ -46,7 +46,8 @@ const HOUSEP={x0:82,x1:89,z0:29,z1:37};
 const SPOTS={start:[6.5,TZ+.5],gran0:[10.5,TZ+.5],river:[63,TZ+.5],forge:[93.5,26.5],desert:[121,TZ+.5],castle:[155,TZ+.5],krivo:[157.8,TZ+3.6]};
 function surfH(x,z){const zn=zoneAt(x);let h=GY;
  if(zn==='forest'||zn==='village')h=GY+Math.round((vnoise(x,z,9,1)-.5)*3*(Math.abs(z-TZ)>4?1.6:.4));
- if(zn==='desert')h=GY+Math.round((vnoise(x,z,7,3)-.5)*2.4*(Math.abs(z-TZ)>3?1.4:.3));
+ if(zn==='desert'){const calm=Math.abs(z-TZ)<=4||(Math.abs(x-129)<9&&Math.abs(z-23)<9)||(Math.abs(x-120)<4&&Math.abs(z-12)<4)||x>138;
+  h=GY+Math.round((vnoise(x,z,7,3)-.5)*2.4*(Math.abs(z-TZ)>3?1.4:.3));if(!calm){const dn=Math.max(0,Math.sin(x*.32+z*.12+vnoise(x,z,11,4)*3))*Math.min(1,(Math.abs(z-TZ)-4)/4);h=Math.max(h,GY+Math.round(dn*4))}}
  if(zn==='river')h=GY;if(zn==='castle')h=GY;
  return h}
 function genWorld(){VOX.fill(0);RS=12345;
@@ -71,6 +72,9 @@ function genWorld(){VOX.fill(0);RS=12345;
  // река
  for(let x=RIV.x0;x<=RIV.x1;x++)for(let z=0;z<WZ;z++){for(let y=GY-4;y<=GY;y++)vsetRaw(x,y,z,y<=GY-1?B.water:0);vsetRaw(x,GY-5,z,B.sand)}
  for(let z=0;z<WZ;z++){vsetRaw(RIV.x0-1,GY,z,B.sand);vsetRaw(RIV.x1+1,GY,z,B.sand)}
+ // берега: каменные стенки, песок с камнями, камыш; в воде — валуны на дне и кувшинки
+ for(let z=0;z<WZ;z++)for(const x of[RIV.x0-1,RIV.x1+1]){for(let y=GY-4;y<GY;y++)vsetRaw(x,y,z,hsh(x+y,z,61)<.5?B.stone:B.cobble);if(Math.abs(z-TZ)>2&&hsh(x,z,62)<.3)vsetRaw(x,GY,z,B.stone)}
+ for(let x=RIV.x0;x<=RIV.x1;x++)for(let z=1;z<WZ-1;z++){if(Math.abs(z-TZ)<=3)continue;const r=hsh(x,z,63);if(r<.05){vsetRaw(x,GY-4,z,B.stone);if(r<.02)vsetRaw(x,GY-3,z,B.cobble)}else if(r>.93&&x>RIV.x0&&x<RIV.x1)vsetRaw(x,GY,z,B.lily)}
  // деревья в лесу и деревне
  const tree=(x,z)=>{const h=surfH(x,z);if(vget(x,h,z)!==B.grass)return;const th=4+Math.floor(hsh(x,z,4)*2);for(let i=1;i<=th;i++)vsetRaw(x,h+i,z,B.log);
   for(let dy=th-1;dy<=th+1;dy++)for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){const r=Math.abs(dx)+Math.abs(dz);if(r<=(dy===th+1?1:3)&&!(dx===0&&dz===0&&dy<=th)&&vget(x+dx,h+dy,z+dz)===0)vsetRaw(x+dx,h+dy,z+dz,B.leaf)}};
@@ -82,7 +86,7 @@ function genWorld(){VOX.fill(0);RS=12345;
   for(let x=x0;x<x0+w;x++)for(let z=z0;z<z0+d;z++){const edge=x===x0||x===x0+w-1||z===z0||z===z0+d-1;if(!edge)continue;const corner=(x===x0||x===x0+w-1)&&(z===z0||z===z0+d-1);for(let y=y0;y<y0+3;y++){const door=z===z0&&x===x0+Math.floor(w/2)&&y<y0+2;const win=y===y0+1&&!corner&&((z===z0||z===z0+d-1)&&(x-x0)%2===1&&x!==x0+Math.floor(w/2));if(!door)vsetRaw(x,y,z,win?B.glass:corner?B.log:wall)}}
   for(let k=0;k<=Math.ceil(d/2);k++)for(let x=x0-1;x<=x0+w;x++)for(const z of[z0-1+k,z0+d-k])vsetRaw(x,y0+3+k,z,roof);
   // труба, подоконные цветы, факелы у двери
-  for(let y=y0+3;y<=y0+4+Math.ceil(d/2);y++)vsetRaw(x0+w-2,y,z0+1,B.cobble);
+  for(let y=y0+3;y<=y0+4+Math.ceil(d/2);y++)vsetRaw(x0+w-2,y,z0+1,B.cobble);vsetRaw(x0+Math.floor(w/2),y0,z0,B.door);vsetRaw(x0+Math.floor(w/2),y0+1,z0,B.door);
   for(let x=x0;x<x0+w;x++)for(const z of[z0-1,z0+d]){if(x===x0+Math.floor(w/2))continue;if(vget(x,y0,z)===0&&solidT(vget(x,y0-1,z))&&hsh(x,z,41)<.6)vsetRaw(x,y0,z,B.flower)}
   for(const dx of[-1,1]){const x=x0+Math.floor(w/2)+dx;if(vget(x,y0+2,z0-1)===0)vsetRaw(x,y0+2,z0-1,B.banner)}};
  house(96,12,6,5,B.plank,B.brick);house(104,12,5,5,B.cobble,B.plank);house(80,12,5,5,B.plank,B.brick);house(100,32,6,5,B.cobble,B.brick);
@@ -95,7 +99,7 @@ function genWorld(){VOX.fill(0);RS=12345;
  // столб с сундуком у стены (лесенку строит ребёнок)
  for(let y=GY+1;y<=GY+5;y++)vsetRaw(104,y,36,B.hcob);
  // пустыня: кактусы и пирамида (3 выпавших блока на западной грани)
- for(let x=114;x<144;x++)for(let z=3;z<WZ-3;z++)if(Math.abs(z-TZ)>4&&hsh(x,z,13)<.02&&!(Math.abs(x-PYR.cx)<9&&Math.abs(z-PYR.cz)<9)){const h=surfH(x,z);for(let i=1;i<=3;i++)vsetRaw(x,h+i,z,B.cactus)}
+ for(let x=114;x<139;x++)for(let z=3;z<WZ-3;z++)if(Math.abs(z-TZ)>4&&hsh(x,z,13)<.032&&!(Math.abs(x-PYR.cx)<9&&Math.abs(z-PYR.cz)<9)){const h=surfH(x,z);const ch=2+Math.floor(hsh(z,x,14)*3);for(let i=1;i<=ch;i++)vsetRaw(x,h+i,z,B.cactus)}
  for(let k=0;k<6;k++)for(let x=PYR.cx-5+k;x<=PYR.cx+5-k;x++)for(let z=PYR.cz-5+k;z<=PYR.cz+5-k;z++)vsetRaw(x,GY+1+k,z,B.pyr);
  for(let k=0;k<6;k++)for(let z=PYR.cz-5+k;z<=PYR.cz+5-k;z++)if(vget(PYR.cx-5+k,GY+2+k,z)===0)vsetRaw(PYR.cx-6+k,GY+1+k,z,0);
  PYR.gaps=[[PYR.cx-5,GY+1,PYR.cz],[PYR.cx-3,GY+3,PYR.cz],[PYR.cx-1,GY+5,PYR.cz]];PYR.gaps.forEach(([x,y,z])=>vsetRaw(x,y,z,0));
@@ -120,6 +124,16 @@ function genWorld(){VOX.fill(0);RS=12345;
  for(const x of[151,157,169])for(const z of[3,WZ-4])vsetRaw(x,GY+4,z,B.banner);
  for(const z of[TZ-3,TZ+3])post(144,z,2,B.castle);
  for(let x=150;x<WX-4;x+=6)for(const z of[0,WZ-1])if(vget(x,GY+7,z)===B.hcastle&&vget(x,GY+8,z)===0)vsetRaw(x,GY+8,z,B.torch);
+ // ров с лавой перед замком: мост на тропе, забор по краям (а если всё же попасть в ров — лава мягко выталкивает на мост)
+ for(let x=141;x<=143;x++)for(let z=0;z<WZ;z++){for(let y=GY-2;y<=GY+5;y++)vsetRaw(x,y,z,0);vsetRaw(x,GY-2,z,B.stone);vsetRaw(x,GY-1,z,B.lava);if(Math.abs(z-TZ)<=2)vsetRaw(x,GY,z,B.deck)}
+ for(let z=0;z<WZ;z++){if(Math.abs(z-TZ)<=2)continue;for(const x of[140,144]){const g=x===144?GY:surfH(x,z);for(let y=GY-2;y<=g;y++)vsetRaw(x,y,z,y<g?B.stone:B.sand);for(let y=g+1;y<=GY+5;y++)vsetRaw(x,y,z,0);vsetRaw(x,g+1,z,B.fence)}}
+ for(const z of[TZ-3,TZ+3])post(144,z,2,B.castle);
+ for(const z of[TZ-6,TZ+6,TZ-12,TZ+12])vsetRaw(144,GY+5,z,B.banner);
+ // огород с забором и тыквами-цветами в деревне
+ for(let x=106;x<=111;x++)for(let z=26;z<=31;z++){const e=x===106||x===111||z===26||z===31;const g=surfH(x,z);for(let y=g+1;y<g+5;y++)vsetRaw(x,y,z,0);if(e&&!(z===26&&x===108))vsetRaw(x,g+1,z,B.fence);else if(!e){vsetRaw(x,g,z,B.dirt);if((x+z)%2)vsetRaw(x,g+1,z,B.flower)}}
+ for(let x=78;x<=84;x++)if(x!==81){const z=TZ+2,g=surfH(x,z);if(vget(x,g+1,z)===0)vsetRaw(x,g+1,z,B.fence)}
+ // пустыня: сухие кусты; лес: грибы под деревьями
+ for(let x=114;x<140;x++)for(let z=2;z<WZ-2;z++){if(Math.abs(z-TZ)<=2)continue;let y=WY-1;while(y>0&&VOX[vi(x,y,z)]===0)y--;if(VOX[vi(x,y,z)]===B.sand&&hsh(x,z,81)<.03)vsetRaw(x,y+1,z,B.bush)}
  // сундуки: клетка под блоком (выкопал — нашёл)
  CHESTS.forEach(c=>{for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)for(let y=GY+1;y<WY;y++){const b=vget(c.x+dx,y,c.z+dz);if(b===B.leaf||b===B.log)vsetRaw(c.x+dx,y,c.z+dz,0)}});// над сундуками — без деревьев
  CHESTS.forEach(c=>{vsetRaw(c.x,c.y,c.z,0)});vsetRaw(14,10,31,B.dirt);vsetRaw(14,GY,31,B.dirt);for(let y=10;y<GY;y++)vsetRaw(14,y,31,B.dirt);vsetRaw(14,9,31,0);
@@ -128,8 +142,9 @@ function genWorld(){VOX.fill(0);RS=12345;
  DECOL=[];for(let x=0;x<WX;x++)for(let z=1;z<WZ-1;z++){const zn=zoneAt(x);if(zn==='river'||zn==='desert'||zn==='castle')continue;if(Math.abs(z-TZ)<=1&&zn!=='mine')continue;
   if(x>=HOUSEP.x0-1&&x<=HOUSEP.x1+1&&z>=HOUSEP.z0-1&&z<=HOUSEP.z1+1)continue;if(CHESTS.some(c=>Math.abs(c.x-x)<=2&&Math.abs(c.z-z)<=2))continue;
   let y=WY-1;while(y>0&&VOX[vi(x,y,z)]===0)y--;if(VOX[vi(x,y,z)]!==B.grass||y+1>=WY)continue;const r=hsh(x,z,31),near=Math.abs(z-TZ)<=3?.5:1;
+  const shade=vget(x,y+3,z)===B.leaf||vget(x,y+4,z)===B.leaf||vget(x,y+5,z)===B.leaf;if(shade&&zn==='forest'&&hsh(z,x,33)<.25){vsetRaw(x,y+1,z,B.mush);continue}
   if(r<.2*near)vsetRaw(x,y+1,z,B.tgrass);else if(r<.245*near)vsetRaw(x,y+1,z,B.flower)}
- for(let y=1;y<WY;y++)for(let z=0;z<WZ;z++)for(let x=0;x<WX;x++){const t=VOX[vi(x,y,z)];if(t===B.tgrass||t===B.flower||t===B.rail||t===B.torch)DECOL.push([x,y,z])}
+ for(let y=1;y<WY;y++)for(let z=0;z<WZ;z++)for(let x=0;x<WX;x++){const t=VOX[vi(x,y,z)];if(t===B.tgrass||t===B.flower||t===B.rail||t===B.torch||t===B.mush||t===B.bush)DECOL.push([x,y,z])}
  applyState()}
 let DECOL=[];
 // ---- состояние прохождения → мир ----
@@ -140,12 +155,12 @@ function applyState(){
  if(SV.z>=3)openGate(112,true);if(SV.z>=4)openGate(145,true);
  const pg=SV.z>=4?3:(SV.tr.desert||0);for(let i=0;i<pg;i++){const[x,y,z]=PYR.gaps[i];vsetRaw(x,y,z,B.pyr)}
  for(const k in SV.diff){const[x,y,z]=k.split(',').map(Number);const t=vget(x,y,z);if(!BT[t].hard||t===B.dia||t===0||BT[t].deco)vsetRaw(x,y,z,SV.diff[k])}
- for(const[x,y,z]of DECOL){const t=vget(x,y,z);if((t===B.tgrass||t===B.flower||t===B.rail||t===B.torch)&&!solidT(vget(x,y-1,z)))vsetRaw(x,y,z,0)}
+ for(const[x,y,z]of DECOL){const t=vget(x,y,z);if((t===B.tgrass||t===B.flower||t===B.rail||t===B.torch||t===B.mush||t===B.bush)&&!solidT(vget(x,y-1,z)))vsetRaw(x,y,z,0)}
  if(SV.z>=5)ROOF.forEach(([x,y,z])=>vsetRaw(x,y,z,B.roof))}
 function deckSpan(s,raw){const x0=RIV.x0+s*3;const xe=s>=2?RIV.x1:x0+2;for(let x=x0;x<=xe&&x<=RIV.x1;x++)for(let z=TZ-2;z<=TZ+2;z++)(raw?vsetRaw:vset)(x,GY,z,B.deck)}
 function openGate(x,raw){for(let z=TZ-2;z<=TZ+2;z++)for(let y=GY+1;y<=GY+3;y++)(raw?vsetRaw:vset)(x,y,z,0)}
 function setBlock(x,y,z,t){vset(x,y,z,t);SV.diff[x+','+y+','+z]=t;
- if(!solidT(t)){const a=vget(x,y+1,z);if(a===B.tgrass||a===B.flower||a===B.torch||a===B.rail){vset(x,y+1,z,0);SV.diff[x+','+(y+1)+','+z]=0;if(a===B.torch){scanTorches();torchFx();for(let dx=-8;dx<=8;dx+=8)for(let dz=-8;dz<=8;dz+=8)markDirty(clamp(x+dx,0,WX-1),clamp(z+dz,0,WZ-1))}}}
+ if(!solidT(t)){const a=vget(x,y+1,z);if(a===B.tgrass||a===B.flower||a===B.torch||a===B.rail||a===B.mush||a===B.bush){vset(x,y+1,z,0);SV.diff[x+','+(y+1)+','+z]=0;if(a===B.torch){scanTorches();torchFx();for(let dx=-8;dx<=8;dx+=8)for(let dz=-8;dz<=8;dz+=8)markDirty(clamp(x+dx,0,WX-1),clamp(z+dz,0,WZ-1))}}}
  save()}
 // ---- чанки: только видимые грани, мягкие тени в углах (AO), освещение граней ----
 const NCX=Math.ceil(WX/CH),NCZ=Math.ceil(WZ/CH);const CHUNK=[];let DIRTY=new Set();
@@ -162,7 +177,7 @@ function texFor(t,f,x,y,z){const tt=BT[t].t;let n=f===1?(tt[1]||tt[0]):f===2?(tt
  if(BT[t].deco&&tt.length>1)n=tt[Math.floor(hsh(x,z,y+5)*tt.length)];
  const vn=AT32.VARN[n]||1;const v=vn>1?Math.floor(hsh(x*7+y*3+f,z*11+y*5,91)*vn):0;return AT32.IDX[n+'#'+v]}
 let TORCH=[];// факелы: свет в вершинах (тёплое свечение), огоньки
-function scanTorches(){TORCH=[];for(let y=0;y<WY;y++)for(let z=0;z<WZ;z++)for(let x=0;x<WX;x++)if(VOX[vi(x,y,z)]===B.torch)TORCH.push([x+.5,y+.6,z+.5])}
+function scanTorches(){TORCH=[];for(let y=0;y<WY;y++)for(let z=0;z<WZ;z++)for(let x=0;x<WX;x++)if(VOX[vi(x,y,z)]===B.torch)TORCH.push([x+.5,y+.6,z+.5]);else if(VOX[vi(x,y,z)]===B.lava&&(x+z*3)%5===0&&VOX[vi(x,y+1,z)]===0)TORCH.push([x+.5,y+1.2,z+.5,1])}
 const TL_R=6.5;
 function torchAt(px,py,pz,n,L){let g=0;for(const t of L){const dx=t[0]-px,dy=t[1]-py,dz=t[2]-pz;const d=Math.sqrt(dx*dx+dy*dy+dz*dz);if(d>=TL_R)continue;if(n&&(dx*n[0]+dy*n[1]+dz*n[2])<-.3)continue;const k=1-d/TL_R;g+=k*k}return Math.min(1.1,g)}
 function meshChunk(cx,cz){const P=[],N=[],U=[],Cc=[],Gl=[],I=[],WP=[],WN=[],WU=[],WC=[],WI=[],DP=[],DN=[],DU=[],DC=[],DG=[],DI=[],SP=[],SPh=[];
@@ -178,8 +193,14 @@ function meshChunk(cx,cz){const P=[],N=[],U=[],Cc=[],Gl=[],I=[],WP=[],WN=[],WU=[
     if(solidT(vget(x+1,y,z))){pts=[[x+.94,y0,z+.92],[x+.94,y0,z+.08],[x+.94,y1,z+.08],[x+.94,y1,z+.92]];n=[-1,0,0]}else if(solidT(vget(x-1,y,z))){pts=[[x+.06,y0,z+.08],[x+.06,y0,z+.92],[x+.06,y1,z+.92],[x+.06,y1,z+.08]];n=[1,0,0]}
     else if(solidT(vget(x,y,z+1))){pts=[[x+.08,y0,z+.94],[x+.92,y0,z+.94],[x+.92,y1,z+.94],[x+.08,y1,z+.94]];n=[0,0,-1]}else{pts=[[x+.92,y0,z+.06],[x+.08,y0,z+.06],[x+.08,y1,z+.06],[x+.92,y1,z+.06]];n=[0,0,1]}
     quad(pts,n,tx,.9,gl)}
+   else if(bt.deco===4){const tx=uvOf(TI(vget(x,y-1,z)===B.door?'door_top':'door_bot'));const y1=y+1;
+    if(solidT(vget(x-1,y,z))&&solidT(vget(x+1,y,z)))quad([[x+.1,y,z],[x+.1,y,z+1],[x+.1,y1,z+1],[x+.1,y1,z]],[1,0,0],tx,.9,gl);else quad([[x,y,z+.1],[x+1,y,z+.1],[x+1,y1,z+.1],[x,y1,z+.1]],[0,0,1],tx,.9,gl)}
    else{const yy=y+.03;quad([[x,yy,z+1],[x+1,yy,z+1],[x+1,yy,z],[x,yy,z]],[0,1,0],tx,.85,gl)}
    continue}
+  if(bt.fence){const tx=uvOf(texFor(t,0,x,y,z));const bx=(a,b,c,d,e,g)=>{for(let f=0;f<6;f++){const F=FACES[f];const bi=P.length/3;for(let k=0;k<4;k++){const q=F.c[k];P.push(q[0]?d:a,q[1]?e:b,q[2]?g:c);N.push(...F.n);Cc.push(F.l,F.l,F.l);Gl.push(0,0,0)}
+     U.push(tx[0],tx[1],tx[2],tx[1],tx[2],tx[3],tx[0],tx[3]);I.push(bi,bi+1,bi+2,bi,bi+2,bi+3)}};
+   bx(x+.38,y,z+.38,x+.62,y+1.15,z+.62);const nb=(dx,dz)=>{const q=vget(x+dx,y,z+dz);return q===B.fence||opaqueT(q)};
+   for(const yy of[.38,.8]){if(nb(1,0))bx(x+.6,y+yy,z+.44,x+1,y+yy+.15,z+.56);if(nb(-1,0))bx(x,y+yy,z+.44,x+.4,y+yy+.15,z+.56);if(nb(0,1))bx(x+.44,y+yy,z+.6,x+.56,y+yy+.15,z+1);if(nb(0,-1))bx(x+.44,y+yy,z,x+.56,y+yy+.15,z+.4)}continue}
   const fl=bt.fluid;
   for(let f=0;f<6;f++){const F=FACES[f],nx=x+F.n[0],ny=y+F.n[1],nz=z+F.n[2];const nt=vget(nx,ny,nz);
    if(fl){if(nt!==0&&!(BT[nt].ghost)&&!BT[nt].deco)continue;if(f!==2&&nt!==0&&!BT[nt].deco)continue}
@@ -189,12 +210,12 @@ function meshChunk(cx,cz){const P=[],N=[],U=[],Cc=[],Gl=[],I=[],WP=[],WN=[],WU=[
    for(let k=0;k<4;k++){const c=F.c[k];let yy=y+c[1];if(fl&&f===2&&nt!==B.water)yy-=.12;const vx=x+c[0],vz=z+c[2];p.push(vx,yy,vz);nn.push(...F.n);
     let l=F.l;if(!fl){const o1=[0,0,0],o2=[0,0,0];o1[ta[0]]=c[ta[0]]?1:-1;o2[ta[1]]=c[ta[1]]?1:-1;
      const q=(o)=>aoT(vget(nx+o[0],ny+o[1],nz+o[2]))?1:0;const s1=q(o1),s2=q(o2),s3=q([o1[0]+o2[0],o1[1]+o2[1],o1[2]+o2[2]]);const a=s1&&s2?0:3-(s1+s2+s3);ao.push(a);l*=AOL[a];
-     const g=TL.length?torchAt(vx+F.n[0]*.3,yy+F.n[1]*.3,vz+F.n[2]*.3,F.n,TL):0;Gl.push(g,g*.62,g*.3)}
+     const g=bt.lit?1.5:TL.length?torchAt(vx+F.n[0]*.3,yy+F.n[1]*.3,vz+F.n[2]*.3,F.n,TL):0;Gl.push(g,g*.62,g*.3)}
     cc.push(l,l,l);
     if(fl){if(f===2)u.push(vx*.25,vz*.25);else u.push((vx+vz)*.25,yy*.25)}}
    if(!fl){const tx=uvOf(texFor(t,F.t,x,y,z));[[tx[0],tx[1]],[tx[2],tx[1]],[tx[2],tx[3]],[tx[0],tx[3]]].forEach(v=>u.push(...v))}
    // искорки на руде и кристаллах
-   if((t===B.dia||t===B.gold||t===B.crystal)&&!opaqueT(nt)){const ns=t===B.crystal?1:2;for(let k=0;k<ns;k++){const r1=hsh(x*5+f,y*7+k,z+13)-.5,r2=hsh(z*3+k,x+f,y+17)-.5;const q=[x+.5+F.n[0]*.53,y+.5+F.n[1]*.53,z+.5+F.n[2]*.53];q[ta[0]]+=r1*.8;q[ta[1]]+=r2*.8;SP.push(...q);SPh.push(hsh(x+k,z,y)*6.28,t===B.gold?1:0)}}
+   if((t===B.dia||t===B.gold||t===B.crystal||(t===B.lava&&f===2&&hsh(x,z,71)<.5))&&!opaqueT(nt)){const ns=t===B.crystal?1:2;for(let k=0;k<ns;k++){const r1=hsh(x*5+f,y*7+k,z+13)-.5,r2=hsh(z*3+k,x+f,y+17)-.5;const q=[x+.5+F.n[0]*.53,y+.5+F.n[1]*.53,z+.5+F.n[2]*.53];q[ta[0]]+=r1*.8;q[ta[1]]+=r2*.8;SP.push(...q);SPh.push(hsh(x+k,z,y)*6.28,t===B.gold||t===B.lava?1:0)}}
    if(!fl&&ao[0]+ao[2]<ao[1]+ao[3])ii.push(b+1,b+2,b+3,b+1,b+3,b);else ii.push(b,b+1,b+2,b,b+2,b+3)}}
  const mk=(p,n,u,c,i,g)=>{const G_=new T3.BufferGeometry();G_.setAttribute('position',new T3.Float32BufferAttribute(p,3));G_.setAttribute('normal',new T3.Float32BufferAttribute(n,3));G_.setAttribute('uv',new T3.Float32BufferAttribute(u,2));G_.setAttribute('color',new T3.Float32BufferAttribute(c,3));if(g)G_.setAttribute('glow',new T3.Float32BufferAttribute(g,3));G_.setIndex(i);G_.computeBoundingSphere();return G_};
  let sg=null;if(SP.length){sg=new T3.BufferGeometry();sg.setAttribute('position',new T3.Float32BufferAttribute(SP,3));const ph=[],kd=[];for(let i=0;i<SPh.length;i+=2){ph.push(SPh[i]);kd.push(SPh[i+1])}sg.setAttribute('ph',new T3.Float32BufferAttribute(ph,1));sg.setAttribute('kd',new T3.Float32BufferAttribute(kd,1));sg.computeBoundingSphere()}
@@ -207,7 +228,7 @@ function rebuildChunk(cx,cz){const key=cx+','+cz;let c=CHUNK[cz*NCX+cx];const[g,
  sub('w',wg,WMAT,2);sub('d',dg,DMAT,1);sub('s',sg,SPMAT,3,T3.Points);DIRTY.delete(key)}
 function chunkVis(maxD){for(const c of CHUNK){if(!c)continue;const d=Math.hypot(c.cx*CH+8-CAM.position.x,c.cz*CH+8-CAM.position.z);const v=d<maxD;c.m.visible=v;if(c.w)c.w.visible=v;if(c.d)c.d.visible=v&&d<maxD-6;if(c.s)c.s.visible=d<34}}
 function stepChunks(n){let k=0;for(const key of DIRTY){if(k++>=n)break;const[a,b]=key.split(',').map(Number);rebuildChunk(a,b)}}
-function rebuildAll(){scanTorches();DIRTY.clear();for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++)rebuildChunk(cx,cz);torchFx()}
+function rebuildAll(){scanTorches();DIRTY.clear();for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++)rebuildChunk(cx,cz);torchFx();makeLife()}
 // ---- рендер ----
 const GLC=document.getElementById('g');let PR=1;
 // материал блоков: обычное освещение + тёплый свет факелов (атрибут glow) + лёгкое покачивание травы (sway)
@@ -271,10 +292,22 @@ function stepSky(dt,nightK){NIGHTK=nightK;const px=PL?PL.p.x:0,py=PL?PL.p.y:GY,p
  if(QHI){const sx=Math.round(px*2)/2,sz=Math.round(pz*2)/2;SUN.target.position.set(sx,GY,sz);SUN.position.set(sx-30,GY+60,sz+21)}
  // огоньки факелов мерцают
  for(const f of TFX){const k=1+Math.sin(T*9+f.userData.ph)*.06+Math.sin(T*23+f.userData.ph*2)*.04;f.scale.set(f.userData.s*k,f.userData.s*k,1);f.material.opacity=f.userData.o*(.6+.4*UNI.uGK.value)}
- stepPuffs(dt)}
+ stepPuffs(dt);stepLife(dt)}
 let TFX=[];function torchFx(){if(!SCENE)return;TFX.forEach(f=>SCENE.remove(f));TFX=[];
- for(const t of TORCH){const sp=new T3.Sprite(new T3.SpriteMaterial({map:glowTex(),color:0xffb050,transparent:true,blending:T3.AdditiveBlending,depthWrite:false}));sp.position.set(t[0],t[1]+.1,t[2]);sp.userData={s:1.5,o:.42,ph:Math.random()*6};SCENE.add(sp);TFX.push(sp);
+ for(const t of TORCH){if(t[3])continue;const sp=new T3.Sprite(new T3.SpriteMaterial({map:glowTex(),color:0xffb050,transparent:true,blending:T3.AdditiveBlending,depthWrite:false}));sp.position.set(t[0],t[1]+.1,t[2]);sp.userData={s:1.5,o:.42,ph:Math.random()*6};SCENE.add(sp);TFX.push(sp);
   const core=new T3.Sprite(new T3.SpriteMaterial({map:glowTex(),color:0xfff0b0,transparent:true,blending:T3.AdditiveBlending,depthWrite:false}));core.position.copy(sp.position);core.userData={s:.42,o:.7,ph:Math.random()*6};SCENE.add(core);TFX.push(core)}}
+// жизнь вокруг: бабочки над цветами, птицы в небе, вагонетки в шахте
+let LIFE=[];function makeLife(){if(!SCENE)return;LIFE.forEach(o=>SCENE.remove(o));LIFE=[];
+ const fl=DECOL.filter(([x,y,z])=>vget(x,y,z)===B.flower&&x<112);const cols=[0xffd84a,0xff7ab0,0x7ad0ff,0xffffff,0xff9a3a];
+ for(let i=0;i<Math.min(18,fl.length);i++){const[x,y,z]=fl[Math.floor(hsh(i,7,3)*fl.length)];const g=new T3.Group();const m=new T3.MeshBasicMaterial({color:cols[i%5],side:T3.DoubleSide});
+  for(const s of[-1,1]){const w=new T3.Mesh(new T3.PlaneGeometry(.2,.16),m);w.position.x=s*.1;const p=new T3.Group();p.add(w);p.userData.s=s;g.add(p)}
+  g.userData={kind:'bf',h:[x+.5,y+.6,z+.5],a:.5+hsh(i,1,2),b:.7+hsh(i,2,2),ph:i*1.7};SCENE.add(g);LIFE.push(g)}
+ for(let i=0;i<7;i++){const g=new T3.Group();const m=new T3.MeshLambertMaterial({color:0x2a2a34});for(const s of[-1,1]){const w=new T3.Mesh(new T3.BoxGeometry(.5,.05,.18),m);w.position.x=s*.25;const p=new T3.Group();p.add(w);p.userData.s=s;g.add(p)}
+  g.add(new T3.Mesh(new T3.BoxGeometry(.14,.12,.36),m));g.userData={kind:'bird',c:[20+i*22,WY-6+i%3*2,10+hsh(i,4,5)*28],r:6+hsh(i,5,5)*8,sp:.25+hsh(i,6,5)*.2,ph:i};SCENE.add(g);LIFE.push(g)}
+ if(typeof cartMesh==='function')for(const[x,z,r]of[[44.5,TZ-2.5,.3],[31.4,TZ+3.6,-.5],[58.6,TZ+.5,0]]){if(x===58.6)continue;const c=cartMesh();c.position.set(x,GY+1,z);c.rotation.y=r;SCENE.add(c);LIFE.push(c)}}
+function stepLife(dt){const night=NIGHTK>.5;for(const g of LIFE){const u=g.userData;if(u.kind==='bf'){g.visible=!night&&Math.hypot(u.h[0]-CAM.position.x,u.h[2]-CAM.position.z)<36;if(!g.visible)continue;
+  const t=T*u.a+u.ph;g.position.set(u.h[0]+Math.sin(t)*1.4,u.h[1]+.4+Math.sin(T*u.b*2+u.ph)*.35,u.h[2]+Math.cos(t*1.3)*1.2);g.rotation.y=-t;g.children.forEach(p=>p.rotation.y=p.userData.s*Math.sin(T*16+u.ph)*1.1)}
+ else if(u.kind==='bird'){const t=T*u.sp+u.ph;g.position.set(u.c[0]+Math.cos(t)*u.r,u.c[1]+Math.sin(t*2)*.6,u.c[2]+Math.sin(t)*u.r);g.rotation.y=-t;g.visible=UNDER<.5;g.children.forEach(p=>{if(p.userData.s)p.rotation.z=p.userData.s*Math.sin(T*7+u.ph)*.5})}}}
 // пыль при копании (на каждой стадии трещины)
 const PUFF=[];function dustPuff(x,y,z,t,n){if(!SCENE)return;const col=tileColor(t);for(let i=0;i<(n||4);i++){const sp=new T3.Sprite(new T3.SpriteMaterial({map:glowTex(),color:col.clone().lerp(new T3.Color(1,1,1),.25),transparent:true,depthWrite:false,opacity:.75}));
  sp.position.set(x+.5+(Math.random()-.5)*1.05,y+.5+(Math.random()-.5)*1.05,z+.5+(Math.random()-.5)*1.05);const s=.18+Math.random()*.16;sp.scale.set(s,s,1);sp.userData={v:new T3.Vector3((Math.random()-.5)*1.2,.6+Math.random()*.8,(Math.random()-.5)*1.2),l:.55+Math.random()*.3,s};SCENE.add(sp);PUFF.push(sp)}}

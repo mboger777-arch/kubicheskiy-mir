@@ -62,3 +62,10 @@ function waterCanvas(){const c=document.createElement('canvas');c.width=c.height
  g.putImageData(img,0,0);return c}
 def('water',(x,y,R)=>mix([36,104,200],[70,150,230],tn(x,y,8,211)));
 def('gold_block',(x,y,R)=>{let c=mix([236,186,40],[255,222,90],tn(x,y,8,221));if(x<2||y<2)c=[255,240,160];if(x>29||y>29)c=[176,120,20];if((x+y)%13===0&&x>3&&y>3)c=[255,250,200];return c});
+def('lily',(x,y,R)=>{const d=Math.hypot(x-15.5,y-15.5);const a=Math.atan2(y-15.5,x-15.5);if(d>13||(a>-.35&&a<.35&&d>2))return null;let c=mix([50,130,40],[80,170,60],tn(x,y,4,231));if(Math.abs(a-1.8)<.06||Math.abs(a+2.2)<.06)c=mul(c,.75);if(d<3&&y<16)c=[250,170,200];return c});
+def('mush_red',(x,y,R)=>{if(Math.abs(x-15.5)<2.5&&y>=17&&y<29)return x<15?[220,210,190]:[240,232,215];const d=Math.hypot((x-15.5)/1.1,(y-16)*1.6);if(y<=17&&d<12){const s=Math.hypot(x-11,y-11)<2||Math.hypot(x-20,y-9)<2||Math.hypot(x-17,y-14)<1.5;return s?[255,255,240]:mix([200,30,30],[236,60,50],(17-y)/12)}return null});
+def('mush_brown',(x,y,R)=>{if(Math.abs(x-15.5)<2&&y>=19&&y<29)return[226,214,190];const d=Math.hypot((x-15.5)/1.2,(y-18)*1.8);if(y<=19&&d<10)return mix([140,96,60],[176,126,80],(19-y)/8+tn(x,y,4,241)*.3);return null});
+def('lava',(x,y,R)=>{const n=tn(x,y,8,251)*.6+tn(x,y,4,252)*.4;let c=mix([200,60,10],[255,170,40],n);if(n>.72)c=[255,230,120];if(n<.3)c=mix([120,30,10],[180,50,10],n/.3);return c});
+def('door_bot',(x,y,R)=>{let c=mix([126,88,50],[150,108,64],tn(x*.3,y,4,261));if(x<2||x>29||y>29)c=mul(c,.7);if(x%8===7)c=mul(c,.82);if(x>=23&&x<=26&&y>=2&&y<=5)c=[60,60,64];return c});
+def('door_top',(x,y,R)=>{let c=PAINT.door_bot.fn(x,y,R);if(x<2||x>29||y<2)c=mul(c,.7);if(y>=6&&y<=20&&x>=5&&x<=26){c=(x===15||x===16||y===13)?[96,66,36]:[170,215,235]}if(y>=6&&y<=20&&x>=5&&x<=26&&x-y===-3)c=[230,250,255];return c});
+def('deadbush',(x,y,R)=>{const br=[[16,31,16,14],[16,22,9,12],[16,20,24,10],[12,17,6,6],[20,15,26,6],[16,14,13,4],[16,14,19,3]];for(const[a,b,c2,d]of br){const t=((x-a)*(c2-a)+(y-b)*(d-b))/((c2-a)**2+(d-b)**2);if(t<0||t>1)continue;const px=a+(c2-a)*t,py=b+(d-b)*t;if(Math.hypot(x-px,y-py)<.9)return[120,84,46]}return null});

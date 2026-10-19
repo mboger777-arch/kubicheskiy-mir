@@ -109,6 +109,7 @@ function stepStory(){const f=SV.f;
  if(!f.sp1&&SV.mw>=1&&PL.p.x>42&&PL.p.x<47&&!TASK&&!MON.some(m=>m.fixed&&m.kind==='spider')){const e=spawnMonster('spider',46.5,TZ+.5);e.fixed=1;f.sp1q=1}
  if(!f.zb1&&SV.mw>=3&&PL.p.x>62&&PL.p.x<64.5&&!TASK&&!MON.some(m=>m.kind==='zombie')){const e=spawnMonster('zombie',PL.p.x-6,TZ+3.5);e.fixed=1}
  stepFoes();
+ if(vget(Math.floor(PL.p.x),Math.floor(PL.p.y-.2),Math.floor(PL.p.z))===B.lava){PL.p.set(139.5,groundAt(139.5,TZ+.5,GY+4),TZ+.5);PL.v.set(0,0,0);SFX.jump()}
  const inPlot=PL.p.x>HOUSEP.x0-2&&PL.p.x<HOUSEP.x1+2&&PL.p.z>HOUSEP.z0-2&&PL.p.z<HOUSEP.z1+2;if(inPlot&&!f.house){f.house=1;save();say('house').catch(()=>{})}
  if(!SV.house){let n=0;for(const q of SV.placed)if(q[0]>=HOUSEP.x0&&q[0]<=HOUSEP.x1&&q[2]>=HOUSEP.z0&&q[2]<=HOUSEP.z1)n++;if(n>=12){SV.house=1;save(1);SFX.star();say('house_ok').catch(()=>{})}}}
 onEV('dig',()=>{if(!SV.f.t3){SV.f.t3=1;save();say('t3').catch(()=>{})}});

@@ -15,13 +15,14 @@ async def main():
       await pg.wait_for_timeout(120);await pg.screenshot(path=f'{OUT}{n}_{SUF}.png');await E("document.getElementById('c').style.opacity=1")
     # мост
     await E("G.zone(2);G.close();talk=null;G.tp(62.5,23.5);G.open('river')");await pg.wait_for_timeout(2500);await E("talk=null");await S('bridge_q',True)
-    await E("TD.river.pick(TASK,'sq')");await pg.wait_for_timeout(1700);await E("talk=null");await S('bridge_fold')
-    await pg.wait_for_timeout(3500)
+    await E("TD.river.pick(TASK,'sq')");await pg.wait_for_timeout(1450);await E("talk=null");await S('bridge_fold')
+    await pg.wait_for_function("TASK&&!TASK.b",timeout=60000)
     for r in range(3):
-      await E("TD.river.pick(TASK,G.ans(true)[0])");await pg.wait_for_timeout(1300 if r==0 else 300)
+      await E("TD.river.pick(TASK,G.ans(true)[0])");await pg.wait_for_timeout(550 if r==0 else 300)
       if r==0:await E("talk=null");await S('bridge_build')
-      await pg.wait_for_timeout(5000)
-    await pg.wait_for_timeout(2500);await E("talk=null");await S('bridge_done')
+      if r<2:await pg.wait_for_function(f"TASK&&TASK.r=={r+1}&&!TASK.b",timeout=90000)
+    await pg.wait_for_function("TASK&&PL.p.x>RIV.x0+3.5",timeout=60000);await E("talk=null");await S('bridge_cross')
+    await pg.wait_for_function("!TASK||PL.p.x>RIV.x1+.6",timeout=60000);await E("talk=null");await S('bridge_done')
     # кирка
     await E("G.close();G.zone(1);G.close();talk=null;G.tp(10.5,23.5);CAMS.fp=false;G.look(Math.PI/2+.5,-0.8)");await pg.wait_for_timeout(1200)
     await E("KEYS.dig=1");await pg.wait_for_timeout(int(sys.argv[3]) if len(sys.argv)>3 else 450);await S('swing3')
