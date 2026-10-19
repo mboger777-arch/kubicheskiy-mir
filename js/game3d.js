@@ -68,7 +68,9 @@ function monsterDone(){DAY.kills++;DAY.spawn=10}
 function stepMonsters(dt){for(const e of MON.slice()){if(!ENTS.includes(e)){MON.splice(MON.indexOf(e),1);continue}if(e.task)continue;
   const dx=PL.p.x-e.p.x,dz=PL.p.z-e.p.z,d=Math.hypot(dx,dz)||1;let mx=dx/d,mz=dz/d;if(e.flee>0){e.flee-=dt;mx=-mx;mz=-mz}
   if(!DAY.night&&!e.fixed){mx=-mx;mz=-mz;e.gone=(e.gone||0)+dt;if(e.gone>3){rmEnt(e);continue}}
-  physEnt(e,dt,d>2.6||e.flee>0?mx:0,d>2.6||e.flee>0?mz:0,false);animEnt(e,dt);
+  if(e.stk>.8){const ax=Math.abs(PL.p.z-e.p.z)>.3?0:1;mx=ax?mx:mx*.3;mz=ax?mz:Math.sign(PL.p.z-e.p.z)}// застрял — тянется к линии игрока и подпрыгивает
+  const x0=e.p.x,z0=e.p.z,wantM=d>2.6||e.flee>0;physEnt(e,dt,wantM?mx:0,wantM?mz:0,e.stk>.8&&e.onG);animEnt(e,dt);
+  if(wantM&&Math.hypot(e.p.x-x0,e.p.z-z0)<dt*.25)e.stk=(e.stk||0)+dt;else e.stk=Math.max(0,(e.stk||0)-dt*.5);if(e.stk>4){const sp=spawnSpot();if(sp){e.p.set(sp[0],sp[1],sp[2]);e.v.set(0,0,0)}e.stk=0}
   if(d<3.2&&!TASK&&!(e.flee>0)&&(DAY.night||e.fixed)&&Math.abs(PL.p.y-e.p.y)<2.5)openTask(e.kind,e)}}
 // место для монстра: на том же уровне, что и Блоки (в туннеле — по туннелю), 6–10 блоков, есть место над головой, не в воде
 function spawnSpot(){const py=Math.round(PL.p.y);let roof=false;for(let k=2;k<6;k++)if(solidT(vget(Math.floor(PL.p.x),Math.floor(PL.p.y)+k,Math.floor(PL.p.z))))roof=true;
