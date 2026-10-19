@@ -1,0 +1,15 @@
+<!doctype html><meta charset=utf-8><body style="margin:0"><script type=module>
+// Листы для согласования: герои/враги лицом к зрителю на светлом фоне; сравнение до/после
+import * as THREE from '../../js/vendor/three.module.js';import {ALL} from '../../js/chars.js';import {ALL as OLD} from './chars_v1.js';
+const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});R.setPixelRatio(1);R.outputColorSpace=THREE.SRGBColorSpace;R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;document.body.appendChild(R.domElement);
+window.sheet=(names,W,H,o={})=>{const sc=new THREE.Scene();sc.background=new THREE.Color(o.bg||0xeef4fb);const objs=names.map(n=>{const src=n.startsWith('old:')?OLD[n.slice(4)]:ALL[n];return src()});
+ let x=0;const gap=o.gap||8;const boxes=[];objs.forEach((ob,i)=>{const bb=new THREE.Box3().setFromObject(ob);const sz=bb.getSize(new THREE.Vector3());const fly=ob.userData.fly;ob.position.x=x-bb.min.x;ob.position.y=-bb.min.y+(fly?10:0);ob.rotation.y=(o.yaw||0)*Math.PI/180;
+  if(ob.userData.fly)ob.rotation.x=.35;x+=sz.x+gap;sc.add(ob);ob.traverse(c=>{if(c.isMesh){c.castShadow=true}});boxes.push(sz)});
+ const tot=x-gap,maxH=Math.max(...objs.map(ob=>new THREE.Box3().setFromObject(ob).max.y));
+ const fl=new THREE.Mesh(new THREE.PlaneGeometry(tot+80,80),new THREE.ShadowMaterial({opacity:.18}));fl.rotation.x=-Math.PI/2;fl.position.set(tot/2,0,0);fl.receiveShadow=true;sc.add(fl);
+ sc.add(new THREE.HemisphereLight(0xffffff,0xb8c0d0,2.0));const d=new THREE.DirectionalLight(0xfff4e0,2.0);d.position.set(tot/2-30,80,70);d.target.position.set(tot/2,0,0);d.castShadow=true;d.shadow.mapSize.set(2048,2048);
+ Object.assign(d.shadow.camera,{left:-tot,right:tot,top:80,bottom:-40,near:1,far:300});sc.add(d,d.target);
+ const cam=new THREE.PerspectiveCamera(20,W/H,1,3000);const dist=Math.max(maxH*1.15,tot*H/W*1.08)/(2*Math.tan(10*Math.PI/180));cam.position.set(tot/2,maxH*.52+dist*.06,dist);cam.lookAt(tot/2,maxH*.48,0);
+ R.setSize(W,H);R.render(sc,cam);return R.domElement.toDataURL('image/png')};
+window.ready=1;
+</script>
