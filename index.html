@@ -11,5 +11,5 @@ canvas{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;displa
 // three.js (локально) + воксельные модели героев, затем скрипты игры по порядку
 (async()=>{const V=window.V;const ch=await import('./js/chars.js?v='+V);window.THREE=ch.THREE;window.CHARS=ch.ALL;
  const L=s=>new Promise((r,j)=>{const e=document.createElement('script');e.src='js/'+s+'.js?v='+V;e.onload=r;e.onerror=j;document.body.appendChild(e)});
- for(const s of['voice','lines','core','draw','vox','tasks3d','game3d'])await L(s);startGame()})();
+ for(const s of['voice','lines','core','draw','tex32','vox','tasks3d','game3d'])await L(s);startGame()})();
 </script></body></html>

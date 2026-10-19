@@ -8,31 +8,26 @@ function vget(x,y,z){if(y<0)return B.bed;if(y>=WY)return 0;if(x<0||x>=WX||z<0||z
 function vset(x,y,z,t){if(x<0||x>=WX||y<0||y>=WY||z<0||z>=WZ)return;VOX[vi(x,y,z)]=t;markDirty(x,z)}
 function vsetRaw(x,y,z,t){if(x<0||x>=WX||y<0||y>=WY||z<0||z>=WZ)return;VOX[vi(x,y,z)]=t}
 // ---- блоки: текстуры в атласе (бок, верх, низ), твёрдость (время копания), непробиваемые ----
-const B={air:0,grass:1,dirt:2,cobble:3,stone:4,dia:5,gold:6,bed:7,sand:8,sst:9,plank:10,log:11,leaf:12,castle:13,brick:14,water:15,iron:16,crystal:17,rock:18,hcastle:19,hcob:20,deck:21,pyr:22,roof:23,cactus:24,ghost:25};
-const TEXN=['grass','grass_top','dirt','cobble','stone','diamond_ore','gold_ore','bedrock','sand','sandstone','planks','log','log_top','leaves','castle','brick','water','iron','crystal','cactus','cactus_top'];
-const TI=n=>TEXN.indexOf(n);
+const B={air:0,grass:1,dirt:2,cobble:3,stone:4,dia:5,gold:6,bed:7,sand:8,sst:9,plank:10,log:11,leaf:12,castle:13,brick:14,water:15,iron:16,crystal:17,rock:18,hcastle:19,hcob:20,deck:21,pyr:22,roof:23,cactus:24,ghost:25,tgrass:26,flower:27,torch:28,glass:29,banner:30,goldb:31,rail:32};
 const BT=[{n:'air'},
  {n:'grass',t:['grass','grass_top','dirt'],d:.45,drop:2},{n:'dirt',t:['dirt'],d:.4},{n:'cobble',t:['cobble'],d:.7},{n:'stone',t:['stone'],d:.7,drop:3},
  {n:'dia',t:['diamond_ore'],d:.8,drop:'dia'},{n:'gold',t:['gold_ore'],d:.8},{n:'bed',t:['bedrock'],hard:1},{n:'sand',t:['sand'],d:.35},{n:'sst',t:['sandstone'],d:.6},
- {n:'plank',t:['planks'],d:.5},{n:'log',t:['log','log_top'],d:.6},{n:'leaf',t:['leaves'],d:.15},{n:'castle',t:['castle'],d:.8},{n:'brick',t:['brick'],d:.7},
+ {n:'plank',t:['planks'],d:.5},{n:'log',t:['log','log_top'],d:.6},{n:'leaf',t:['leaves'],d:.15,cut:1},{n:'castle',t:['castle'],d:.8},{n:'brick',t:['brick'],d:.7},
  {n:'water',t:['water'],fluid:1,hard:1},{n:'iron',t:['iron'],hard:1},{n:'crystal',t:['crystal'],hard:1,cw:1},{n:'rock',t:['stone'],hard:1},{n:'hcastle',t:['castle'],hard:1},
- {n:'hcob',t:['cobble'],hard:1},{n:'deck',t:['planks'],hard:1},{n:'pyr',t:['sandstone'],hard:1},{n:'roof',t:['brick'],hard:1},{n:'cactus',t:['cactus','cactus_top'],d:.3},{n:'ghost',t:['castle'],ghost:1}];
-const solidT=t=>t!==0&&!BT[t].fluid&&!BT[t].ghost;
-const opaqueT=t=>t!==0&&!BT[t].fluid&&!BT[t].ghost;
-// ---- атлас 8×4 клеток по 16 пикселей (точно, без размытия) ----
-let ATLAS=null,ATC=null;
-function buildAtlas(){const c=document.createElement('canvas');c.width=128;c.height=64;const g=c.getContext('2d');g.imageSmoothingEnabled=false;
- TEXN.forEach((n,i)=>{const x=(i%8)*16,y=Math.floor(i/8)*16;const im=IM['t_'+n];if(ok(im))g.drawImage(im,x,y,16,16);else{g.fillStyle='#f0f';g.fillRect(x,y,16,16)}});
- // верх травы, торец бревна, кристалл, кактус — дорисовываем пиксели сами
- const px=(i,f)=>{const x0=(i%8)*16,y0=Math.floor(i/8)*16;let s=7;const r=()=>{s=(s*16807)%2147483647;return s/2147483647};for(let y=0;y<16;y++)for(let x=0;x<16;x++){const c=f(x,y,r);if(c){g.fillStyle=c;g.fillRect(x0+x,y0+y,1,1)}}};
- const sh=(c,r,a)=>{const v=c.map(k=>Math.max(0,Math.min(255,Math.round(k+(r()*2-1)*a))));return`rgb(${v})`};
- px(TI('grass_top'),(x,y,r)=>sh([96,176,58],r,22));
- px(TI('log_top'),(x,y,r)=>{const d=Math.max(Math.abs(x-7.5),Math.abs(y-7.5));return d>6.5?sh([90,62,34],r,10):(Math.floor(d)%2?sh([176,136,80],r,8):sh([196,156,96],r,8))});
- px(TI('crystal'),(x,y,r)=>{const e=x===0||y===0||x===15||y===15;const d=(x+y)%6===0||(x-y+16)%7===0;return e?'#1a6a80':d?sh([200,255,255],r,10):sh([80,210,230],r,18)});
- px(TI('cactus'),(x,y,r)=>x%4===0?sh([30,110,40],r,8):(y%5===2&&x%4===2?'#e8e0a0':sh([60,150,60],r,12)));
- px(TI('cactus_top'),(x,y,r)=>sh([70,160,70],r,14));
- const t=new T3.CanvasTexture(c);t.magFilter=T3.NearestFilter;t.minFilter=T3.NearestFilter;t.generateMipmaps=false;t.colorSpace=T3.SRGBColorSpace;ATLAS=t;ATC=c}
-function uvOf(i){const u0=(i%8)/8,v1=1-Math.floor(i/8)/4;const e=.0008;return[u0+e,v1-.25+e,u0+.125-e,v1-e]}
+ {n:'hcob',t:['cobble'],hard:1},{n:'deck',t:['planks'],hard:1},{n:'pyr',t:['sandstone'],hard:1},{n:'roof',t:['brick'],hard:1},{n:'cactus',t:['cactus','cactus_top'],d:.3},{n:'ghost',t:['castle'],ghost:1},
+ {n:'tgrass',t:['tallgrass'],deco:1},{n:'flower',t:['flower_red','flower_yel','flower_blu'],deco:1},{n:'torch',t:['torch'],deco:1,lit:1},{n:'glass',t:['glass'],cut:1,hard:1},{n:'banner',t:['banner'],deco:2},{n:'goldb',t:['gold_block'],hard:1},{n:'rail',t:['rail'],deco:3}];
+const solidT=t=>t!==0&&!BT[t].fluid&&!BT[t].ghost&&!BT[t].deco;// стоим/упираемся
+const opaqueT=t=>solidT(t)&&!BT[t].cut;// закрывает соседнюю грань (листья и стекло — сквозные)
+const aoT=t=>opaqueT(t)||t===B.leaf;
+const decoT=t=>t!==0&&!!BT[t].deco;
+// ---- качество графики: hi (тени от солнца, дальше видно) / lo (для телефонов) ----
+const Q=(()=>{try{const u=new URLSearchParams(location.search).get('q');if(u==='hi'||u==='lo')return u;const s=localStorage.getItem('kubq');if(s==='hi'||s==='lo')return s}catch(_){}return(('ontouchstart' in window)||navigator.maxTouchPoints>0)?'lo':'hi'})();
+const QHI=Q==='hi';function setQuality(q){try{localStorage.setItem('kubq',q)}catch(_){}location.reload()}
+// ---- атлас 8×8 клеток по 32 пикселя (рисуется кодом в tex32.js), у многих блоков 2–3 варианта ----
+let ATLAS=null,ATC=null,AT32=null;
+function buildAtlas(){AT32=buildAtlas32();ATC=AT32.c;const t=new T3.CanvasTexture(ATC);t.magFilter=T3.NearestFilter;t.minFilter=T3.NearestFilter;t.generateMipmaps=false;t.colorSpace=T3.SRGBColorSpace;ATLAS=t}
+const TI=n=>AT32.IDX[n];
+function uvOf(i){const u0=(i%8)/8,v1=1-Math.floor(i/8)/8;const e=.0004;return[u0+e,v1-.125+e,u0+.125-e,v1-e]}
 // ---- шум (детерминированный) ----
 function hsh(x,z,s){let h=(x*374761393+z*668265263+(s||0)*982451653)|0;h=(h^(h>>>13))*1274126177|0;return((h^(h>>>16))>>>0)/4294967295}
 function vnoise(x,z,sc,s){const fx=x/sc,fz=z/sc,x0=Math.floor(fx),z0=Math.floor(fz),tx=fx-x0,tz=fz-z0;const sm=t=>t*t*(3-2*t);const a=hsh(x0,z0,s),b=hsh(x0+1,z0,s),c=hsh(x0,z0+1,s),d=hsh(x0+1,z0+1,s);const u=sm(tx),v=sm(tz);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v}
@@ -84,8 +79,12 @@ function genWorld(){VOX.fill(0);RS=12345;
  // деревня: домики, тропа, кузница
  for(let x=77;x<113;x++)for(let z=TZ-1;z<=TZ+1;z++)vsetRaw(x,surfH(x,z),z,B.cobble);
  const house=(x0,z0,w,d,wall,roof)=>{const y0=GY+1;for(let x=x0;x<x0+w;x++)for(let z=z0;z<z0+d;z++){for(let y=GY-1;y<=GY;y++)vsetRaw(x,y,z,B.cobble);for(let y=y0;y<y0+4;y++)vsetRaw(x,y,z,0)}
-  for(let x=x0;x<x0+w;x++)for(let z=z0;z<z0+d;z++){const edge=x===x0||x===x0+w-1||z===z0||z===z0+d-1;if(!edge)continue;const corner=(x===x0||x===x0+w-1)&&(z===z0||z===z0+d-1);for(let y=y0;y<y0+3;y++){const door=z===z0&&x===x0+Math.floor(w/2)&&y<y0+2;const win=y===y0+1&&!corner&&((z===z0||z===z0+d-1)&&(x-x0)%2===1&&x!==x0+Math.floor(w/2));if(!door&&!win)vsetRaw(x,y,z,corner?B.log:wall)}}
-  for(let k=0;k<=Math.ceil(d/2);k++)for(let x=x0-1;x<=x0+w;x++)for(const z of[z0-1+k,z0+d-k])vsetRaw(x,y0+3+k,z,roof)};
+  for(let x=x0;x<x0+w;x++)for(let z=z0;z<z0+d;z++){const edge=x===x0||x===x0+w-1||z===z0||z===z0+d-1;if(!edge)continue;const corner=(x===x0||x===x0+w-1)&&(z===z0||z===z0+d-1);for(let y=y0;y<y0+3;y++){const door=z===z0&&x===x0+Math.floor(w/2)&&y<y0+2;const win=y===y0+1&&!corner&&((z===z0||z===z0+d-1)&&(x-x0)%2===1&&x!==x0+Math.floor(w/2));if(!door)vsetRaw(x,y,z,win?B.glass:corner?B.log:wall)}}
+  for(let k=0;k<=Math.ceil(d/2);k++)for(let x=x0-1;x<=x0+w;x++)for(const z of[z0-1+k,z0+d-k])vsetRaw(x,y0+3+k,z,roof);
+  // труба, подоконные цветы, факелы у двери
+  for(let y=y0+3;y<=y0+4+Math.ceil(d/2);y++)vsetRaw(x0+w-2,y,z0+1,B.cobble);
+  for(let x=x0;x<x0+w;x++)for(const z of[z0-1,z0+d]){if(x===x0+Math.floor(w/2))continue;if(vget(x,y0,z)===0&&solidT(vget(x,y0-1,z))&&hsh(x,z,41)<.6)vsetRaw(x,y0,z,B.flower)}
+  for(const dx of[-1,1]){const x=x0+Math.floor(w/2)+dx;if(vget(x,y0+2,z0-1)===0)vsetRaw(x,y0+2,z0-1,B.banner)}};
  house(96,12,6,5,B.plank,B.brick);house(104,12,5,5,B.cobble,B.plank);house(80,12,5,5,B.plank,B.brick);house(100,32,6,5,B.cobble,B.brick);
  // кузница: навес над наковальней
  for(let x=91;x<=96;x++)for(let z=27;z<=31;z++)vsetRaw(x,GY,z,B.cobble);[[91,27],[96,27],[91,31],[96,31]].forEach(([x,z])=>{for(let y=GY+1;y<=GY+3;y++)vsetRaw(x,y,z,B.log)});for(let x=91;x<=96;x++)for(let z=27;z<=31;z++)vsetRaw(x,GY+4,z,B.plank);
@@ -105,11 +104,34 @@ function genWorld(){VOX.fill(0);RS=12345;
  for(let x=TOWER.x0;x<=TOWER.x1;x++)for(let z=TOWER.z0;z<=TOWER.z1;z++)for(let y=GY+1;y<=TOWER.top;y++)vsetRaw(x,y,z,B.hcastle);
  for(let i=0;i<3;i++)for(let z=TOWER.z0;z<=TOWER.z1;z++)for(let y=GY+1;y<=GY+1+i;y++)vsetRaw(TOWER.x0-3+i,y,z,B.castle);
  for(let x=149;x<=151;x++)for(let y=GY+1;y<=GY+2;y++)vsetRaw(x,y,39,B.brick);for(let x=149;x<=151;x++)for(let y=GY+1;y<=GY+2;y++)vsetRaw(x,y,41,B.brick);vsetRaw(149,GY+1,40,B.brick);vsetRaw(151,GY+1,40,B.brick);vsetRaw(150,GY+2,40,B.brick);
+ // ---- детали: фонари в деревне, шахта с крепью и факелами, пирамида, замок ----
+ const post=(x,z,h,t)=>{const g=surfH(x,z);for(let y=g+1;y<=g+h;y++)vsetRaw(x,y,z,t||B.log);vsetRaw(x,g+h+1,z,B.torch)};
+ for(const x of[79,86,99,108])for(const z of[TZ-3,TZ+3])post(x,z,2,B.log);
+ for(let x=34;x<=60;x++){if(MW.some(m=>Math.abs(m-x)<=1)||(x>=42&&x<=47))continue;
+  if(x%6===1){for(let y=GY+1;y<=GY+3;y++){vsetRaw(x,y,TZ-2,B.log);vsetRaw(x,y,TZ+2,B.log)}for(let z=TZ-1;z<=TZ+1;z++)vsetRaw(x,GY+4,z,B.plank)}
+  else if(x%6===4){const z=Math.floor(x/6)%2?TZ-2:TZ+2;vsetRaw(x,GY+2,z,B.torch);vsetRaw(x,GY+1,z,B.cobble)}
+  if(vget(x,GY+1,TZ)===0)vsetRaw(x,GY+1,TZ,B.rail)}
+ for(const z of[TZ-2,TZ+2])post(32,z,1,B.log);
+ for(const[x,z]of[[43,TZ-3],[46,TZ+3],[43,TZ+3],[46,TZ-3]])vsetRaw(x,GY+1,z,B.torch);
+ vsetRaw(PYR.cx,GY+7,PYR.cz,B.goldb);for(const z of[TZ-3,TZ+3])post(PYR.cx-8,z,2,B.sst);
+ const tower=(x0,z0)=>{for(let x=x0;x<x0+4;x++)for(let z=z0;z<z0+4;z++){for(let y=GY+1;y<=GY+10;y++)vsetRaw(x,y,z,B.hcastle);const e=x===x0||x===x0+3||z===z0||z===z0+3;if(e&&(x+z)%2===0)vsetRaw(x,GY+11,z,B.hcastle)}};
+ tower(145,0);tower(145,WZ-4);tower(WX-4,0);tower(WX-4,WZ-4);
+ for(const z of[TZ-6,TZ+6,TZ-12,TZ+12])vsetRaw(144,GY+5,z,B.banner);
+ for(const x of[151,157,169])for(const z of[3,WZ-4])vsetRaw(x,GY+4,z,B.banner);
+ for(const z of[TZ-3,TZ+3])post(144,z,2,B.castle);
+ for(let x=150;x<WX-4;x+=6)for(const z of[0,WZ-1])if(vget(x,GY+7,z)===B.hcastle&&vget(x,GY+8,z)===0)vsetRaw(x,GY+8,z,B.torch);
  // сундуки: клетка под блоком (выкопал — нашёл)
  CHESTS.forEach(c=>{for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)for(let y=GY+1;y<WY;y++){const b=vget(c.x+dx,y,c.z+dz);if(b===B.leaf||b===B.log)vsetRaw(c.x+dx,y,c.z+dz,0)}});// над сундуками — без деревьев
  CHESTS.forEach(c=>{vsetRaw(c.x,c.y,c.z,0)});vsetRaw(14,10,31,B.dirt);vsetRaw(14,GY,31,B.dirt);for(let y=10;y<GY;y++)vsetRaw(14,y,31,B.dirt);vsetRaw(14,9,31,0);
  vsetRaw(120,GY,12,B.sand);vsetRaw(120,11,12,0);
+ // трава и цветы на лугах (не на тропе, не на участке для дома, не у сундуков)
+ DECOL=[];for(let x=0;x<WX;x++)for(let z=1;z<WZ-1;z++){const zn=zoneAt(x);if(zn==='river'||zn==='desert'||zn==='castle')continue;if(Math.abs(z-TZ)<=1&&zn!=='mine')continue;
+  if(x>=HOUSEP.x0-1&&x<=HOUSEP.x1+1&&z>=HOUSEP.z0-1&&z<=HOUSEP.z1+1)continue;if(CHESTS.some(c=>Math.abs(c.x-x)<=2&&Math.abs(c.z-z)<=2))continue;
+  let y=WY-1;while(y>0&&VOX[vi(x,y,z)]===0)y--;if(VOX[vi(x,y,z)]!==B.grass||y+1>=WY)continue;const r=hsh(x,z,31),near=Math.abs(z-TZ)<=3?.5:1;
+  if(r<.2*near)vsetRaw(x,y+1,z,B.tgrass);else if(r<.245*near)vsetRaw(x,y+1,z,B.flower)}
+ for(let y=1;y<WY;y++)for(let z=0;z<WZ;z++)for(let x=0;x<WX;x++){const t=VOX[vi(x,y,z)];if(t===B.tgrass||t===B.flower||t===B.rail||t===B.torch)DECOL.push([x,y,z])}
  applyState()}
+let DECOL=[];
 // ---- состояние прохождения → мир ----
 function applyState(){
  for(let i=0;i<SV.mw;i++)for(let z=TZ-1;z<=TZ+1;z++)for(let y=GY+1;y<=GY+3;y++)vsetRaw(MW[i],y,z,0);
@@ -117,11 +139,14 @@ function applyState(){
  const spans=SV.z>=2?3:(SV.tr.river||0);for(let s=0;s<spans;s++)deckSpan(s,true);
  if(SV.z>=3)openGate(112,true);if(SV.z>=4)openGate(145,true);
  const pg=SV.z>=4?3:(SV.tr.desert||0);for(let i=0;i<pg;i++){const[x,y,z]=PYR.gaps[i];vsetRaw(x,y,z,B.pyr)}
- for(const k in SV.diff){const[x,y,z]=k.split(',').map(Number);const t=vget(x,y,z);if(!BT[t].hard||t===B.dia||t===0)vsetRaw(x,y,z,SV.diff[k])}
+ for(const k in SV.diff){const[x,y,z]=k.split(',').map(Number);const t=vget(x,y,z);if(!BT[t].hard||t===B.dia||t===0||BT[t].deco)vsetRaw(x,y,z,SV.diff[k])}
+ for(const[x,y,z]of DECOL){const t=vget(x,y,z);if((t===B.tgrass||t===B.flower||t===B.rail||t===B.torch)&&!solidT(vget(x,y-1,z)))vsetRaw(x,y,z,0)}
  if(SV.z>=5)ROOF.forEach(([x,y,z])=>vsetRaw(x,y,z,B.roof))}
 function deckSpan(s,raw){const x0=RIV.x0+s*3;const xe=s>=2?RIV.x1:x0+2;for(let x=x0;x<=xe&&x<=RIV.x1;x++)for(let z=TZ-2;z<=TZ+2;z++)(raw?vsetRaw:vset)(x,GY,z,B.deck)}
 function openGate(x,raw){for(let z=TZ-2;z<=TZ+2;z++)for(let y=GY+1;y<=GY+3;y++)(raw?vsetRaw:vset)(x,y,z,0)}
-function setBlock(x,y,z,t){vset(x,y,z,t);SV.diff[x+','+y+','+z]=t;save()}
+function setBlock(x,y,z,t){vset(x,y,z,t);SV.diff[x+','+y+','+z]=t;
+ if(!solidT(t)){const a=vget(x,y+1,z);if(a===B.tgrass||a===B.flower||a===B.torch||a===B.rail){vset(x,y+1,z,0);SV.diff[x+','+(y+1)+','+z]=0;if(a===B.torch){scanTorches();torchFx();for(let dx=-8;dx<=8;dx+=8)for(let dz=-8;dz<=8;dz+=8)markDirty(clamp(x+dx,0,WX-1),clamp(z+dz,0,WZ-1))}}}
+ save()}
 // ---- чанки: только видимые грани, мягкие тени в углах (AO), освещение граней ----
 const NCX=Math.ceil(WX/CH),NCZ=Math.ceil(WZ/CH);const CHUNK=[];let DIRTY=new Set();
 function markDirty(x,z){const cx=Math.floor(x/CH),cz=Math.floor(z/CH);DIRTY.add(cx+','+cz);const lx=x%CH,lz=z%CH;if(lx===0&&cx>0)DIRTY.add((cx-1)+','+cz);if(lx===CH-1&&cx<NCX-1)DIRTY.add((cx+1)+','+cz);if(lz===0&&cz>0)DIRTY.add(cx+','+(cz-1));if(lz===CH-1&&cz<NCZ-1)DIRTY.add(cx+','+(cz+1))}
@@ -130,54 +155,130 @@ const FACES=[// нормаль, 4 угла (против часовой снар
  {n:[0,1,0],c:[[0,1,1],[1,1,1],[1,1,0],[0,1,0]],l:1,t:1},{n:[0,-1,0],c:[[0,0,0],[1,0,0],[1,0,1],[0,0,1]],l:.55,t:2},
  {n:[0,0,1],c:[[0,0,1],[1,0,1],[1,1,1],[0,1,1]],l:.68,t:0},{n:[0,0,-1],c:[[1,0,0],[0,0,0],[0,1,0],[1,1,0]],l:.68,t:0}];
 const AOL=[.42,.62,.82,1];
-function texFor(t,f){const tt=BT[t].t;const n=f===1?(tt[1]||tt[0]):f===2?(tt[2]||(t===B.log||t===B.cactus?tt[1]:tt[0])):tt[0];return TI(n)}
-function meshChunk(cx,cz){const P=[],N=[],U=[],Cc=[],I=[],WP=[],WN=[],WU=[],WC=[],WI=[];
- for(let x=cx*CH;x<Math.min(WX,cx*CH+CH);x++)for(let z=cz*CH;z<Math.min(WZ,cz*CH+CH);z++)for(let y=0;y<WY;y++){const t=VOX[vi(x,y,z)];if(!t||BT[t].ghost)continue;const fl=BT[t].fluid;
+function texFor(t,f,x,y,z){const tt=BT[t].t;let n=f===1?(tt[1]||tt[0]):f===2?(tt[2]||(t===B.log||t===B.cactus?tt[1]:tt[0])):tt[0];
+ if(x==null)return TI(n);
+ if((t===B.castle||t===B.hcastle)&&f!==1&&hsh(x*3+y,z*5+y,77)<.13)n='castle_moss';// мох на старых стенах
+ else if(t===B.pyr&&f===0&&(y-GY)%2===0)n='sandstone_ch';// узорные ряды пирамиды
+ if(BT[t].deco&&tt.length>1)n=tt[Math.floor(hsh(x,z,y+5)*tt.length)];
+ const vn=AT32.VARN[n]||1;const v=vn>1?Math.floor(hsh(x*7+y*3+f,z*11+y*5,91)*vn):0;return AT32.IDX[n+'#'+v]}
+let TORCH=[];// факелы: свет в вершинах (тёплое свечение), огоньки
+function scanTorches(){TORCH=[];for(let y=0;y<WY;y++)for(let z=0;z<WZ;z++)for(let x=0;x<WX;x++)if(VOX[vi(x,y,z)]===B.torch)TORCH.push([x+.5,y+.6,z+.5])}
+const TL_R=6.5;
+function torchAt(px,py,pz,n,L){let g=0;for(const t of L){const dx=t[0]-px,dy=t[1]-py,dz=t[2]-pz;const d=Math.sqrt(dx*dx+dy*dy+dz*dz);if(d>=TL_R)continue;if(n&&(dx*n[0]+dy*n[1]+dz*n[2])<-.3)continue;const k=1-d/TL_R;g+=k*k}return Math.min(1.1,g)}
+function meshChunk(cx,cz){const P=[],N=[],U=[],Cc=[],Gl=[],I=[],WP=[],WN=[],WU=[],WC=[],WI=[],DP=[],DN=[],DU=[],DC=[],DG=[],DI=[],SP=[],SPh=[];
+ const X0=cx*CH,Z0=cz*CH;const TL=TORCH.filter(t=>t[0]>X0-TL_R&&t[0]<X0+CH+TL_R&&t[2]>Z0-TL_R&&t[2]<Z0+CH+TL_R);
+ const quad=(pts,nrm,tx,col,gl)=>{const b=DP.length/3;pts.forEach(q=>{DP.push(...q);DN.push(...nrm);DC.push(col,col,col);DG.push(gl,gl,gl)});DU.push(tx[0],tx[1],tx[2],tx[1],tx[2],tx[3],tx[0],tx[3]);DI.push(b,b+1,b+2,b,b+2,b+3)};
+ for(let x=X0;x<Math.min(WX,X0+CH);x++)for(let z=Z0;z<Math.min(WZ,Z0+CH);z++)for(let y=0;y<WY;y++){const t=VOX[vi(x,y,z)];if(!t||BT[t].ghost)continue;const bt=BT[t];
+  if(bt.deco){// трава, цветы, факел — крест из двух плоскостей; флаг — на стене; рельсы — на полу
+   const tx=uvOf(texFor(t,0,x,y,z));const lt=bt.lit?1.5:0;const gl=lt||torchAt(x+.5,y+.5,z+.5,null,TL);
+   if(bt.deco===1){const j=(hsh(x,z,y+3)-.5)*.3,k=(hsh(z,x,y+4)-.5)*.3,h=t===B.torch?1:.75+hsh(x,z,y+9)*.35,ww=t===B.torch?.36:.5;const mx=x+.5+(t===B.torch?0:j),mz=z+.5+(t===B.torch?0:k);
+    const s1=[[mx-ww,y,mz-ww],[mx+ww,y,mz+ww],[mx+ww,y+h,mz+ww],[mx-ww,y+h,mz-ww]],s2=[[mx-ww,y,mz+ww],[mx+ww,y,mz-ww],[mx+ww,y+h,mz-ww],[mx-ww,y+h,mz+ww]];
+    const tw=t===B.torch?[tx[0]+(tx[2]-tx[0])*.14,tx[1],tx[2]-(tx[2]-tx[0])*.14,tx[3]]:tx;quad(s1,[0,1,0],tw,.95,gl);quad(s2,[0,1,0],tw,.95,gl)}
+   else if(bt.deco===2){let pts=null,n=null;const y0=y-.9,y1=y+1;
+    if(solidT(vget(x+1,y,z))){pts=[[x+.94,y0,z+.92],[x+.94,y0,z+.08],[x+.94,y1,z+.08],[x+.94,y1,z+.92]];n=[-1,0,0]}else if(solidT(vget(x-1,y,z))){pts=[[x+.06,y0,z+.08],[x+.06,y0,z+.92],[x+.06,y1,z+.92],[x+.06,y1,z+.08]];n=[1,0,0]}
+    else if(solidT(vget(x,y,z+1))){pts=[[x+.08,y0,z+.94],[x+.92,y0,z+.94],[x+.92,y1,z+.94],[x+.08,y1,z+.94]];n=[0,0,-1]}else{pts=[[x+.92,y0,z+.06],[x+.08,y0,z+.06],[x+.08,y1,z+.06],[x+.92,y1,z+.06]];n=[0,0,1]}
+    quad(pts,n,tx,.9,gl)}
+   else{const yy=y+.03;quad([[x,yy,z+1],[x+1,yy,z+1],[x+1,yy,z],[x,yy,z]],[0,1,0],tx,.85,gl)}
+   continue}
+  const fl=bt.fluid;
   for(let f=0;f<6;f++){const F=FACES[f],nx=x+F.n[0],ny=y+F.n[1],nz=z+F.n[2];const nt=vget(nx,ny,nz);
-   if(fl){if(nt!==0&&!(BT[nt].ghost))continue}else if(opaqueT(nt))continue;if(fl&&f!==2&&nt!==0)continue;
-   const tx=uvOf(texFor(t,F.t));const p=fl?WP:P,nn=fl?WN:N,u=fl?WU:U,cc=fl?WC:Cc,ii=fl?WI:I;const b=p.length/3;
+   if(fl){if(nt!==0&&!(BT[nt].ghost)&&!BT[nt].deco)continue;if(f!==2&&nt!==0&&!BT[nt].deco)continue}
+   else{if(opaqueT(nt))continue;if(nt===t&&bt.cut&&(t!==B.leaf||!QHI))continue}
+   const p=fl?WP:P,nn=fl?WN:N,u=fl?WU:U,cc=fl?WC:Cc,ii=fl?WI:I;const b=p.length/3;
    const ax=F.n[0]?0:F.n[1]?1:2;const ta=[0,1,2].filter(a=>a!==ax);const ao=[];
-   for(let k=0;k<4;k++){const c=F.c[k];let yy=y+c[1];if(fl&&f===2)yy-=.12;p.push(x+c[0],yy,z+c[2]);nn.push(...F.n);
-    let l=F.l;if(!fl){const s=[0,0,0];const o1=[0,0,0],o2=[0,0,0];o1[ta[0]]=c[ta[0]]?1:-1;o2[ta[1]]=c[ta[1]]?1:-1;
-     const q=(o)=>opaqueT(vget(nx+o[0],ny+o[1],nz+o[2]))?1:0;const s1=q(o1),s2=q(o2),s3=q([o1[0]+o2[0],o1[1]+o2[1],o1[2]+o2[2]]);const a=s1&&s2?0:3-(s1+s2+s3);ao.push(a);l*=AOL[a]}
-    cc.push(l,l,l)}
-   // UV: для боковых граней низ текстуры внизу блока
-   const uv=f===2||f===3?[[tx[0],tx[1]],[tx[2],tx[1]],[tx[2],tx[3]],[tx[0],tx[3]]]:[[tx[0],tx[1]],[tx[2],tx[1]],[tx[2],tx[3]],[tx[0],tx[3]]];uv.forEach(v=>u.push(...v));
+   for(let k=0;k<4;k++){const c=F.c[k];let yy=y+c[1];if(fl&&f===2&&nt!==B.water)yy-=.12;const vx=x+c[0],vz=z+c[2];p.push(vx,yy,vz);nn.push(...F.n);
+    let l=F.l;if(!fl){const o1=[0,0,0],o2=[0,0,0];o1[ta[0]]=c[ta[0]]?1:-1;o2[ta[1]]=c[ta[1]]?1:-1;
+     const q=(o)=>aoT(vget(nx+o[0],ny+o[1],nz+o[2]))?1:0;const s1=q(o1),s2=q(o2),s3=q([o1[0]+o2[0],o1[1]+o2[1],o1[2]+o2[2]]);const a=s1&&s2?0:3-(s1+s2+s3);ao.push(a);l*=AOL[a];
+     const g=TL.length?torchAt(vx+F.n[0]*.3,yy+F.n[1]*.3,vz+F.n[2]*.3,F.n,TL):0;Gl.push(g,g*.62,g*.3)}
+    cc.push(l,l,l);
+    if(fl){if(f===2)u.push(vx*.25,vz*.25);else u.push((vx+vz)*.25,yy*.25)}}
+   if(!fl){const tx=uvOf(texFor(t,F.t,x,y,z));[[tx[0],tx[1]],[tx[2],tx[1]],[tx[2],tx[3]],[tx[0],tx[3]]].forEach(v=>u.push(...v))}
+   // искорки на руде и кристаллах
+   if((t===B.dia||t===B.gold||t===B.crystal)&&!opaqueT(nt)){const ns=t===B.crystal?1:2;for(let k=0;k<ns;k++){const r1=hsh(x*5+f,y*7+k,z+13)-.5,r2=hsh(z*3+k,x+f,y+17)-.5;const q=[x+.5+F.n[0]*.53,y+.5+F.n[1]*.53,z+.5+F.n[2]*.53];q[ta[0]]+=r1*.8;q[ta[1]]+=r2*.8;SP.push(...q);SPh.push(hsh(x+k,z,y)*6.28,t===B.gold?1:0)}}
    if(!fl&&ao[0]+ao[2]<ao[1]+ao[3])ii.push(b+1,b+2,b+3,b+1,b+3,b);else ii.push(b,b+1,b+2,b,b+2,b+3)}}
- const mk=(p,n,u,c,i)=>{const g=new T3.BufferGeometry();g.setAttribute('position',new T3.Float32BufferAttribute(p,3));g.setAttribute('normal',new T3.Float32BufferAttribute(n,3));g.setAttribute('uv',new T3.Float32BufferAttribute(u,2));g.setAttribute('color',new T3.Float32BufferAttribute(c,3));g.setIndex(i);g.computeBoundingSphere();return g};
- return[mk(P,N,U,Cc,I),WI.length?mk(WP,WN,WU,WC,WI):null]}
-let SCENE=null,CAM=null,REN=null,MAT=null,WMAT=null,HEMI=null,SUN=null,WROOT=null;
-function rebuildChunk(cx,cz){const key=cx+','+cz;let c=CHUNK[cz*NCX+cx];const[g,wg]=meshChunk(cx,cz);
- if(!c){c={m:new T3.Mesh(g,MAT),w:null,cx,cz};c.m.matrixAutoUpdate=false;WROOT.add(c.m);CHUNK[cz*NCX+cx]=c}else{c.m.geometry.dispose();c.m.geometry=g}
- if(c.w){WROOT.remove(c.w);c.w.geometry.dispose();c.w=null}if(wg){c.w=new T3.Mesh(wg,WMAT);c.w.renderOrder=2;c.w.matrixAutoUpdate=false;WROOT.add(c.w)}DIRTY.delete(key)}
+ const mk=(p,n,u,c,i,g)=>{const G_=new T3.BufferGeometry();G_.setAttribute('position',new T3.Float32BufferAttribute(p,3));G_.setAttribute('normal',new T3.Float32BufferAttribute(n,3));G_.setAttribute('uv',new T3.Float32BufferAttribute(u,2));G_.setAttribute('color',new T3.Float32BufferAttribute(c,3));if(g)G_.setAttribute('glow',new T3.Float32BufferAttribute(g,3));G_.setIndex(i);G_.computeBoundingSphere();return G_};
+ let sg=null;if(SP.length){sg=new T3.BufferGeometry();sg.setAttribute('position',new T3.Float32BufferAttribute(SP,3));const ph=[],kd=[];for(let i=0;i<SPh.length;i+=2){ph.push(SPh[i]);kd.push(SPh[i+1])}sg.setAttribute('ph',new T3.Float32BufferAttribute(ph,1));sg.setAttribute('kd',new T3.Float32BufferAttribute(kd,1));sg.computeBoundingSphere()}
+ const dg3=[];for(let i=0;i<DG.length;i+=3)dg3.push(DG[i],DG[i]*.62,DG[i]*.3);
+ return[mk(P,N,U,Cc,I,Gl),WI.length?mk(WP,WN,WU,WC,WI):null,DI.length?mk(DP,DN,DU,DC,DI,dg3):null,sg]}
+let SCENE=null,CAM=null,REN=null,MAT=null,WMAT=null,DMAT=null,SPMAT=null,HEMI=null,SUN=null,WROOT=null;const UNI={uT:{value:0},uGK:{value:.4}};
+function rebuildChunk(cx,cz){const key=cx+','+cz;let c=CHUNK[cz*NCX+cx];const[g,wg,dg,sg]=meshChunk(cx,cz);
+ if(!c){c={m:new T3.Mesh(g,MAT),w:null,d:null,s:null,cx,cz};c.m.matrixAutoUpdate=false;c.m.castShadow=c.m.receiveShadow=QHI;WROOT.add(c.m);CHUNK[cz*NCX+cx]=c}else{c.m.geometry.dispose();c.m.geometry=g}
+ const sub=(k,geo,mat,ro,ctor)=>{if(c[k]){WROOT.remove(c[k]);c[k].geometry.dispose();c[k]=null}if(geo){const m=new(ctor||T3.Mesh)(geo,mat);m.renderOrder=ro;m.matrixAutoUpdate=false;if(k==='d'){m.receiveShadow=QHI;m.castShadow=false}WROOT.add(m);c[k]=m}};
+ sub('w',wg,WMAT,2);sub('d',dg,DMAT,1);sub('s',sg,SPMAT,3,T3.Points);DIRTY.delete(key)}
+function chunkVis(maxD){for(const c of CHUNK){if(!c)continue;const d=Math.hypot(c.cx*CH+8-CAM.position.x,c.cz*CH+8-CAM.position.z);const v=d<maxD;c.m.visible=v;if(c.w)c.w.visible=v;if(c.d)c.d.visible=v&&d<maxD-6;if(c.s)c.s.visible=d<34}}
 function stepChunks(n){let k=0;for(const key of DIRTY){if(k++>=n)break;const[a,b]=key.split(',').map(Number);rebuildChunk(a,b)}}
-function rebuildAll(){DIRTY.clear();for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++)rebuildChunk(cx,cz)}
+function rebuildAll(){scanTorches();DIRTY.clear();for(let cz=0;cz<NCZ;cz++)for(let cx=0;cx<NCX;cx++)rebuildChunk(cx,cz);torchFx()}
 // ---- рендер ----
 const GLC=document.getElementById('g');let PR=1;
+// материал блоков: обычное освещение + тёплый свет факелов (атрибут glow) + лёгкое покачивание травы (sway)
+function litMat(o,sway){const m=new T3.MeshLambertMaterial(o);m.onBeforeCompile=sh=>{sh.uniforms.uGK=UNI.uGK;sh.uniforms.uT=UNI.uT;
+ sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute vec3 glow;varying vec3 vGlow;uniform float uT;').replace('#include <begin_vertex>','#include <begin_vertex>\nvGlow=glow;'+(sway?'if(glow.r<1.45){vec3 wp=(modelMatrix*vec4(position,1.)).xyz;float hgt=fract(uv.y*8.);transformed.x+=sin(uT*1.7+wp.x*.9+wp.z*.6)*.06*hgt;transformed.z+=cos(uT*1.3+wp.z*.8)*.05*hgt;}':''));
+ sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vGlow;uniform float uGK;').replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance+=diffuseColor.rgb*vGlow*(vGlow.r>1.45?0.9:uGK);')};
+ m.customProgramCacheKey=()=>'lit'+(sway?1:0);return m}
+// вода: своя бесшовная текстура, течёт и колышется, полупрозрачная, с бликом солнца
+function waterMat(){const t=new T3.CanvasTexture(waterCanvas());t.wrapS=t.wrapT=T3.RepeatWrapping;t.magFilter=T3.NearestFilter;t.minFilter=T3.LinearFilter;t.colorSpace=T3.SRGBColorSpace;
+ const m=new T3.MeshPhongMaterial({map:t,vertexColors:true,transparent:true,opacity:.74,depthWrite:false,shininess:90,specular:0x99bbdd});m.userData.tex=t;
+ m.onBeforeCompile=sh=>{sh.uniforms.uT=UNI.uT;sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uT;').replace('#include <begin_vertex>','#include <begin_vertex>\nif(normal.y>.5){transformed.y+=(sin(position.x*1.7+uT*1.8)+cos(position.z*1.3+uT*1.4))*.035-.03;}')};return m}
+// искорки на руде: мигающие точки
+function sparkMat(){return new T3.ShaderMaterial({uniforms:{uT:UNI.uT,uS:{value:1}},transparent:true,depthWrite:false,blending:T3.AdditiveBlending,
+ vertexShader:'attribute float ph;attribute float kd;uniform float uT;uniform float uS;varying float vA;varying float vK;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);gl_Position=projectionMatrix*mv;float a=sin(uT*2.2+ph*3.);vA=pow(max(0.,a),5.);vK=kd;gl_PointSize=uS*(10.+vA*14.)/max(1.,-mv.z*.35);}',
+ fragmentShader:'varying float vA;varying float vK;void main(){vec2 d=gl_PointCoord-.5;float r=length(d);float c=max(0.,1.-r*2.);float x=max(0.,1.-abs(d.x)*9.)*max(0.,1.-abs(d.y)*2.)+max(0.,1.-abs(d.y)*9.)*max(0.,1.-abs(d.x)*2.);float a=(c*c*.6+x)*vA;vec3 col=vK>.5?vec3(1.,.9,.45):vec3(.75,1.,1.);gl_FragColor=vec4(col*a,a);}'})}
+
 function init3d(){REN=new T3.WebGLRenderer({canvas:GLC,antialias:false,powerPreference:'high-performance'});REN.outputColorSpace=T3.SRGBColorSpace;
- PR=Math.min(1.5,window.devicePixelRatio||1);REN.setPixelRatio(PR);
- SCENE=new T3.Scene();CAM=new T3.PerspectiveCamera(62,1,.08,90);SCENE.fog=new T3.Fog(0xbfe3ff,28,70);
- buildAtlas();MAT=new T3.MeshLambertMaterial({map:ATLAS,vertexColors:true});WMAT=new T3.MeshLambertMaterial({map:ATLAS,vertexColors:true,transparent:true,opacity:.78,depthWrite:false});
- HEMI=new T3.HemisphereLight(0xffffff,0x9aa0b0,1.6);SUN=new T3.DirectionalLight(0xfff2dc,1.4);SUN.position.set(-.5,1,.35);SCENE.add(HEMI,SUN);
- WROOT=new T3.Group();SCENE.add(WROOT);makeSky();makeOutline();makeCrack();resize3d()}
+ PR=Math.min(QHI?1.5:1.25,window.devicePixelRatio||1);REN.setPixelRatio(PR);
+ if(QHI){REN.shadowMap.enabled=true;REN.shadowMap.type=T3.PCFShadowMap}
+ SCENE=new T3.Scene();CAM=new T3.PerspectiveCamera(62,1,.08,110);SCENE.fog=QHI?new T3.Fog(0xbfe3ff,34,80):new T3.Fog(0xbfe3ff,26,60);
+ buildAtlas();MAT=litMat({map:ATLAS,vertexColors:true,alphaTest:.5});DMAT=litMat({map:ATLAS,vertexColors:true,alphaTest:.5,side:T3.DoubleSide},1);
+ MAT.shadowSide=T3.FrontSide;DMAT.shadowSide=T3.DoubleSide;WMAT=waterMat();SPMAT=sparkMat();
+ HEMI=new T3.HemisphereLight(0xffffff,0x9aa0b0,1.6);SUN=new T3.DirectionalLight(0xfff2dc,1.4);SUN.position.set(-.5,1,.35);SCENE.add(HEMI,SUN,SUN.target);
+ if(QHI){SUN.castShadow=true;SUN.shadow.mapSize.set(2048,2048);const sc=SUN.shadow.camera;sc.left=sc.bottom=-26;sc.right=sc.top=26;sc.near=1;sc.far=120;SUN.shadow.bias=-.0006;SUN.shadow.normalBias=.04;SUN.shadow.radius=3;sc.updateProjectionMatrix()}
+ WROOT=new T3.Group();SCENE.add(WROOT);makeSky();SPMAT.uniforms.uS.value=PR;makeOutline();makeCrack();resize3d()}
 function resize3d(){if(!REN)return;REN.setPixelRatio(PR);REN.setSize(W,H,false);GLC.style.width=W+'px';GLC.style.height=H+'px';GLC.style.left=VVX+'px';GLC.style.top=VVY+'px';CAM.aspect=W/Math.max(1,H);CAM.updateProjectionMatrix()}
 // небо: солнце, луна, звёзды, облака
-let SKY={};function makeSky(){const sq=(c,s)=>{const m=new T3.Mesh(new T3.PlaneGeometry(s,s),new T3.MeshBasicMaterial({color:c,fog:false,transparent:true}));return m};
+let SKY={};
+const glowTex=(()=>{let t=null;return()=>{if(t)return t;const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');const gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.25,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);t=new T3.CanvasTexture(c);return t}})();
+function makeSky(){const sq=(c,s)=>{const m=new T3.Mesh(new T3.PlaneGeometry(s,s),new T3.MeshBasicMaterial({color:c,fog:false,transparent:true}));return m};
+ // купол неба: плавный переход от горизонта к зениту, свечение вокруг солнца
+ SKY.dome=new T3.Mesh(new T3.SphereGeometry(95,32,16),new T3.ShaderMaterial({side:T3.BackSide,depthWrite:false,fog:false,uniforms:{top:{value:new T3.Color(0x4a9be8)},hor:{value:new T3.Color(0xcfe9ff)},sd:{value:new T3.Vector3(-.6,.5,-.4)},sk:{value:1}},
+  vertexShader:'varying vec3 vD;void main(){vD=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+  fragmentShader:'uniform vec3 top;uniform vec3 hor;uniform vec3 sd;uniform float sk;varying vec3 vD;void main(){float h=vD.y;vec3 c=mix(hor,top,smoothstep(-.02,.55,h));float s=max(0.,dot(normalize(vD),normalize(sd)));c+=vec3(1.,.85,.6)*(pow(s,24.)*.55+pow(s,4.)*.12)*sk;gl_FragColor=vec4(c,1.);}'}));
+ SKY.dome.renderOrder=-10;SKY.dome.frustumCulled=false;SCENE.add(SKY.dome);
  SKY.sun=sq(0xfff3a0,9);SKY.moon=sq(0xeef0ff,6);SCENE.add(SKY.sun,SKY.moon);
+ SKY.halo=new T3.Sprite(new T3.SpriteMaterial({map:glowTex(),color:0xfff0b0,transparent:true,opacity:.7,blending:T3.AdditiveBlending,depthWrite:false,fog:false}));SKY.halo.scale.set(30,30,1);SCENE.add(SKY.halo);
  const sp=[];for(let i=0;i<260;i++){const a=Math.random()*6.28,b=Math.random()*1.2+.15;sp.push(Math.cos(a)*Math.cos(b)*80,Math.sin(b)*80,Math.sin(a)*Math.cos(b)*80)}
  const sg=new T3.BufferGeometry();sg.setAttribute('position',new T3.Float32BufferAttribute(sp,3));SKY.stars=new T3.Points(sg,new T3.PointsMaterial({color:0xffffff,size:1.6,sizeAttenuation:false,fog:false,transparent:true}));SCENE.add(SKY.stars);
- const cg=new T3.BoxGeometry(1,1,1),cm=new T3.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:.88,fog:false,emissive:0x777777});let n=0;const pos=[];
- for(let x=-20;x<WX+40;x+=2)for(let z=-30;z<WZ+30;z+=2)if(vnoise(x,z,10,21)>.68)pos.push([x,z]);
- SKY.clouds=new T3.InstancedMesh(cg,cm,pos.length);const o=new T3.Object3D();pos.forEach(([x,z],i)=>{o.position.set(x,WY+6,z);o.scale.set(2,1,2);o.updateMatrix();SKY.clouds.setMatrixAt(i,o.matrix)});SCENE.add(SKY.clouds)}
+ // два слоя облаков: низкие плотные «кубические» и высокие лёгкие
+ const mkC=(y,step,sc,thr,seed,op,th)=>{const cg=new T3.BoxGeometry(1,1,1),cm=new T3.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:op,fog:false,emissive:0x8a8a90});const pos=[];
+  for(let x=-40;x<WX+60;x+=step)for(let z=-50;z<WZ+50;z+=step)if(vnoise(x,z,10*step/2,seed)>thr)pos.push([x,z]);
+  const m=new T3.InstancedMesh(cg,cm,pos.length);const o=new T3.Object3D();pos.forEach(([x,z],i)=>{o.position.set(x,y,z);o.scale.set(step,th,step);o.updateMatrix();m.setMatrixAt(i,o.matrix)});m.userData.op=op;m.renderOrder=-5;SCENE.add(m);return m};
+ SKY.clouds=mkC(WY+6,2,2,.66,21,.9,1.2);SKY.clouds2=mkC(WY+18,4,4,.7,23,.5,.6)}
 const DAYC={day:new T3.Color(0x8fcfff),dusk:new T3.Color(0xf0a070),night:new T3.Color(0x141a3a),cave:new T3.Color(0x1a1820)};
+const SKYT={day:new T3.Color(0x3f8fe4),night:new T3.Color(0x070a1c),cave:new T3.Color(0x121014)};const HORD=new T3.Color(0xd4ecff);
 let NIGHTK=0,UNDER=0;
-function stepSky(dt,nightK){NIGHTK=nightK;const px=PL?PL.p.x:0,py=PL?PL.p.y:GY,pz=PL?PL.p.z:TZ;
+function stepSky(dt,nightK){NIGHTK=nightK;const px=PL?PL.p.x:0,py=PL?PL.p.y:GY,pz=PL?PL.p.z:TZ;UNI.uT.value=T;
  UNDER+=((py<GY-1||(PL&&isCovered(PL.p)))?1:0-UNDER)*Math.min(1,dt*2);UNDER=clamp(UNDER,0,1);
- const c=DAYC.day.clone().lerp(DAYC.night,nightK);c.lerp(DAYC.cave,UNDER*.85);SCENE.background=c;SCENE.fog.color.copy(c);
- const light=1-nightK*.55;HEMI.intensity=(1.65*light)*(1-UNDER*.35);SUN.intensity=1.4*(1-nightK*.8)*(1-UNDER*.6);
+ const c=HORD.clone().lerp(DAYC.night,nightK);c.lerp(DAYC.cave,UNDER*.85);SCENE.background=c;SCENE.fog.color.copy(c);
+ const tc=SKYT.day.clone().lerp(SKYT.night,nightK);tc.lerp(SKYT.cave,UNDER*.85);SKY.dome.material.uniforms.top.value.copy(tc);SKY.dome.material.uniforms.hor.value.copy(c);SKY.dome.position.copy(CAM.position);
+ const light=1-nightK*.55;HEMI.intensity=((QHI?1.3:1.65)*light)*(1-UNDER*.5);SUN.intensity=(QHI?1.9:1.4)*(1-nightK*.8)*(1-UNDER*.6);
+ UNI.uGK.value=.2+.5*Math.max(UNDER,nightK);
  const ang=nightK*Math.PI;SKY.sun.position.set(CAM.position.x-50*Math.cos(ang*.5+.4),CAM.position.y+38*(1-nightK)+2,CAM.position.z-28);SKY.sun.lookAt(CAM.position);
+ SKY.halo.position.copy(SKY.sun.position);SKY.halo.material.opacity=.7*(1-nightK)*(1-UNDER*.8);
+ const sd=SKY.sun.position.clone().sub(CAM.position).normalize();SKY.dome.material.uniforms.sd.value.copy(sd);SKY.dome.material.uniforms.sk.value=(1-nightK)*(1-UNDER);
  SKY.moon.position.set(CAM.position.x+40,CAM.position.y+34*nightK-4,CAM.position.z-30);SKY.moon.lookAt(CAM.position);SKY.moon.material.opacity=nightK;SKY.sun.material.opacity=1-nightK;
- SKY.stars.position.copy(CAM.position);SKY.stars.material.opacity=nightK;SKY.clouds.position.x=(T*.6)%2;SKY.clouds.material.opacity=.88*(1-nightK*.6)}
+ SKY.stars.position.copy(CAM.position);SKY.stars.material.opacity=nightK;SKY.clouds.position.x=(T*.6)%2;SKY.clouds.material.opacity=.9*(1-nightK*.6);SKY.clouds2.position.x=(T*.25)%4;SKY.clouds2.material.opacity=.5*(1-nightK*.7);
+ if(WMAT&&WMAT.userData.tex){WMAT.userData.tex.offset.set(T*.03,T*.05)}
+ // тени от солнца следуют за игроком (сетка, чтобы не мерцали)
+ if(QHI){const sx=Math.round(px*2)/2,sz=Math.round(pz*2)/2;SUN.target.position.set(sx,GY,sz);SUN.position.set(sx-30,GY+60,sz+21)}
+ // огоньки факелов мерцают
+ for(const f of TFX){const k=1+Math.sin(T*9+f.userData.ph)*.06+Math.sin(T*23+f.userData.ph*2)*.04;f.scale.set(f.userData.s*k,f.userData.s*k,1);f.material.opacity=f.userData.o*(.6+.4*UNI.uGK.value)}
+ stepPuffs(dt)}
+let TFX=[];function torchFx(){if(!SCENE)return;TFX.forEach(f=>SCENE.remove(f));TFX=[];
+ for(const t of TORCH){const sp=new T3.Sprite(new T3.SpriteMaterial({map:glowTex(),color:0xffb050,transparent:true,blending:T3.AdditiveBlending,depthWrite:false}));sp.position.set(t[0],t[1]+.1,t[2]);sp.userData={s:1.5,o:.42,ph:Math.random()*6};SCENE.add(sp);TFX.push(sp);
+  const core=new T3.Sprite(new T3.SpriteMaterial({map:glowTex(),color:0xfff0b0,transparent:true,blending:T3.AdditiveBlending,depthWrite:false}));core.position.copy(sp.position);core.userData={s:.42,o:.7,ph:Math.random()*6};SCENE.add(core);TFX.push(core)}}
+// пыль при копании (на каждой стадии трещины)
+const PUFF=[];function dustPuff(x,y,z,t,n){if(!SCENE)return;const col=tileColor(t);for(let i=0;i<(n||4);i++){const sp=new T3.Sprite(new T3.SpriteMaterial({map:glowTex(),color:col.clone().lerp(new T3.Color(1,1,1),.25),transparent:true,depthWrite:false,opacity:.75}));
+ sp.position.set(x+.5+(Math.random()-.5)*1.05,y+.5+(Math.random()-.5)*1.05,z+.5+(Math.random()-.5)*1.05);const s=.18+Math.random()*.16;sp.scale.set(s,s,1);sp.userData={v:new T3.Vector3((Math.random()-.5)*1.2,.6+Math.random()*.8,(Math.random()-.5)*1.2),l:.55+Math.random()*.3,s};SCENE.add(sp);PUFF.push(sp)}}
+function stepPuffs(dt){for(let i=PUFF.length-1;i>=0;i--){const p=PUFF[i],u=p.userData;u.l-=dt;p.position.addScaledVector(u.v,dt);u.v.multiplyScalar(1-dt*2);const s=u.s*(1+(.9-u.l)*1.6);p.scale.set(s,s,1);p.material.opacity=Math.max(0,u.l)*.9;if(u.l<=0){SCENE.remove(p);p.material.dispose();PUFF.splice(i,1)}}}
 function isCovered(p){const x=Math.floor(p.x),z=Math.floor(p.z);for(let y=Math.floor(p.y)+2;y<Math.min(WY,Math.floor(p.y)+9);y++)if(opaqueT(vget(x,y,z)))return true;return false}
 // ---- прицел: рамка выбранного блока и трещины ----
 let OUTL=null,CRACK=null,CRT=[];
@@ -190,13 +291,14 @@ function makeCrack(){for(let s=0;s<5;s++){const c=document.createElement('canvas
 // луч по вокселям (DDA): первый твёрдый блок + грань
 function rayVox(o,d,maxD,pred){let x=Math.floor(o.x),y=Math.floor(o.y),z=Math.floor(o.z);const sx=Math.sign(d.x),sy=Math.sign(d.y),sz=Math.sign(d.z);
  const tdx=Math.abs(1/d.x),tdy=Math.abs(1/d.y),tdz=Math.abs(1/d.z);let tx=(sx>0?x+1-o.x:o.x-x)*tdx,ty=(sy>0?y+1-o.y:o.y-y)*tdy,tz=(sz>0?z+1-o.z:o.z-z)*tdz;let n=[0,0,0],t=0;
- for(let i=0;i<200&&t<=maxD;i++){const b=vget(x,y,z);if(i>0&&(pred?pred(b,x,y,z):(b!==0&&!BT[b].fluid)))return{x,y,z,n,t,b};
+ for(let i=0;i<200&&t<=maxD;i++){const b=vget(x,y,z);if(i>0&&(pred?pred(b,x,y,z):(b!==0&&!BT[b].fluid&&!BT[b].deco)))return{x,y,z,n,t,b};
   if(tx<ty&&tx<tz){x+=sx;t=tx;tx+=tdx;n=[-sx,0,0]}else if(ty<tz){y+=sy;t=ty;ty+=tdy;n=[0,-sy,0]}else{z+=sz;t=tz;tz+=tdz;n=[0,0,-sz]}}return null}
 // ---- существа: модель из блоков + физика (гравитация, прыжок, столкновения, автопрыжок на 1 блок) ----
 const K3=1.85/32;// единый масштаб всех моделей
 const ENTS=[];
 function mkEnt(kind,x,z,o){o=o||{};const m=CHARS[kind]();m.scale.setScalar(K3);const root=new T3.Group();root.add(m);SCENE.add(root);
  const parts=[];m.traverse(c=>{if(c.userData&&(c.userData.sw||c.userData.sp))parts.push(c)});
+ if(!QHI){const bl=new T3.Mesh(new T3.PlaneGeometry(1,1),new T3.MeshBasicMaterial({map:glowTex(),color:0x000000,transparent:true,opacity:.38,depthWrite:false}));bl.rotation.x=-Math.PI/2;bl.position.y=.03;const s=(o.hw||.3)*3.4*(kind==='spider'?1.6:1);bl.scale.set(s,s,1);bl.renderOrder=1;root.add(bl)}
  const e={kind,obj:root,m,parts,p:new T3.Vector3(x,groundTop(x,z),z),v:new T3.Vector3(),yaw:o.yaw||0,ty:o.yaw||0,onG:false,hw:o.hw||.3,h:o.h||1.8,walk:0,ph:Math.random()*6,face:null,hide:false};
  ENTS.push(e);placeEnt(e);return e}
 function rmEnt(e){SCENE.remove(e.obj);const i=ENTS.indexOf(e);if(i>=0)ENTS.splice(i,1)}
@@ -238,4 +340,4 @@ function screenRay(sx,sy){const v=new T3.Vector3((sx/W)*2-1,-(sy/H)*2+1,.5).unpr
 const CUBES=[];let CUBEG=null;
 function cubeBurst(x,y,z,t,n){if(!CUBEG)CUBEG=new T3.BoxGeometry(.16,.16,.16);const tx=uvOf(texFor(t,0));const col=tileColor(t);for(let i=0;i<(n||10);i++){const m=new T3.Mesh(CUBEG,new T3.MeshLambertMaterial({color:col}));m.position.set(x+.5+(Math.random()-.5)*.6,y+.5+(Math.random()-.5)*.6,z+.5+(Math.random()-.5)*.6);m.userData.v=new T3.Vector3((Math.random()-.5)*4,Math.random()*4+1,(Math.random()-.5)*4);m.userData.l=.8+Math.random()*.4;SCENE.add(m);CUBES.push(m)}}
 function stepCubes(dt){for(let i=CUBES.length-1;i>=0;i--){const m=CUBES[i];m.userData.l-=dt;m.userData.v.y-=14*dt;m.position.addScaledVector(m.userData.v,dt);m.rotation.x+=dt*5;if(m.userData.l<=0){SCENE.remove(m);m.material.dispose();CUBES.splice(i,1)}}}
-const TCOL3={};function tileColor(t){if(TCOL3[t])return TCOL3[t];const i=texFor(t,0);const g=ATC.getContext('2d');const d=g.getImageData((i%8)*16+4,Math.floor(i/8)*16+4,8,8).data;let r=0,gg=0,b=0;for(let k=0;k<d.length;k+=4){r+=d[k];gg+=d[k+1];b+=d[k+2]}const n=d.length/4;return TCOL3[t]=new T3.Color(`rgb(${Math.round(r/n)},${Math.round(gg/n)},${Math.round(b/n)})`)}
+const TCOL3={};function tileColor(t){if(TCOL3[t])return TCOL3[t];const i=texFor(t,0);const g=ATC.getContext('2d');const d=g.getImageData((i%8)*32+8,Math.floor(i/8)*32+8,16,16).data;let r=0,gg=0,b=0,n=0;for(let k=0;k<d.length;k+=4){if(d[k+3]<128)continue;r+=d[k];gg+=d[k+1];b+=d[k+2];n++}n=Math.max(1,n);return TCOL3[t]=new T3.Color(`rgb(${Math.round(r/n)},${Math.round(gg/n)},${Math.round(b/n)})`)}
