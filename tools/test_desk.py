@@ -24,7 +24,7 @@ async def main():
       q=await E(f'G.blockXY({x},{top},{z})');await pg.touchscreen.tap(q['x'],q['y']);await pg.wait_for_timeout(120)
       a=await E('G.aim()');await E("G.tapId('place')");await pg.wait_for_timeout(150)
     n1=(await E('G.P()'))['placed']
-    if n1-n0<4:F.append(f'house: placed only {n1-n0}')
+    if n1-n0<6:F.append(f'house: placed only {n1-n0}')
     await E("G.look(-0.5,-.35)");await pg.wait_for_timeout(700);await pg.screenshot(path='shots/t3d/build_house.png')
     await pg.keyboard.press('z');await pg.wait_for_timeout(200)
     if (await E('G.P()'))['placed']!=n1-1:F.append('Z did not undo')
