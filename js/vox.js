@@ -106,6 +106,7 @@ function genWorld(){VOX.fill(0);RS=12345;
  for(let i=0;i<3;i++)for(let z=TOWER.z0;z<=TOWER.z1;z++)for(let y=GY+1;y<=GY+1+i;y++)vsetRaw(TOWER.x0-3+i,y,z,B.castle);
  for(let x=149;x<=151;x++)for(let y=GY+1;y<=GY+2;y++)vsetRaw(x,y,39,B.brick);for(let x=149;x<=151;x++)for(let y=GY+1;y<=GY+2;y++)vsetRaw(x,y,41,B.brick);vsetRaw(149,GY+1,40,B.brick);vsetRaw(151,GY+1,40,B.brick);vsetRaw(150,GY+2,40,B.brick);
  // сундуки: клетка под блоком (выкопал — нашёл)
+ CHESTS.forEach(c=>{for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)for(let y=GY+1;y<WY;y++){const b=vget(c.x+dx,y,c.z+dz);if(b===B.leaf||b===B.log)vsetRaw(c.x+dx,y,c.z+dz,0)}});// над сундуками — без деревьев
  CHESTS.forEach(c=>{vsetRaw(c.x,c.y,c.z,0)});vsetRaw(14,10,31,B.dirt);vsetRaw(14,GY,31,B.dirt);for(let y=10;y<GY;y++)vsetRaw(14,y,31,B.dirt);vsetRaw(14,9,31,0);
  vsetRaw(120,GY,12,B.sand);vsetRaw(120,11,12,0);
  applyState()}
