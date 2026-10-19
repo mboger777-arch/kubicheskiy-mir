@@ -37,11 +37,11 @@ TD.mw={enter(t,i){t.i=i;t.type=['ac','ob','rt'][i];t.a=t.type==='ac'?pick([40,50
  ans(t,good){return[good?t.type:['ac','rt','ob'].find(k=>k!==t.type)]}};
 // ===================== НОЧЬ: паук «острый угол» — лук и транспортир =====================
 // паук висит в плоскости экрана под углом a от Блоки; лук поворачивается шагами по 15°
-TD.spider={enter(t,ent){const first=!SV.f.sp1;SV.f.sp1=1;save();t.a=first?pick([45,60]):pick([30,45,60,120,135,150]);t.aim=90;t.arrow=null;t.D=4.2;
-  t.ent=ent||spawnMonster('spider',PL.p.x+3,PL.p.z);t.ent.task=1;xray(t.ent,true);const o=TD.spider.org(t);focusAt(o.x,o.y+1.4,o.z,CAMS.yaw,-.05,7.5,[CAMS.yaw+Math.PI,CAMS.yaw+Math.PI/2,CAMS.yaw-Math.PI/2]);t.yaw=CAMS.focus.yaw;
+TD.spider={enter(t,ent){const first=!SV.f.sp1;SV.f.sp1=1;save();t.a=first?pick([45,60]):pick([30,45,60,120,135,150]);t.aim=90;t.arrow=null;t.D=3.0;
+  t.ent=ent||spawnMonster('spider',PL.p.x+3,PL.p.z);t.ent.task=1;xray(t.ent,true);const o=TD.spider.org(t);let fy=o.y+.7;for(let y=Math.floor(PL.p.y)+1;y<=Math.floor(fy);y++)if(solidT(vget(Math.floor(o.x),y,Math.floor(o.z)))){fy=y-.35;break}focusAt(o.x,fy,o.z,CAMS.yaw,-.05,8.5,[CAMS.yaw+Math.PI,CAMS.yaw+Math.PI/2,CAMS.yaw-Math.PI/2]);t.yaw=CAMS.focus.yaw;
   if(!t.thread){t.thread=new T3.Line(new T3.BufferGeometry().setFromPoints([new T3.Vector3(),new T3.Vector3(0,20,0)]),new T3.LineBasicMaterial({color:0xe8e8ff}));SCENE.add(t.thread)}
   if(first)say('sp_in').catch(()=>{});say('sp_'+t.a).catch(()=>{})},
- org(t){return new T3.Vector3(PL.p.x,PL.p.y+1.1,PL.p.z)},
+ org(t){return new T3.Vector3(PL.p.x,PL.p.y+2.35,PL.p.z)},
  right(t){return new T3.Vector3(Math.cos(t.yaw),0,-Math.sin(t.yaw))},
  spPos(t){const o=TD.spider.org(t),r=TD.spider.right(t);const a=t.a*R2D;return o.addScaledVector(r,-Math.cos(a)*t.D).add(new T3.Vector3(0,Math.sin(a)*t.D-.4,0))},
  update(t,dt){const p=TD.spider.spPos(t);const e=t.ent;if(!t.dead){e.p.lerp(p,Math.min(1,dt*4));e.v.set(0,0,0);e.ty=e.yaw=t.yaw+Math.PI;e.walk=.6;placeEnt(e);animEnt(e,dt)}
@@ -50,7 +50,7 @@ TD.spider={enter(t,ent){const first=!SV.f.sp1;SV.f.sp1=1;save();t.a=first?pick([
   protractor(ox,oy,R,{alpha:.85});const a=t.aim*R2D;rod('stick',ox,oy,ox+Math.cos(-a)*R*1.25,oy+Math.sin(-a)*R*1.25,14);drawImg('arrow',ox+Math.cos(-a)*R*1.3,oy+Math.sin(-a)*R*1.3,96,{rot:-a});
   X.save();X.fillStyle='rgba(255,214,64,.4)';X.beginPath();X.moveTo(ox,oy);X.arc(ox,oy,R*.4,-a,0);X.closePath();X.fill();X.restore();
   if(t.arrow){const k=(T-t.arrow.t0)/.45;const d=k*560;const aa=t.arrow.a*R2D;drawImg('arrow',ox+Math.cos(-aa)*d,oy+Math.sin(-aa)*d,96,{rot:-aa})}
-  const L=layout();const bw=250,bh=130;const ib=nine('tab_sand',L.cx-bw/2,L.optY-bh/2,bw,bh);if(ib)fitText(t.aim+'°',ib,90,'#fff',{one:1})},
+  const L=layout(),s=L.s;const bw=210,bh=120;const ib=nine('tab_sand',s.x0+20,s.y1-190-bh,bw,bh);if(ib)fitText(t.aim+'°',ib,90,'#fff',{one:1})},
  ui(t){const L=layout(),s=L.s;drawBtn('b_left',s.x0+90,s.y1-90,160);btn('rl',s.x0+90,s.y1-90,160,160,()=>TD.spider.rot(t,15));drawBtn('b_right',s.x0+270,s.y1-90,160);btn('rr',s.x0+270,s.y1-90,160,160,()=>TD.spider.rot(t,-15));
   drawBtn('b_bow',s.x1-100,s.y1-100,180,{pulse:!t.arrow});btn('fire',s.x1-100,s.y1-100,180,180,()=>TD.spider.fire(t))},
  rot(t,d){if(t.dead)return;t.aim=clamp(t.aim+d,0,180);SFX.click()},
@@ -58,7 +58,7 @@ TD.spider={enter(t,ent){const first=!SV.f.sp1;SV.f.sp1=1;save();t.a=first?pick([
  fire(t){if(t.arrow&&T-t.arrow.t0<.45)return;SFX.bow();t.arrow={t0:T,a:t.aim};const c={ep:t.ep};
   if(t.aim===t.a){win(t,async c=>{await wait(320,c);t.dead=1;SFX.pop();const p=t.ent.p;cubeBurst(Math.floor(p.x),Math.floor(p.y),Math.floor(p.z),B.bed,16);rmEnt(t.ent);
     await say(t.a<90?'sp_ac':'sp_ob',c).catch(()=>{});await wait(300,c);closeTask();monsterDone()})}
-  else{const up=t.aim<t.a;t.mist++;setTimeout(()=>{if(!alive(c))return;t.D=Math.min(t.D+.35,5.4);SFX.bad();sayNow(up?'sp_up':'sp_dn')},250)}},
+  else{const up=t.aim<t.a;t.mist++;setTimeout(()=>{if(!alive(c))return;t.D=Math.min(t.D+.25,3.8);SFX.bad();sayNow(up?'sp_up':'sp_dn')},250)}},
  leave(t){if(t.thread)SCENE.remove(t.thread);if(!t.dead&&t.ent){xray(t.ent,false);t.ent.task=0;t.ent.flee=4}},
  ans(t,good){if(!good)return['fire'];const n=Math.round((t.a-t.aim)/15);const r=[];for(let i=0;i<Math.abs(n);i++)r.push(n>0?'rl':'rr');r.push('fire');return r}};
 // ===================== НОЧЬ: зомби-тупоугольник — стена под прямым углом =====================

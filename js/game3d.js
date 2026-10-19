@@ -58,8 +58,8 @@ function doPlace(){if(TASK)return;const h=AIM;if(!h){hint('t_far');return}const 
  const x=h.x+h.n[0],y=h.y+h.n[1],z=h.z+h.n[2];const c=vget(x,y,z);if(c!==0&&!BT[c].fluid)return;
  if(x>=RIV.x0&&x<=RIV.x1&&SV.z<2){hint('t_water');return}if(BT[c].fluid&&SV.z<2){hint('t_water');return}
  if(x>barrierX()+.4){hint('lock');return}
- for(const e of ENTS){if(e.hide&&e!==PL)continue;if(x+1>e.p.x-e.hw&&x<e.p.x+e.hw&&z+1>e.p.z-e.hw&&z<e.p.z+e.hw&&y+1>e.p.y&&y<e.p.y+e.h){return}}
- setBlock(x,y,z,t);invAdd(t,-1);SFX.place();SV.placed.push([x,y,z,t]);if(SV.placed.length>200)SV.placed.shift();EV('place',{x,y,z})}
+ for(const e of ENTS){if(e.hide&&e!==PL)continue;if(e===GRN||e===DOG)continue;if(x+1>e.p.x-e.hw&&x<e.p.x+e.hw&&z+1>e.p.z-e.hw&&z<e.p.z+e.hw&&y+1>e.p.y&&y<e.p.y+e.h){return}}
+ setBlock(x,y,z,t);for(const e of[GRN,DOG])if(x+1>e.p.x-e.hw&&x<e.p.x+e.hw&&z+1>e.p.z-e.hw&&z<e.p.z+e.hw&&y+1>e.p.y&&y<e.p.y+e.h)e.p.y=y+1;invAdd(t,-1);SFX.place();SV.placed.push([x,y,z,t]);if(SV.placed.length>200)SV.placed.shift();EV('place',{x,y,z})}
 function undoBlock(){if(TASK)return;const q=SV.placed.pop();if(!q){SFX.bad();return}const[x,y,z,t]=q;if(vget(x,y,z)===t){cubeBurst(x,y,z,t,6);setBlock(x,y,z,0);invAdd(t,1);SFX.dig()}save();EV('undo')}
 const EVL={};function EV(k,a){(EVL[k]||[]).forEach(f=>f(a))}function onEV(k,f){(EVL[k]=EVL[k]||[]).push(f)}
 // ---- монстры ночью ----
@@ -80,11 +80,14 @@ function stepDay(dt){if(SV.mw<1){DAY.night=false;return}DAY.t+=dt;const L=DAY.ni
  if(DAY.night&&!TASK){DAY.spawn-=dt;if(DAY.spawn<=0&&MON.filter(m=>!m.fixed).length<1){const sp=spawnSpot();if(sp){DAY.spawn=18;spawnMonster(DAY.next,sp[0],sp[2],sp[1]);DAY.next=DAY.next==='spider'?'zombie':'spider'}else DAY.spawn=1}}}
 function nightK(){if(!DAY.night){const k=DAY.t>DAYLEN-6?(DAY.t-(DAYLEN-6))/6:0;return clamp(k,0,1)*.9}const k=DAY.t<4?DAY.t/4:DAY.t>NIGHTLEN-5?(NIGHTLEN-DAY.t)/5:1;return .9*clamp(k,0,1)+.0}
 // ---- спутники: идут следом, при разговоре поворачиваются к ребёнку ----
-function follow(e,off,dt){const ty=PL.yaw;const tx=PL.p.x-Math.sin(ty)*off[0]+Math.cos(ty)*off[1],tz=PL.p.z-Math.cos(ty)*off[0]-Math.sin(ty)*off[1];
+// место спутника — сбоку от Блоки и чуть дальше от камеры (никогда между камерой и Блоки)
+function followSpot(off){const ty=CAMS.yaw,fx=Math.sin(ty),fz=Math.cos(ty),rx=-Math.cos(ty),rz=Math.sin(ty);let tx=PL.p.x+fx*off[0]+rx*off[1],tz=PL.p.z+fz*off[0]+rz*off[1];
+ const gy=groundAt(tx,tz,PL.p.y+1.5);if(Math.abs(gy-PL.p.y)>1.2||solidT(vget(Math.floor(tx),gy+1,Math.floor(tz)))){tx=PL.p.x+fx*off[0]*2.2+rx*off[1]*.35;tz=PL.p.z+fz*off[0]*2.2+rz*off[1]*.35}return[tx,tz]}
+function follow(e,off,dt){const[tx,tz]=followSpot(off);
  const dx=tx-e.p.x,dz=tz-e.p.z,d=Math.hypot(dx,dz);const far=Math.hypot(PL.p.x-e.p.x,PL.p.z-e.p.z)>11||Math.abs(PL.p.y-e.p.y)>5;
  if(far&&PL.onG){e.p.set(clamp(tx,.6,barrierX()),groundAt(tx,tz,PL.p.y+2),tz);e.v.set(0,0,0);e.stuck=0}
  let mx=0,mz=0;if(d>.9&&!TASK){mx=dx/d*Math.min(1,d/2);mz=dz/d*Math.min(1,d/2)}const x0=e.p.x,z0=e.p.z;physEnt(e,dt,mx,mz,false);
- if((mx||mz)&&Math.hypot(e.p.x-x0,e.p.z-z0)<.004)e.stuck=(e.stuck||0)+dt;else e.stuck=0;if(e.stuck>1.5){e.p.set(PL.p.x,PL.p.y,PL.p.z);e.stuck=0}
+ if((mx||mz)&&Math.hypot(e.p.x-x0,e.p.z-z0)<.004)e.stuck=(e.stuck||0)+dt;else e.stuck=0;if(e.stuck>1.5){e.p.set(tx,groundAt(tx,tz,PL.p.y+1.5),tz);e.stuck=0}
  if(TASK||(talk&&WHO[talk.who]!=null&&e===({gran:GRN,pixel:DOG})[talk.who])||d<.95){if(!(mx||mz))e.ty=Math.atan2(CAM.position.x-e.p.x,CAM.position.z-e.p.z)}animEnt(e,dt)}
 // ---- станции: подошёл — открылось задание ----
 const STIN={};
@@ -144,7 +147,7 @@ SC.world={skipOnTalk:0,enter(){setupWorld();for(const k in STIN)delete STIN[k];s
    // вода — выталкивает на берег
    if(BT[vget(Math.floor(PL.p.x),Math.floor(PL.p.y+.2),Math.floor(PL.p.z))].fluid&&SV.z<2){PL.p.x-=dt*3;hint('t_water')}
    stepStations();stepStory();stepDay(dt)}
-  follow(GRN,[-.3,2.0],dt);follow(DOG,[-.1,-1.6],dt);KR.ty=Math.atan2(PL.p.x-KR.p.x,PL.p.z-KR.p.z);physEnt(KR,dt,0,0,false);animEnt(KR,dt);KR.hide=SV.z>=5;
+  follow(GRN,[.6,-1.7],dt);follow(DOG,[.5,1.6],dt);KR.ty=Math.atan2(PL.p.x-KR.p.x,PL.p.z-KR.p.z);physEnt(KR,dt,0,0,false);animEnt(KR,dt);KR.hide=SV.z>=5;
   stepMonsters(dt);stepCam(dt);AIM=TASK?null:curAim();stepDig(dt);
   if(!TASK){SV.px=[PL.p.x,PL.p.z];}},
  draw(){render3d(DT);if(TASK&&TASK.def.draw)TASK.def.draw(TASK)},
