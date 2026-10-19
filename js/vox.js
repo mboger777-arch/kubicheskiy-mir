@@ -296,11 +296,14 @@ function rayVox(o,d,maxD,pred){let x=Math.floor(o.x),y=Math.floor(o.y),z=Math.fl
 // ---- существа: модель из блоков + физика (гравитация, прыжок, столкновения, автопрыжок на 1 блок) ----
 const K3=1.85/32;// единый масштаб всех моделей
 const ENTS=[];
-function mkEnt(kind,x,z,o){o=o||{};const m=CHARS[kind]();m.scale.setScalar(K3);const root=new T3.Group();root.add(m);SCENE.add(root);
+function mkEnt(kind,x,z,o){o=o||{};const m=CHARS[kind]();m.scale.multiplyScalar(K3);const root=new T3.Group();root.add(m);SCENE.add(root);
  const parts=[];m.traverse(c=>{if(c.userData&&(c.userData.sw||c.userData.sp))parts.push(c)});
  if(!QHI){const bl=new T3.Mesh(new T3.PlaneGeometry(1,1),new T3.MeshBasicMaterial({map:glowTex(),color:0x000000,transparent:true,opacity:.38,depthWrite:false}));bl.rotation.x=-Math.PI/2;bl.position.y=.03;const s=(o.hw||.3)*3.4*(kind==='spider'?1.6:1);bl.scale.set(s,s,1);bl.renderOrder=1;root.add(bl)}
  const e={kind,obj:root,m,parts,p:new T3.Vector3(x,groundTop(x,z),z),v:new T3.Vector3(),yaw:o.yaw||0,ty:o.yaw||0,onG:false,hw:o.hw||.3,h:o.h||1.8,walk:0,ph:Math.random()*6,face:null,hide:false};
- ENTS.push(e);placeEnt(e);return e}
+ m.traverse(c=>{if(c.userData&&c.userData.tool)e.armR=c});ENTS.push(e);placeEnt(e);return e}
+// взмах киркой (как в Майнкрафте): замах вверх → удар вперёд-вниз → назад. k — доля взмаха 0..1, удар около k=.62
+const SWD=.34;function swingCurve(k){if(k<=0||k>=1)return 0;if(k<.38)return -1.5*ease(k/.38);if(k<.62)return -1.5+2.1*ease((k-.38)/.24);return .6*(1-ease((k-.62)/.38))}
+function swing(e){if(!e)return;if(e.swingT==null||T-e.swingT>SWD*.85)e.swingT=T}
 function rmEnt(e){SCENE.remove(e.obj);const i=ENTS.indexOf(e);if(i>=0)ENTS.splice(i,1)}
 function groundTop(x,z){const X_=Math.floor(x),Z_=Math.floor(z);for(let y=WY-1;y>=0;y--){const b=vget(X_,y,Z_);if(solidT(b)&&b!==B.leaf&&b!==B.log&&b!==B.cactus)return y+1}return GY+1}
 function groundAt(x,z,fromY){const X_=Math.floor(x),Z_=Math.floor(z);for(let y=Math.min(WY-1,Math.floor(fromY));y>=0;y--)if(solidT(vget(X_,y,Z_)))return y+1;return GY+1}
@@ -322,8 +325,22 @@ function physEnt(e,dt,mx,mz,jump){const sp=e.speed||4.3;e.v.x=mx*sp;e.v.z=mz*sp;
 function animEnt(e,dt){e.ph+=dt*(e.kind==='spider'?14:9)*(.3+e.walk);let d=e.ty-e.yaw;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;e.yaw+=d*Math.min(1,dt*10);
  for(const c of e.parts){if(c.userData.sw){const a=Math.sin(e.ph)*.75*e.walk*c.userData.sw*(c.userData.arm?.8:1);c.rotation.x=c.userData.r0+a}if(c.userData.sp){c.rotation.z=c.userData.rz+Math.sin(e.ph+c.userData.sp)*.25*e.walk*(c.position.x>0?1:-1)}}
  if(e.kind==='pixel'){e.m.position.y=Math.abs(Math.sin(e.ph))*.08*e.walk}
+ // слизень прыгает и сплющивается, у Тупика искрит фитиль, Фантом машет крыльями и парит
+ if(!e.fx){e.fx=[];e.s0=e.m.scale.x;e.m.traverse(c=>{if(c.userData&&(c.userData.flap||c.userData.spark))e.fx.push(c)})}
+ if(e.kind==='slime'){const k=Math.abs(Math.sin(T*3.2+e.ph*.1)),q=1-k;e.m.position.y=k*.3;e.m.scale.set(e.s0*(1+.1*q),e.s0*(1-.13*q),e.s0*(1+.1*q))}
+ for(const c of e.fx){if(c.userData.flap)c.rotation.z=Math.sin(T*6)*.5*c.userData.flap;if(c.userData.spark)c.scale.setScalar(.6+.6*Math.abs(Math.sin(T*13+e.ph)))}
+ if(e.kind==='phantom')e.m.position.y=.9+Math.sin(T*2.2)*.18
+ if(e.armR&&e.swingT!=null){const k=(T-e.swingT)/SWD;if(k<1){e.armR.rotation.x=e.armR.userData.r0+swingCurve(k);e.armR.rotation.z=-.15*Math.sin(k*Math.PI)}else e.armR.rotation.z=0}
  placeEnt(e)}
 function placeEnt(e){e.obj.position.copy(e.p);e.obj.rotation.y=e.yaw;e.obj.visible=!e.hide}
+let HANDS=null,HAND=null;
+function makeHand(){HANDS=new T3.Scene();HANDS.add(new T3.HemisphereLight(0xffffff,0x8890a0,1.7));const dl=new T3.DirectionalLight(0xfff2dc,1.2);dl.position.set(-1,2,1);HANDS.add(dl);
+ const b=CHARS.bloki();let arm=null;b.traverse(c=>{if(c.userData&&c.userData.tool)arm=c});HAND=new T3.Group();const piv=new T3.Group();arm.position.set(0,0,0);arm.rotation.set(0,0,0);piv.add(arm);
+ piv.scale.setScalar(K3*1.1);piv.rotation.set(1.42,.32,.1);HAND.add(piv);HAND.userData.piv=piv;HANDS.add(HAND)}
+function renderHand(){if(!CAMS.fp||CAMS.focus||!PL||PL.hide===false)return;if(!HANDS)makeHand();
+ const k=PL.swingT!=null?(T-PL.swingT)/SWD:1;const s=swingCurve(k);const bob=Math.sin(PL.ph*.5)*.025*PL.walk;
+ HAND.position.set(.5+s*.03,-.46+bob,-.22+s*.04);HAND.rotation.set(-s*.9,0,s*.15);HAND.quaternion.premultiply(CAM.quaternion);HAND.position.applyQuaternion(CAM.quaternion).add(CAM.position);
+ const lt=1-UNDER*.4-NIGHTK*.4;HANDS.children[0].intensity=1.7*lt;REN.autoClear=false;REN.clearDepth();REN.render(HANDS,CAM);REN.autoClear=true}
 // ---- камера: от третьего лица (за спиной Блоки) или его глазами ----
 const CAMS={yaw:Math.PI/2,pitch:-.22,fp:false,dist:5.2,cur:5.2,focus:null,fyaw:null};
 function stepCam(dt,snap){if(!PL)return;const eye=new T3.Vector3(PL.p.x,PL.p.y+1.62,PL.p.z);let tgt=eye.clone(),yaw=CAMS.yaw,pitch=CAMS.pitch,dist=CAMS.dist;

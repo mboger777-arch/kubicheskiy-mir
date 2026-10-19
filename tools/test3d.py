@@ -5,9 +5,10 @@ from playwright.async_api import async_playwright
 URL=os.environ.get('URL','http://127.0.0.1:18640/index.html')
 VPS=[(844,390),(667,375),(932,430)]
 if os.environ.get('VPS'):VPS=[tuple(map(int,v.split('x'))) for v in os.environ['VPS'].split(',')]
+FOES=('slime','tupik','drowned','skeleton','phantom')
 GL=['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']
 async def run(b,W,H,F,R):
-  tag=f'{W}x{H}';out=f'shots/t3d/{tag}';os.makedirs(out,exist_ok=True)
+  tag=f'{W}x{H}';MET=set();out=f'shots/t3d/{tag}';os.makedirs(out,exist_ok=True)
   ctx=await b.new_context(viewport={'width':W,'height':H},has_touch=True,is_mobile=True,device_scale_factor=2)
   pg=await ctx.new_page();errs=[];pg.on('pageerror',lambda e:errs.append(str(e)));pg.on('console',lambda m:errs.append('console '+m.text) if m.type=='error' else None)
   cdp=await ctx.new_cdp_session(pg)
@@ -89,7 +90,10 @@ async def run(b,W,H,F,R):
     # бот: камера вдоль +x, джойстик вперёд (с поправкой к тропе), упёрся — прыгает, не помогло — копает
     t0=time.time();lastx=-1;stuck=0
     while time.time()-t0<maxs:
-      if await task():return 'task'
+      tt=await task()
+      if tt and tt['id'] in FOES:
+        R.append(f'{tag} met {tt["id"]} on foot (walk {name})');await shot('foe_'+tt['id']);await play_task('foe '+tt['id'],2,'foe_'+tt['id']);MET.add(tt['id']);continue
+      if tt:return 'task'
       p=await E('G.P()')
       if p['x']>=xt:return 'ok'
       side=max(-40,min(40,(zt-p['z'])*30))
@@ -101,7 +105,9 @@ async def run(b,W,H,F,R):
         u=await bxy('jump')
         if u:await joy(0,-90,500,(u['x'],u['y']))
         continue
-      if await task():return 'task'
+      tt=await task()
+      if tt and tt['id'] not in FOES:return 'task'
+      if tt:continue
       c=int(p['x']+.6);dug=0
       for y in (int(p['y']),int(p['y'])+1):
         for zz in (int(p['z']),):
@@ -204,7 +210,7 @@ async def run(b,W,H,F,R):
   await play_task('forge',2,'forge')
   if (await E('G.P()'))['z_']<3:F.append(f'{tag} forge not completed')
   # ---- 4. пустыня
-  await E("G.zone(4)");await pg.wait_for_timeout(800);await E("if(G.task())G.close();talk=null;G.tp(117,23.5)");r=await walk_to(119,'to desert',20);t=await task()
+  await E("G.zone(4)");await pg.wait_for_timeout(800);await E("if(G.task())G.close();talk=null;G.tp(114.2,23.5)");r=await walk_to(119,'to desert',20);t=await task()
   if not t or t['id']!='desert':F.append(f'{tag} desert not opened on foot {t}');await E("G.close();G.open('desert')")
   await play_task('desert',3,'desert')
   if (await E('G.P()'))['z_']<4:F.append(f'{tag} desert not completed')
@@ -212,7 +218,7 @@ async def run(b,W,H,F,R):
   for i in range(4):
     await E(f"if(G.task())G.close();G.open('chest',{i})");await play_task(f'chest{i+1}',1,'chest' if i==0 else None)
   # ---- 5. замок: 3 щита + крыша касаниями (ошибочный блок убрать)
-  await E("G.zone(5)");await pg.wait_for_timeout(800);await E("if(G.task())G.close();talk=null;G.tp(152,23.5)");r=await walk_to(155,'to castle',20);t=await task()
+  await E("G.zone(5)");await pg.wait_for_timeout(800);await E("if(G.task())G.close();talk=null;G.tp(147.2,23.5)");r=await walk_to(155,'to castle',20);t=await task()
   if not t or t['id']!='castle':F.append(f'{tag} castle not opened on foot {t}');await E("G.close();G.open('castle')")
   await pg.wait_for_timeout(500);await shot('castle')
   for k in range(3):
@@ -254,6 +260,8 @@ async def run(b,W,H,F,R):
   await E("if(G.task())G.close();G.open('zombie')");await pg.wait_for_timeout(300);ids=await E('G.ans(false)');await btn(ids[0]);await E("G.close();G.open('desert')");await pg.wait_for_timeout(2300)
   t=await task()
   if not t or t['id']!='desert' or t['mist']!=0:F.append(f'{tag} stale coroutine leaked {t}')
+  for k in FOES:
+    if k not in MET:F.append(f'{tag} enemy {k} never met on foot')
   fps2=await E('G.fps()');R.append(f'{tag} fps end {fps2:.1f}')
   F.extend(f'{tag} JSERR {e}' for e in errs);await ctx.close()
 async def main():

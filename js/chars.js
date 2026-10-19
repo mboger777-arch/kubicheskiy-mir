@@ -63,7 +63,7 @@ export function bloki(){const skin='#e9b48a',hair=['#5a3a1e','#664424','#4e3218'
   ...[[-4.4,6.5],[-3.2,7.4],[-1.8,7.9],[1.8,7.9],[3.2,7.4],[4.4,6.5]].map(([x,y])=>box([1.7,1.7,1.5],{all:metal,top:'#e0e0ea'},[x,y,0],[0,0,-x*8])));
  const armR=at(grp(limb(armP,shirt[0],skin),at(pick,[0,-10.5,1.6],[90,0,0])),[-6,24,0],[-35,0,8]);
  const armL=at(limb(armP,shirt[0],skin),[6,24,0],[0,0,-6]);
- sw(L,1);sw(R,-1);sw(armR,-1,1);sw(armL,1,1);return grp(head,helm,brim,lampB,lamp,body,L,R,armR,armL)}
+ sw(L,1);sw(R,-1);sw(armR,-1,1);sw(armL,1,1);armR.userData.tool=1;return grp(head,helm,brim,lampB,lamp,body,L,R,armR,armL)}
 // ---------- Грань: фиолетовые волосы с прядями, очки на лбу, бирюзовая куртка, золотой транспортир с делениями ----------
 function protractorMesh(r){const cv=document.createElement('canvas');cv.width=256;cv.height=136;const g=cv.getContext('2d');const cx=128,cy=128,R=124;
  g.fillStyle='#e8b224';g.beginPath();g.moveTo(cx-R,cy);g.arc(cx,cy,R,Math.PI,0);g.closePath();g.fill();

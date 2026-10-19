@@ -49,7 +49,7 @@ function curAim(){if(PIN&&T-PIN.t<4){const b=vget(PIN.h.x,PIN.h.y,PIN.h.z);if(b&
 function stepDig(dt){const want=held('dig');const h=AIM;if(!want||!h){DIGS=null;CRACK.visible=false;return}
  const b=vget(h.x,h.y,h.z);if(BT[b].hard){if(!BT[b].cw)hint(b===B.iron?'t_gate':'t_hard');else hint('m_q');DIGS=null;CRACK.visible=false;return}
  if(!DIGS||DIGS.x!==h.x||DIGS.y!==h.y||DIGS.z!==h.z)DIGS={x:h.x,y:h.y,z:h.z,t:0,d:(BT[b].d||.5)*(SV.armor?.8:1),snd:0};
- DIGS.t+=G.fast?dt*6:dt;if(T-DIGS.snd>.22){DIGS.snd=T;SFX.dig()}CRACK.visible=true;CRACK.position.set(h.x+.5,h.y+.5,h.z+.5);const stg=Math.min(4,Math.floor(DIGS.t/DIGS.d*5));if(stg!==DIGS.stg){DIGS.stg=stg;dustPuff(h.x,h.y,h.z,b,3)}CRACK.material.map=CRT[stg];
+ DIGS.t+=G.fast?dt*6:dt;if(PL.swingT==null||T-PL.swingT>=SWD){swing(PL);PL.swingT=T;DIGS.hit=T+SWD*.62}if(DIGS.hit&&T>=DIGS.hit){DIGS.hit=0;SFX.dig();dustPuff(h.x,h.y,h.z,b,3);cubeBurst(h.x,h.y,h.z,b,2)}CRACK.visible=true;CRACK.position.set(h.x+.5,h.y+.5,h.z+.5);const stg=Math.min(4,Math.floor(DIGS.t/DIGS.d*5));CRACK.material.map=CRT[stg];
  if(DIGS.t>=DIGS.d){CRACK.visible=false;breakBlock(h.x,h.y,h.z);DIGS=null}}
 function breakBlock(x,y,z){const b=vget(x,y,z);if(!b||BT[b].hard)return;cubeBurst(x,y,z,b,12);setBlock(x,y,z,0);
  const dr=BT[b].drop;if(dr==='dia'){SV.dia++;SFX.gem();if(Math.abs(z-TZ)<=1&&MW.includes(x)){SV.f['cd'+x]=1}EV('dia')}else invAdd(dr||b,1);
@@ -59,7 +59,7 @@ function doPlace(){if(TASK)return;const h=AIM;if(!h){hint('t_far');return}const 
  if(x>=RIV.x0&&x<=RIV.x1&&SV.z<2){hint('t_water');return}if(BT[c].fluid&&SV.z<2){hint('t_water');return}
  if(x>barrierX()+.4){hint('lock');return}
  for(const e of ENTS){if(e.hide&&e!==PL)continue;if(e===GRN||e===DOG)continue;if(x+1>e.p.x-e.hw&&x<e.p.x+e.hw&&z+1>e.p.z-e.hw&&z<e.p.z+e.hw&&y+1>e.p.y&&y<e.p.y+e.h){return}}
- setBlock(x,y,z,t);for(const e of[GRN,DOG])if(x+1>e.p.x-e.hw&&x<e.p.x+e.hw&&z+1>e.p.z-e.hw&&z<e.p.z+e.hw&&y+1>e.p.y&&y<e.p.y+e.h)e.p.y=y+1;invAdd(t,-1);SFX.place();SV.placed.push([x,y,z,t]);if(SV.placed.length>200)SV.placed.shift();EV('place',{x,y,z})}
+ setBlock(x,y,z,t);for(const e of[GRN,DOG])if(x+1>e.p.x-e.hw&&x<e.p.x+e.hw&&z+1>e.p.z-e.hw&&z<e.p.z+e.hw&&y+1>e.p.y&&y<e.p.y+e.h)e.p.y=y+1;invAdd(t,-1);SFX.place();swing(PL);SV.placed.push([x,y,z,t]);if(SV.placed.length>200)SV.placed.shift();EV('place',{x,y,z})}
 function undoBlock(){if(TASK)return;const q=SV.placed.pop();if(!q){SFX.bad();return}const[x,y,z,t]=q;if(vget(x,y,z)===t){cubeBurst(x,y,z,t,6);setBlock(x,y,z,0);invAdd(t,1);SFX.dig()}save();EV('undo')}
 const EVL={};function EV(k,a){(EVL[k]||[]).forEach(f=>f(a))}function onEV(k,f){(EVL[k]=EVL[k]||[]).push(f)}
 // ---- монстры ночью ----
@@ -108,6 +108,7 @@ function stepStory(){const f=SV.f;
  if(SV.mw>=3&&!f.mdone&&(MW.every(x=>f['cd'+x])||PL.p.x>61)){f.mdone=1;save();say('m_done').catch(()=>{})}
  if(!f.sp1&&SV.mw>=1&&PL.p.x>42&&PL.p.x<47&&!TASK&&!MON.some(m=>m.fixed&&m.kind==='spider')){const e=spawnMonster('spider',46.5,TZ+.5);e.fixed=1;f.sp1q=1}
  if(!f.zb1&&SV.mw>=3&&PL.p.x>62&&PL.p.x<64.5&&!TASK&&!MON.some(m=>m.kind==='zombie')){const e=spawnMonster('zombie',PL.p.x-6,TZ+3.5);e.fixed=1}
+ stepFoes();
  const inPlot=PL.p.x>HOUSEP.x0-2&&PL.p.x<HOUSEP.x1+2&&PL.p.z>HOUSEP.z0-2&&PL.p.z<HOUSEP.z1+2;if(inPlot&&!f.house){f.house=1;save();say('house').catch(()=>{})}
  if(!SV.house){let n=0;for(const q of SV.placed)if(q[0]>=HOUSEP.x0&&q[0]<=HOUSEP.x1&&q[2]>=HOUSEP.z0&&q[2]<=HOUSEP.z1)n++;if(n>=12){SV.house=1;save(1);SFX.star();say('house_ok').catch(()=>{})}}}
 onEV('dig',()=>{if(!SV.f.t3){SV.f.t3=1;save();say('t3').catch(()=>{})}});
@@ -119,7 +120,7 @@ function render3d(dt){if(!REN)return;for(const e of ENTS){if(e.hide)continue;con
  CHESTM.forEach((m,i)=>{m.visible=!SV.st[i];m.userData.lid.rotation.x=0});
  // слабый компьютер: меньше пикселей
  if(fpsA<24&&PR>1&&T>4){PR=1;resize3d()}if(fpsA<20&&QHI&&SUN.castShadow&&T>8){SUN.castShadow=false}
- REN.render(SCENE,CAM)}
+ REN.render(SCENE,CAM);renderHand()}
 function counters(){const s=safeV();let x=s.x0+130;const y=s.y0+44;drawImg('diamond',x+22,y,44);txt(String(SV.dia),x+62,y+2,40,'#fff',{al:'left'});x+=120;drawImg('star',x+22,y,46);txt(String(SV.st.reduce((a,b)=>a+b,0)+(SV.house?1:0)),x+62,y+2,40,'#fff',{al:'left'});if(SV.armor){drawImg('armor',x+140,y,46)}}
 function hud(){const s=safeV();drawBtn('b_home',s.x0+58,s.y0+58,104);btn('home',s.x0+58,s.y0+58,104,104,()=>go('title'));counters();
  drawBtn('b_eye',s.x1-58,s.y0+58,104,{sel:CAMS.fp});btn('view',s.x1-58,s.y0+58,104,104,toggleView);
