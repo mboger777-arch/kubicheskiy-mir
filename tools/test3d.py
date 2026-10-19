@@ -132,7 +132,10 @@ async def run(b,W,H,F,R):
   await touch([]);c1=await E('G.cam().yaw')
   if abs(c1-c0)<.3:F.append(f'{tag} look drag did not turn camera {c0}->{c1}')
   await E('G.look(Math.PI/2,-0.22)')
-  y0=(await E('G.P()'))['y'];q=await bxy('jump');await touch([(q['x'],q['y'])]);await pg.wait_for_timeout(160);y1=(await E('G.P()'))['y'];await touch([]);await pg.wait_for_timeout(700)
+  y0=(await E('G.P()'))['y'];q=await bxy('jump');await touch([(q['x'],q['y'])]);y1=y0
+  for k in range(8):
+    await pg.wait_for_timeout(50);y1=max(y1,(await E('G.P()'))['y'])
+  await touch([]);await pg.wait_for_timeout(700)
   if y1-y0<.3:F.append(f'{tag} jump did not lift {y0}->{y1}')
   # ---- копать (держать), ставить, отменить
   await E('G.tp(10.5,23.5);talk=null');await E('G.look(Math.PI/2,-0.5)');await pg.wait_for_timeout(300)
