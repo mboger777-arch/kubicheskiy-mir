@@ -125,7 +125,7 @@ function genWorld(){VOX.fill(0);RS=12345;
  for(const z of[TZ-3,TZ+3])post(144,z,2,B.castle);
  for(let x=150;x<WX-4;x+=6)for(const z of[0,WZ-1])if(vget(x,GY+7,z)===B.hcastle&&vget(x,GY+8,z)===0)vsetRaw(x,GY+8,z,B.torch);
  // ров с лавой перед замком: мост на тропе, забор по краям (а если всё же попасть в ров — лава мягко выталкивает на мост)
- for(let x=141;x<=143;x++)for(let z=0;z<WZ;z++){for(let y=GY-2;y<=GY+5;y++)vsetRaw(x,y,z,0);vsetRaw(x,GY-2,z,B.stone);vsetRaw(x,GY-1,z,B.lava);if(Math.abs(z-TZ)<=2)vsetRaw(x,GY,z,B.deck)}
+ for(let x=141;x<=143;x++)for(let z=0;z<WZ;z++){for(let y=GY-2;y<=GY+5;y++)vsetRaw(x,y,z,0);vsetRaw(x,GY-2,z,B.stone);vsetRaw(x,GY-1,z,B.lava);vsetRaw(x,GY,z,Math.abs(z-TZ)<=2?B.deck:B.lava)}
  for(let z=0;z<WZ;z++){if(Math.abs(z-TZ)<=2)continue;for(const x of[140,144]){const g=x===144?GY:surfH(x,z);for(let y=GY-2;y<=g;y++)vsetRaw(x,y,z,y<g?B.stone:B.sand);for(let y=g+1;y<=GY+5;y++)vsetRaw(x,y,z,0);vsetRaw(x,g+1,z,B.fence)}}
  for(const z of[TZ-3,TZ+3])post(144,z,2,B.castle);
  for(const z of[TZ-6,TZ+6,TZ-12,TZ+12])vsetRaw(144,GY+5,z,B.banner);
