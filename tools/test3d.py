@@ -120,8 +120,11 @@ async def run(b,W,H,F,R):
       if not dug and stuck>3:F.append(f'{tag} walk {name}: stuck at {p}');return 'stuck'
     F.append(f'{tag} walk {name}: timeout at {(await E("G.P()"))["x"]:.1f}');return 'timeout'
   async def dig_block(x,y,z,ms=1400):
-    q=await E(f'G.blockXY({x},{y},{z})');await tapxy(q['x'],q['y'],120)
-    a=await E('G.aim()')
+    for _ in range(2):
+      q=await E(f'G.blockXY({x},{y},{z})');await tapxy(q['x'],q['y'],120)
+      a=await E('G.aim()')
+      if a and (a['x'],a['y'],a['z'])==(x,y,z):break
+      await pg.wait_for_timeout(400)
     if not a or (a['x'],a['y'],a['z'])!=(x,y,z):F.append(f'{tag} tap-to-aim missed {x},{y},{z} got {a}')
     await hold('dig',ms)
   # ---- заставка → знакомство → мир
