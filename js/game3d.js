@@ -149,7 +149,7 @@ SC.world={skipOnTalk:0,enter(){setupWorld();for(const k in STIN)delete STIN[k];s
    const bx=barrierX();if(PL.p.x>bx-.05&&mx>0){mx=0;hint(SV.mw>=3&&SV.z<2?'t_water':'lock')}
    physEnt(PL,dt,mx,mz,held('jump'));if(PL.p.x>bx)PL.p.x=bx;if(CAMS.fp)PL.ty=CAMS.yaw;animEnt(PL,dt);
    // вода — выталкивает на берег
-   if(BT[vget(Math.floor(PL.p.x),Math.floor(PL.p.y+.2),Math.floor(PL.p.z))].fluid&&SV.z<2){PL.p.x-=dt*3;hint('t_water')}
+   if(BT[vget(Math.floor(PL.p.x),Math.floor(PL.p.y+.2),Math.floor(PL.p.z))].fluid&&SV.z<2){const nx=PL.p.x-dt*3;if(!collides(nx,PL.p.y,PL.p.z,PL.hw,PL.h))PL.p.x=nx;else PL.v.y=Math.max(PL.v.y,4);hint('t_water')}
    stepStations();stepStory();stepDay(dt)}
   follow(GRN,[.6,-1.7],dt);follow(DOG,[.5,1.6],dt);KR.ty=Math.atan2(PL.p.x-KR.p.x,PL.p.z-KR.p.z);physEnt(KR,dt,0,0,false);animEnt(KR,dt);KR.hide=SV.z>=5;
   stepMonsters(dt);stepCam(dt);AIM=TASK?null:curAim();stepDig(dt);
@@ -162,6 +162,7 @@ SC.world={skipOnTalk:0,enter(){setupWorld();for(const k in STIN)delete STIN[k];s
  move(x,y,id){if(TASK&&TASK.id==='spider'&&id!==JOY.id){return}
   if(id===JOY.id&&JOY.on){const dx=x-JOY.bx,dy=y-JOY.by,d=Math.hypot(dx,dy),r=100;const k=d>r?r/d:1;JOY.vx=dx*k/r;JOY.vy=dy*k/r;return}
   if(id===LOOK.id){const dx=x-LOOK.x,dy=y-LOOK.y;LOOK.moved+=Math.abs(dx)+Math.abs(dy);LOOK.x=x;LOOK.y=y;CAMS.yaw-=dx*.0062;CAMS.pitch=clamp(CAMS.pitch-dy*.0052,-1.3,CAMS.fp?1.3:.6)}},
+ upAll(){JOY.on=false;JOY.id=null;JOY.vx=JOY.vy=0;LOOK.id=null},
  up(id){if(id===JOY.id){JOY.on=false;JOY.id=null;JOY.vx=JOY.vy=0}if(id===LOOK.id){if(LOOK.moved<14&&T-LOOK.t0<.4)tapWorld(LOOK.x,LOOK.y);LOOK.id=null}},
  tap(x,y){if(TASK&&TASK.id==='spider')TD.spider.drag(TASK,x,y);else if(TASK)tapWorld(x,y)}};
 // ---- заставка / знакомство / финал: 3D-мир, герои стоят и смотрят на ребёнка ----

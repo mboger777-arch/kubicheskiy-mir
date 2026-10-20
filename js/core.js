@@ -110,7 +110,9 @@ C.addEventListener('pointerdown',e=>{if(PORTRAIT())return;e.preventDefault();ac(
  if(locked())return;
  if(SCN&&SCN.tap)SCN.tap(x,y,e.pointerId)},{passive:false});
 function upP(e){if(HOLD[e.pointerId]!=null)delete HOLD[e.pointerId];if(SCN&&SCN.up)SCN.up(e.pointerId)}
-C.addEventListener('pointerup',upP);C.addEventListener('pointercancel',upP);C.addEventListener('lostpointercapture',upP);
+function releaseAll(){for(const k in HOLD)delete HOLD[k];for(const k in KEYS)KEYS[k]=0;if(SCN&&SCN.upAll)SCN.upAll()}
+addEventListener('blur',releaseAll);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAll()});addEventListener('pagehide',releaseAll);
+C.addEventListener('touchcancel',releaseAll);C.addEventListener('pointerup',upP);C.addEventListener('pointercancel',upP);C.addEventListener('lostpointercapture',upP);
 C.addEventListener('pointermove',e=>{const[x,y]=toD(e);PX=x;PY=y;if(SCN&&SCN.move)SCN.move(x,y,e.pointerId)});
 const held=id=>Object.values(HOLD).includes(id)||KEYS[id];
 const KEYS={};const KMAP={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',Space:'up'};
@@ -123,7 +125,7 @@ function go(n,arg){EPOCH++;for(const k in HOLD)delete HOLD[k];scene=n;SCN=SC[n];
 let last=performance.now(),fpsA=60;
 const TOUCH=(('ontouchstart' in window)||navigator.maxTouchPoints>0)&&matchMedia('(pointer:coarse)').matches;const PORTRAIT=()=>TOUCH&&H>W*1.05;
 let GND=[];
-function loop(now){DT=PORTRAIT()?0:clamp((now-last)/1000,0,.05);last=now;T+=DT;fpsA=fpsA*.95+(1/Math.max(DT,.001))*.05;
+function loop(now){DT=PORTRAIT()?0:clamp((now-last)/1000,0,.1);last=now;T+=DT;fpsA=fpsA*.95+(1/Math.max(DT,.001))*.05;
  X.setTransform(DPR,0,0,DPR,0,0);X.clearRect(0,0,W,H);
  const sx=(Math.random()-.5)*shake,sy=(Math.random()-.5)*shake;shake*=Math.pow(.004,DT);if(shake<.3)shake=0;
  X.setTransform(DPR*S,0,0,DPR*S,DPR*(OX+sx),DPR*(OY+sy));PUI=UI;UI=[];GND=[];if(G.auditReq){G.auditReq=0;AUD={t:[],c:[],h:[]};G._aud=AUD}else AUD=null;stepParticles();
