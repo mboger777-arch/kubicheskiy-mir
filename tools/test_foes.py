@@ -20,7 +20,7 @@ async def run(b,W,H,F,R):
     if not bb:F.append(f'{tag} no button {i} have {[x["id"] for x in bs]}');return
     q=await E(f"G.pg({bb[0]['x']},{bb[0]['y']})");await pg.touchscreen.tap(q['x'],q['y']);await pg.wait_for_timeout(200)
   for k,z,prep,x0,x1 in CASES:
-    await E(f"G.zone({z});G.close();DAY.night=false;{prep};talk=null;G.tp({x0},23.5)");await pg.wait_for_timeout(400)
+    await E(f"G.zone({z});G.close();DAY.night=false;{prep};talk=null;G.tp({x0},23.5{",13" if k=="tupik" else ""})");await pg.wait_for_timeout(400)
     t0=time.time();t=None
     while time.time()-t0<25:
       t=await E('G.task()')
@@ -32,7 +32,7 @@ async def run(b,W,H,F,R):
     small=await E("PUI.filter(b=>!b.dis).map(b=>({id:b.id,w:Math.max(b.w+12,56/S)*S,h:Math.max(b.h+12,56/S)*S})).filter(b=>b.w<56||b.h<56)")
     for s in small:F.append(f'{tag} {k}: button {s["id"]} small')
     await pg.wait_for_timeout(900)
-    if W==844:await pg.screenshot(path=f'shots/foes/{k}.png')
+    await pg.screenshot(path=f'shots/foes/{k}.png' if W==844 else f'shots/foes/{tag}_{k}.png')
     rounds=0;rlast=-1
     for r in range(4):
       t=await E('G.task()')
@@ -44,7 +44,7 @@ async def run(b,W,H,F,R):
       ts=time.time()
       while await E('G.locked()') and time.time()-ts<3:await pg.wait_for_timeout(20)
       if (time.time()-ts)*1000>600:F.append(f'{tag} {k}: locked after mistake')
-      if W==844 and r==0:await pg.wait_for_timeout(300);await pg.screenshot(path=f'shots/foes/{k}_mistake.png')
+      if r==0:await pg.wait_for_timeout(300);await pg.screenshot(path=f'shots/foes/{k}_mistake.png' if W==844 else f'shots/foes/{tag}_{k}_mistake.png')
       for i in await E('G.ans(true)'):await btn(i)
       ts=time.time()
       while time.time()-ts<12:
