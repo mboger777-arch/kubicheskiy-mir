@@ -48,26 +48,30 @@ function stepFoes(){if(TASK||!PL)return;const p=PL.p;for(const k of FOEK){const 
 function plate(tx,x,y,w,h){X.save();X.fillStyle='rgba(16,16,26,.94)';X.strokeStyle='#ffe066';X.lineWidth=6;X.beginPath();if(X.roundRect)X.roundRect(x,y,w,h,14);else X.rect(x,y,w,h);X.fill();X.stroke();X.restore();
  fitText(tx,[x+14,y+6,w-28,h-12],Math.min(96,h*.78),'#ffe066',{one:1,min:24})}
 // камера встречи: герои и враг целиком (ноги видны) в левой части экрана, табло справа; перебираем ракурсы без стен между камерой и героями
-function foeStage(t){const e=t.ent;const d=new T3.Vector3(e.p.x-PL.p.x,0,e.p.z-PL.p.z);if(d.length()<.5)d.set(1,0,0);d.normalize();t.dir=d;const sd=new T3.Vector3(-d.z,0,d.x);
+function foeStage(t){const e=t.ent;for(const x of[PL,e])if(x){x.p.y=groundAt(x.p.x,x.p.z,x.p.y+.6);x.v.set(0,0,0);x.onG=true}const d=new T3.Vector3(e.p.x-PL.p.x,0,e.p.z-PL.p.z);if(d.length()<.5)d.set(1,0,0);d.normalize();t.dir=d;const sd=new T3.Vector3(-d.z,0,d.x);
+ [[PL,-.55],[e,.55]].forEach(([x,o])=>{const nx=x.p.x+sd.x*o,nz=x.p.z+sd.z*o;if(!collides(nx,x.p.y,nz,x.hw||.3,x.h||1.6)){x.p.x=nx;x.p.z=nz}});
  [[GRN,-1.25,.95],[DOG,-.95,-.95]].forEach(([f,a,b])=>{if(!f)return;for(const k of[1,.6,.3]){const nx=PL.p.x+d.x*a*k+sd.x*b,nz=PL.p.z+d.z*a*k+sd.z*b;const ny=groundAt(nx,nz,PL.p.y+1.2);
   if(Math.abs(ny-PL.p.y)<1.1&&!collides(nx,ny,nz,f.hw||.3,f.h||1.6)){f.p.set(nx,ny,nz);f.v.set(0,0,0);f.hide=false;placeEnt(f);break}}})}
-function foeCam(t){const e=t.ent;const d=t.dir;const ents=[PL,GRN,DOG,e].filter(x=>x&&!x.hide);const pts=[];
- for(const x of ents){placeEnt(x);x.obj.updateMatrixWorld(true);const bb=new T3.Box3().setFromObject(x.m);if(!isFinite(bb.min.x)){bb.min.set(x.p.x-.3,x.p.y,x.p.z-.3);bb.max.set(x.p.x+.3,x.p.y+1.8,x.p.z+.3)}
-  bb.min.y=Math.min(bb.min.y,x.p.y);for(const cx of[bb.min.x,bb.max.x])for(const cy of[bb.min.y,bb.max.y])for(const cz of[bb.min.z,bb.max.z])pts.push(new T3.Vector3(cx,cy,cz))}
- const P=foePanel(),v=vis(),s=P.L.s;const rx0=-1+2*((s.x0+20-v.x0)/v.w),rx1=-1+2*((P.x-24-v.x0)/v.w),ry1=1-2*((s.y0+132-v.y0)/v.h),ry0=1-2*((s.y1-176-v.y0)/v.h);
- const C=new T3.PerspectiveCamera(CAM.fov,CAM.aspect||W/H,.08,110);const ctr=new T3.Vector3();pts.forEach(q=>ctr.add(q));ctr.multiplyScalar(1/pts.length);
- const sd=new T3.Vector3(-d.z,0,d.x);const cands=[];for(const sg of[1,-1])for(const a of[0,.45,-.45,.8])cands.push(sd.clone().multiplyScalar(sg).applyAxisAngle(new T3.Vector3(0,1,0),a*sg));
- cands.push(d.clone().applyAxisAngle(new T3.Vector3(0,1,0),.35),d.clone().applyAxisAngle(new T3.Vector3(0,1,0),-.35));
- let best=null;cands.forEach((cd,ci)=>{for(const pitch of[-.12,-.32]){const yaw=Math.atan2(cd.x,cd.z);const dir=new T3.Vector3(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));
-  let tgt=ctr.clone(),dist=7;for(let it=0;it<6;it++){C.position.copy(tgt).addScaledVector(dir,-dist);C.lookAt(tgt);C.updateMatrixWorld(true);let x0=9,x1=-9,y0=9,y1=-9;
-   for(const q of pts){const n=q.clone().project(C);x0=Math.min(x0,n.x);x1=Math.max(x1,n.x);y0=Math.min(y0,n.y);y1=Math.max(y1,n.y)}
-   const sc=Math.max((x1-x0)/((rx1-rx0)*.92),(y1-y0)/((ry1-ry0)*.92));dist=clamp(dist*sc,3.2,14);
+function foeCam(t){const e=t.ent;const d=t.dir;const ents=[PL,GRN,DOG,e].filter(x=>x&&!x.hide);const EP=[];
+ for(const x of ents){placeEnt(x);x.obj.updateMatrixWorld(true);const bb=new T3.Box3().setFromObject(x.m);const hgt=clamp(isFinite(bb.max.y)?bb.max.y-x.p.y:1.8,.8,3);const hw=clamp(isFinite(bb.max.x)?Math.max(bb.max.x-bb.min.x,bb.max.z-bb.min.z)/2:.4,.3,.9);
+  const by0=Math.min(x.p.y,isFinite(bb.min.y)?Math.max(bb.min.y,x.p.y-.2):x.p.y);const q=[];for(const a of[-hw,hw])for(const b of[-hw,hw])for(const yy of[by0,x.p.y+hgt])q.push(new T3.Vector3(x.p.x+a,yy,x.p.z+b));EP.push(q)}
+ const pts=EP.flat();const P=foePanel(),v=vis(),s=P.L.s;const rx0=-1+2*((s.x0+20-v.x0)/v.w),rx1=-1+2*((P.x-24-v.x0)/v.w),ry1=1-2*((s.y0+132-v.y0)/v.h),ry0=1-2*((s.y1-176-v.y0)/v.h);
+ const C=new T3.PerspectiveCamera(CAM.fov,CAM.aspect||W/H,.08,110);const ctr=new T3.Vector3();pts.forEach(q=>ctr.add(q));ctr.multiplyScalar(1/pts.length);const Y=new T3.Vector3(0,1,0);
+ const sd=new T3.Vector3(-d.z,0,d.x);const cands=[];for(const sg of[1,-1])for(const a of[0,.45,-.45,.8])cands.push([sd.clone().multiplyScalar(sg).applyAxisAngle(Y,a*sg),2]);
+ for(const a of[.12,-.12,.35,-.35,.6,-.6]){cands.push([d.clone().negate().applyAxisAngle(Y,a),1]);cands.push([d.clone().applyAxisAngle(Y,a),0])}
+ let best=null;cands.forEach(([cd,bon],ci)=>{for(const pitch of[-.12,-.3]){const yaw=Math.atan2(cd.x,cd.z);const dir=new T3.Vector3(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));
+  let tgt=ctr.clone(),dist=7,boxes=null;for(let it=0;it<7;it++){C.position.copy(tgt).addScaledVector(dir,-dist);C.lookAt(tgt);C.updateMatrixWorld(true);let x0=9,x1=-9,y0=9,y1=-9;boxes=[];
+   for(const q of EP){let a0=9,a1=-9,b0=9,b1=-9;for(const p of q){const n=p.clone().project(C);a0=Math.min(a0,n.x);a1=Math.max(a1,n.x);b0=Math.min(b0,n.y);b1=Math.max(b1,n.y)}boxes.push([a0,a1,b0,b1,q[0].distanceTo(C.position)]);x0=Math.min(x0,a0);x1=Math.max(x1,a1);y0=Math.min(y0,b0);y1=Math.max(y1,b1)}
+   const sc=Math.max((x1-x0)/((rx1-rx0)*.9),(y1-y0)/((ry1-ry0)*.9));dist=clamp(dist*sc,3,12);
    const hx=(rx0+rx1)/2-(x0+x1)/2,hy=(ry0+ry1)/2-(y0+y1)/2;const th=Math.tan(CAM.fov*Math.PI/360)*dist;const right=new T3.Vector3(-Math.cos(yaw),0,Math.sin(yaw)),up=new T3.Vector3().crossVectors(right,dir);
    tgt.addScaledVector(right,-hx*th*C.aspect).addScaledVector(up,-hy*th)}
-  const back=dir.clone().negate();const h=rayVox(tgt,back,dist+.3,b=>opaqueT(b));let clear=h?h.t:dist+.3;const cam=tgt.clone().addScaledVector(back,Math.min(dist,clear-.2));
-  let vis_=0;for(const x of ents){const c=new T3.Vector3(x.p.x,x.p.y+.9,x.p.z);const r=c.clone().sub(cam);const L=r.length();const hb=rayVox(cam,r.normalize(),L-.4,b=>opaqueT(b));if(!hb)vis_++}
-  const score=vis_*10+(clear>=dist?5:clear/dist*3)-dist*.15-ci*.05-(pitch<-.2?.3:0);if(!best||score>best.score)best={score,tgt,yaw,pitch,dist:Math.min(dist,Math.max(2.5,clear-.25))}}});
- CAMS.focus={t:[best.tgt.x,best.tgt.y,best.tgt.z],yaw:best.yaw,pitch:best.pitch,dist:best.dist};t.cam=best;stepCam(0,true)}
+  const back=dir.clone().negate();const h=rayVox(tgt,back,dist+.3,b=>opaqueT(b));const clear=h?h.t:dist+.3;const cam=tgt.clone().addScaledVector(back,dist);
+  // стена между камерой и героями срезается ближней плоскостью (вид «в разрезе»), если все герои дальше среза
+  const near=clear>=dist?0:dist-clear+.12;const nearest=Math.min(...boxes.map(b=>b[4]))-1.1;const cutOK=!near||near<nearest;
+  let vs=0;for(const x of ents)for(const hy of[.9,.15]){const c=new T3.Vector3(x.p.x,x.p.y+hy,x.p.z);const r=cam.clone().sub(c);const L=r.length();if(!rayVox(c,r.normalize(),Math.max(.1,L-near-.25),b=>opaqueT(b)))vs+=.5}
+  let occ=0;boxes.forEach((A,ia)=>{const ar=(A[1]-A[0])*(A[3]-A[2])||1e-6;boxes.forEach((B,ib)=>{if(ib===ia||B[4]>=A[4])return;const ox=Math.max(0,Math.min(A[1],B[1])-Math.max(A[0],B[0])),oy=Math.max(0,Math.min(A[3],B[3])-Math.max(A[2],B[2]));if(ox*oy/ar>.4)occ+=(ia===boxes.length-1||ia===0)?2:1})});
+  const score=vs*10-occ*3+bon+(clear>=dist?3:0)-(cutOK?0:30)-dist*.25-(pitch<-.2?.4:0);if(!best||score>best.score)best={score,tgt,yaw,pitch,dist,near,occ}}});
+ CAMS.focus={t:[best.tgt.x,best.tgt.y,best.tgt.z],yaw:best.yaw,pitch:best.pitch,dist:best.dist,near:best.near||0};t.cam=best;stepCam(0,true)}
 function foePanel(){const L=layout(),s=L.s;const pw=Math.min(L.pw*.56,700);return{L,x:s.x1-20-pw,w:pw}}
 FOEK.forEach(k=>{const F=FOES[k];TD[k]={
  enter(t,ent){t.k=k;t.ent=ent||spawnMonster(k,PL.p.x+3.4,PL.p.z);t.ent.task=1;t.ent.fixed=1;const e=t.ent;

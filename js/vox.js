@@ -369,10 +369,10 @@ function placeEnt(e){e.obj.position.copy(e.p);e.obj.rotation.y=e.yaw;e.obj.visib
 let HANDS=null,HAND=null;
 function makeHand(){HANDS=new T3.Scene();HANDS.add(new T3.HemisphereLight(0xffffff,0x8890a0,1.7));const dl=new T3.DirectionalLight(0xfff2dc,1.2);dl.position.set(-1,2,1);HANDS.add(dl);
  const b=CHARS.bloki();let arm=null;b.traverse(c=>{if(c.userData&&c.userData.tool)arm=c});HAND=new T3.Group();const piv=new T3.Group();arm.position.set(0,0,0);arm.rotation.set(0,0,0);piv.add(arm);
- let pk=null;piv.traverse(c=>{if(!pk&&Math.abs(c.rotation.x-Math.PI/2)<.01)pk=c});if(pk)pk.rotation.x=-Math.PI/2;piv.scale.setScalar(K3*1.1);piv.rotation.set(1.6,.3,.05);HAND.add(piv);HAND.userData.piv=piv;HANDS.add(HAND)}
+ let pk=null;piv.traverse(c=>{if(!pk&&Math.abs(c.rotation.x-Math.PI/2)<.01)pk=c});if(pk)pk.rotation.x=-Math.PI/2;piv.scale.setScalar(K3*.82);piv.rotation.set(1.6,.3,.05);HAND.add(piv);HAND.userData.piv=piv;HANDS.add(HAND)}
 function renderHand(){if(!CAMS.fp||CAMS.focus||!PL||PL.hide===false)return;if(!HANDS)makeHand();
  const k=PL.swingT!=null?(T-PL.swingT)/SWD:1;const s=swingCurve(k);const bob=Math.sin(PL.ph*.5)*.025*PL.walk;
- HAND.position.set(.44+s*.03,-.44+bob,-.56+s*.06);HAND.rotation.set(-s*.9,0,s*.15);HAND.quaternion.premultiply(CAM.quaternion);HAND.position.applyQuaternion(CAM.quaternion).add(CAM.position);
+ HAND.position.set(.42+s*.02,-.47+bob-s*.03,-.56+s*.05);HAND.rotation.set(-s*.62,0,s*.12);HAND.quaternion.premultiply(CAM.quaternion);HAND.position.applyQuaternion(CAM.quaternion).add(CAM.position);
  const lt=1-UNDER*.4-NIGHTK*.4;HANDS.children[0].intensity=1.7*lt;REN.autoClear=false;REN.clearDepth();REN.render(HANDS,CAM);REN.autoClear=true}
 // ---- камера: от третьего лица (за спиной Блоки) или его глазами ----
 const CAMS={yaw:Math.PI/2,pitch:-.22,fp:false,dist:5.2,cur:5.2,focus:null,fyaw:null};
@@ -380,9 +380,9 @@ function stepCam(dt,snap){if(!PL)return;const eye=new T3.Vector3(PL.p.x,PL.p.y+1
  if(CAMS.focus){tgt=new T3.Vector3(...CAMS.focus.t);yaw=CAMS.focus.yaw;pitch=CAMS.focus.pitch;dist=CAMS.focus.dist}
  const fp=CAMS.fp&&!CAMS.focus;PL.hide=fp;
  const dir=new T3.Vector3(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));
- let pos;if(fp){pos=eye}else{const back=dir.clone().multiplyScalar(-1);let d=dist;const h=rayVox(tgt,back,dist,b=>opaqueT(b));if(h)d=Math.max(.6,h.t-.25);CAMS.cur=snap?d:Math.min(d,CAMS.cur+dt*6);if(d<CAMS.cur)CAMS.cur=d;pos=tgt.clone().addScaledVector(back,CAMS.cur)}
+ let pos;if(fp){pos=eye}else{const back=dir.clone().multiplyScalar(-1);let d=dist;const cut=CAMS.focus&&CAMS.focus.near;const h=cut?null:rayVox(tgt,back,dist,b=>opaqueT(b));if(h)d=Math.max(.6,h.t-.25);CAMS.cur=snap?d:Math.min(d,CAMS.cur+dt*6);if(d<CAMS.cur)CAMS.cur=d;pos=tgt.clone().addScaledVector(back,CAMS.cur)}
  if(snap||!CAM._init){CAM.position.copy(pos);CAM._init=1}else CAM.position.lerp(pos,Math.min(1,dt*(CAMS.focus?3:14)));
- CAM.lookAt(CAM.position.clone().add(dir))}
+ CAM.lookAt(CAM.position.clone().add(dir));const nn=CAMS.focus&&CAMS.focus.near||.08;if(CAM.near!==nn){CAM.near=nn;CAM.updateProjectionMatrix()}}
 G.cam=()=>({x:CAM.position.x,y:CAM.position.y,z:CAM.position.z,yaw:CAMS.yaw,pitch:CAMS.pitch,fp:CAMS.fp});
 // экранная точка → луч (для касания по блоку)
 function screenRay(sx,sy){const v=new T3.Vector3((sx/W)*2-1,-(sy/H)*2+1,.5).unproject(CAM).sub(CAM.position).normalize();return v}
