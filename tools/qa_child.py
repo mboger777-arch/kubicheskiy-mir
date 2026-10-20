@@ -63,6 +63,8 @@ async def main():
     async def to_world(k,fast=True):
       await E(f"G.mute=true;G.fast={str(fast).lower()};G.zone({k})");await pg.wait_for_timeout(1200);await E("talk=null;skipTalk&&skipTalk()")
     async def joy_moves(tag):
+      tb=await E('G.task()')
+      if tb and await E(f"!!FOES[{json.dumps(tb['id'])}]"):R[f'foe in {tag}']=tb['id'];await answer();await pg.wait_for_timeout(800)
       p0=await E('G.P()');await walk(900);p1=await E('G.P()')
       if math.hypot(p1['x']-p0['x'],p1['z']-p0['z'])<.8:F.append(f'{tag}: joystick did not move player {p0["x"]:.1f},{p0["z"]:.1f}')
     ids={2:'river',3:'forge',4:'desert',5:'castle'}
@@ -85,8 +87,9 @@ async def main():
       if not t:F.append(f'{i}: did not open');continue
       await pg.wait_for_timeout(1500)
       for kk in range(6):await pg.touchscreen.tap(W*.5,H*.4);await pg.wait_for_timeout(40)   # спам в мир
-      await btn('back',600)
-      if await E('G.task()'):F.append(f'{i}: back did not close task')
+      await btn('back',600);tb=await E('G.task()')
+      if tb and await E(f"!!FOES[{json.dumps(tb['id'])}]"):R[f'foe after back {i}']=tb['id'];await answer()
+      elif tb:F.append(f'{i}: back did not close task')
       await btn('home',800)
       await E('G.mute=true');await btn('play',1500);await E("talk=null")
       t=await E('G.task()');s=await sane(f'{i} after home')
@@ -138,7 +141,10 @@ async def main():
     if math.hypot(p1['x']-p0['x'],p1['z']-p0['z'])>.6:F.append(f'walled: walked through wall {p0}->{p1}')
     await E("G.look(Math.PI/2,-.1)");await pg.wait_for_timeout(300);dug=0
     for y in (fy+1,fy):
-      if await aim(fx+1,y,fz):await hold('dig',1600);dug+=await E(f'G.vget({fx+1},{y},{fz})')==0
+      for pit in (-.1,-.45,.2,-.7):
+        await E(f"G.look(Math.PI/2,{pit})");await pg.wait_for_timeout(250)
+        if await aim(fx+1,y,fz):await hold('dig',1600);break
+      dug+=await E(f'G.vget({fx+1},{y},{fz})')==0
     if dug<2:F.append(f'walled: could dig only {dug}/2')
     await walk(1200);p2=await E('G.P()')
     if p2['x']<fx+1.55:F.append(f'walled: did not get out {p2}')
