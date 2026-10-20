@@ -48,6 +48,14 @@ async def main():
           if not t2 or t2['r']!=t['r'] or not t2['lock']:break
           await pg.wait_for_timeout(80)
         await pg.wait_for_timeout(250)
+    async def foe():
+      t=await E('G.task()')
+      if t and await E(f"!!FOES[{json.dumps(t['id'])}]"):
+        print('met foe',t['id'],flush=True);await answer()
+        t0=time.time()
+        while time.time()-t0<8 and await E('G.task()'):await pg.wait_for_timeout(150)
+        await pg.wait_for_timeout(600);return True
+      return False
     async def wait_task(sec=6):
       t0=time.time()
       while time.time()-t0<sec:
@@ -96,17 +104,27 @@ async def main():
     R.append(f'after pillar chest: stars {await stars()} (y={(await E("G.P()"))["y"]})');print(R[-1],flush=True)
     # дом: 12 блоков на участке
     await E("talk=null;G.tp(85.5,33.5);SV.sel=3");await pg.wait_for_timeout(400)
-    cells=[(83,31),(84,31),(85,31),(86,31),(87,31),(88,31),(83,35),(84,35),(85,35),(86,35),(87,35),(88,35),(83,33),(88,33)]
+    cells=[(83,31),(84,31),(85,31),(86,31),(87,31),(88,31),(83,35),(84,35),(85,35),(86,35),(87,35),(88,35),(83,33),(88,33),(83,32),(88,32),(83,34),(88,34),(84,33),(87,33)]
     for x,z in cells:
       if await E('SV.house'):break
+      await foe()
       await look_at(x+.5,z+.5,-.75);top=await E(f"(()=>{{for(let y=20;y>0;y--)if(solidT(G.vget({x},y,{z})))return y;return 0}})()")
-      if await aim(x,top,z):await btn('place',200)
+      ok=await aim(x,top,z)
+      if not ok:
+        q=await E(f'G.blockXY({x},{top},{z})');print('miss at',q,await E('G.aim()'),flush=True)
+        await look_at(x+.5,z+.5,-1.05);ok=await aim(x,top,z)
+      if ok:await btn('place',200)
+      print('cell',x,z,top,ok,await E('SV.placed.length'),await E('JSON.stringify(G.task())'),flush=True)
     await pg.wait_for_timeout(500);await btn('view',300);await E("G.look(Math.PI*1.2,-.4)");await pg.wait_for_timeout(800);await pg.screenshot(path='shots/t3d/house_star.png')
     if not await E('SV.house'):F.append(f'house star not awarded (placed {await E("SV.placed.length")})')
     R.append(f'after house: stars {await stars()}');print(R[-1],flush=True)
     # замок: щиты и крыша
     await E("talk=null;G.tp(151,23.5,13)");await look_at(160,23.5,-.2);await walk(1600)
     t=await wait_task()
+    for k in range(4):
+      if not t or t['id']=='castle':break
+      if await foe():await look_at(160,23.5,-.2);await walk(1600);t=await wait_task()
+      else:break
     if not t or t['id']!='castle':F.append(f'castle did not open {t}')
     else:
       for k in range(3):
