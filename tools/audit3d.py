@@ -22,7 +22,7 @@ async def main():
       await pg.goto(URL);await pg.evaluate('localStorage.clear()');await pg.reload();await pg.wait_for_function('typeof G!=="undefined"&&G.scene==="title"',timeout=60000);await pg.evaluate('G.mute=true')
       for name,js in STATES:
         await pg.evaluate(js);await pg.wait_for_timeout(900 if name!='intro' else 500)
-        await pg.evaluate('G.auditReq=1');await pg.wait_for_timeout(150);a=await pg.evaluate('G._aud')
+        await pg.evaluate('G._aud=null;G.auditReq=1');await pg.wait_for_function('G._aud',timeout=15000);a=await pg.evaluate('G._aud')
         os.makedirs('shots/audit3d',exist_ok=True);await pg.screenshot(path=f'shots/audit3d/{tag}_{name}.png')
         for t in a['t']:
           N+=1
