@@ -343,7 +343,8 @@ function groundAt(x,z,fromY){const X_=Math.floor(x),Z_=Math.floor(z);for(let y=M
 function collides(px,py,pz,hw,h){for(let x=Math.floor(px-hw);x<=Math.floor(px+hw-1e-4);x++)for(let z=Math.floor(pz-hw);z<=Math.floor(pz+hw-1e-4);z++)for(let y=Math.floor(py);y<=Math.floor(py+h-1e-4);y++)if(solidT(vget(x,y,z)))return true;return false}
 const GRAV=28,JUMPV=8.6;
 // физика шагами ≤1/120 с: прыжок, падение и столкновения одинаковы при любом fps
-function physEnt(e,dt,mx,mz,jump){if(!(dt>0))return;dt=Math.min(dt,.12);const n=Math.max(1,Math.ceil(dt*120-1e-6));for(let i=0;i<n;i++)physStep(e,dt/n,mx,mz,jump&&i===0||jump&&e.onG)}
+function unstick(e){if(!collides(e.p.x,e.p.y+.01,e.p.z,e.hw,e.h-.02))return false;const y0=Math.floor(e.p.y+.01);for(let k=0;k<=40;k++){const y=y0+k;if(y>=WY-2)break;if(!collides(e.p.x,y,e.p.z,e.hw,e.h)){e.p.y=y;e.v.y=0;return true}}return false}
+function physEnt(e,dt,mx,mz,jump){if(!(dt>0))return;unstick(e);dt=Math.min(dt,.12);const n=Math.max(1,Math.ceil(dt*120-1e-6));for(let i=0;i<n;i++)physStep(e,dt/n,mx,mz,jump&&i===0||jump&&e.onG)}
 function physStep(e,dt,mx,mz,jump){const sp=e.speed||4.3;e.v.x=mx*sp;e.v.z=mz*sp;e.v.y-=GRAV*dt;if(e.v.y<-30)e.v.y=-30;
  // в воде — медленно и выталкивает
  const inW=BT[vget(Math.floor(e.p.x),Math.floor(e.p.y+.3),Math.floor(e.p.z))].fluid;if(inW){e.v.x*=.6;e.v.z*=.6;e.v.y=Math.max(e.v.y,-2);const hd=BT[vget(Math.floor(e.p.x),Math.floor(e.p.y+e.h*.8),Math.floor(e.p.z))].fluid;if(hd)e.v.y=Math.max(e.v.y,1.4);if(jump||e.swimUp)e.v.y=3.4;

@@ -110,7 +110,7 @@ C.addEventListener('pointerdown',e=>{if(PORTRAIT())return;e.preventDefault();ac(
  if(locked())return;
  if(SCN&&SCN.tap)SCN.tap(x,y,e.pointerId)},{passive:false});
 function upP(e){if(HOLD[e.pointerId]!=null)delete HOLD[e.pointerId];if(SCN&&SCN.up)SCN.up(e.pointerId)}
-function releaseAll(){for(const k in HOLD)delete HOLD[k];for(const k in KEYS)KEYS[k]=0;if(SCN&&SCN.upAll)SCN.upAll()}
+function releaseAll(){try{save(1)}catch(e){}for(const k in HOLD)delete HOLD[k];for(const k in KEYS)KEYS[k]=0;if(SCN&&SCN.upAll)SCN.upAll()}
 addEventListener('blur',releaseAll);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseAll()});addEventListener('pagehide',releaseAll);
 C.addEventListener('touchcancel',releaseAll);C.addEventListener('pointerup',upP);C.addEventListener('pointercancel',upP);C.addEventListener('lostpointercapture',upP);
 C.addEventListener('pointermove',e=>{const[x,y]=toD(e);PX=x;PY=y;if(SCN&&SCN.move)SCN.move(x,y,e.pointerId)});

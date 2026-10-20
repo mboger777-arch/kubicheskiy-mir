@@ -8,7 +8,7 @@ function drawTalk(){if(!talk||scene==='load')return;const s=safeV();const inW=sc
  const box=nine('board',x,y,w,h);talk.box=[x,y,w,h];if(!box)return;const nm=WHO[talk.who];const t=(nm?nm+': ':'')+talk.text;fitText(t,box,40,'#fff',{min:20})}
 let PL=null,GRN=null,DOG=null,KR=null,MON=[];
 const JOY={on:false,id:null,bx:0,by:0,x:0,y:0,vx:0,vy:0},LOOK={id:null,x:0,y:0,t0:0,moved:0};
-let DIGS=null,AIM=null,PIN=null;
+let DIGS=null,AIM=null,PIN=null,PXT=0;
 const DAY={t:0,night:false,spawn:10,next:'spider',kills:0};const DAYLEN=80,NIGHTLEN=50;
 function inv(t){return SV.inv[t]||0}
 function invAdd(t,n){SV.inv[t]=(SV.inv[t]||0)+n;if(SV.inv[t]<=0)delete SV.inv[t];if(SV.sel==null||!SV.inv[SV.sel])SV.sel=SV.inv[t]>0?t:(Object.keys(SV.inv).map(Number)[0]??null);save()}
@@ -153,7 +153,7 @@ SC.world={skipOnTalk:0,enter(){setupWorld();for(const k in STIN)delete STIN[k];s
    stepStations();stepStory();stepDay(dt)}
   follow(GRN,[.6,-1.7],dt);follow(DOG,[.5,1.6],dt);KR.ty=Math.atan2(PL.p.x-KR.p.x,PL.p.z-KR.p.z);physEnt(KR,dt,0,0,false);animEnt(KR,dt);KR.hide=SV.z>=5;
   stepMonsters(dt);stepCam(dt);AIM=TASK?null:curAim();stepDig(dt);
-  if(!TASK){SV.px=[PL.p.x,PL.p.z];}},
+  if(!TASK){SV.px=[PL.p.x,PL.p.z];if(Math.abs(T-PXT)>3){PXT=T;save()}}},
  draw(){render3d(DT);if(TASK&&TASK.def.draw)TASK.def.draw(TASK)},
  ui(){if(TASK){TASK.def.ui&&TASK.def.ui(TASK);return}hud()},
  down(x,y,id){if(TASK){if(TASK.id==='spider'){TD.spider.drag(TASK,x,y)}return false}
