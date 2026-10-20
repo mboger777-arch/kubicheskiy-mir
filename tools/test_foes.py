@@ -37,6 +37,9 @@ async def run(b,W,H,F,R):
     for r in range(4):
       t=await E('G.task()')
       if not t or t['id']!=k or (r>0 and t['r']==rlast):break
+      ts=time.time()
+      while await E('G.locked()') and time.time()-ts<4:await pg.wait_for_timeout(30)
+      t=await E('G.task()')
       rlast=t['r'];m0=t['mist'];r0=t['r']
       for i in await E('G.ans(false)'):await btn(i)
       t=await E('G.task()')
