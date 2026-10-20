@@ -12,7 +12,7 @@ function layout(){const s=safeV();const top=s.y0+128,bot=s.y1-166;const pw=Math.
 function panel(n,o){o=o||{};const L=layout();const w=o.w?Math.min(L.pw,o.w):L.pw;const x=o.x!=null?o.x:L.cx-w/2;return nine(n||'tab_grey',x,L.top,w,L.ph,o.alpha)}
 function optRow(t,opts,fn,o){o=o||{};const L=layout();const n=opts.length,gap=26,w=Math.min(o.w||360,(L.s.x1-L.s.x0-80-gap*(n-1))/n),h=o.h||128;
  const inW=w*.8-8,inH=h*.62;const fs=Math.min(o.fs||48,...opts.filter(op=>op.label!=null).map(op=>oneSize(op.label,inW,inH,o.fs||48)));
- const cx0=o.cx!=null?o.cx:L.cx;opts.forEach((op,i)=>{const cx=cx0+(i-(n-1)/2)*(w+gap);tabBtn(op.id,cx,L.optY,w,h,op.label,()=>fn(op.id),{tab:o.tab,wob:t.wob[op.id],draw:op.draw,fs,one:1,sel:op.sel})})}
+ const tot=n*w+(n-1)*gap;let cx0=o.cx!=null?o.cx:L.cx;cx0=Math.max(L.s.x0+24+tot/2,Math.min(cx0,L.s.x1-24-tot/2));opts.forEach((op,i)=>{const cx=cx0+(i-(n-1)/2)*(w+gap);tabBtn(op.id,cx,L.optY,w,h,op.label,()=>fn(op.id),{tab:o.tab,wob:t.wob[op.id],draw:op.draw,fs,one:1,sel:op.sel})})}
 function backBtn(){const s=safeV();drawBtn('b_left',s.x0+58,s.y0+58,104);btn('back',s.x0+58,s.y0+58,104,104,()=>{closeTask()})}
 // камера смотрит на место задания: t — точка, yaw/pitch — направление, dist — расстояние
 // паук виден даже сквозь стену туннеля (во время задания)

@@ -75,7 +75,7 @@ async def run(b,W,H,F,R):
         if not ids:break
         for i in ids:await btn(i,180)
         t0=time.time()
-        while time.time()-t0<9:
+        while time.time()-t0<30:
           t=await task()
           if not t or t['r']!=r0 or not t['lock']:break
           await pg.wait_for_timeout(60)
@@ -92,7 +92,7 @@ async def run(b,W,H,F,R):
     while time.time()-t0<maxs:
       tt=await task()
       if tt and tt['id'] in FOES:
-        R.append(f'{tag} met {tt["id"]} on foot (walk {name})');await shot('foe_'+tt['id']);await play_task('foe '+tt['id'],2,'foe_'+tt['id']);MET.add(tt['id']);continue
+        R.append(f'{tag} met {tt["id"]} on foot (walk {name})');await shot('foe_'+tt['id']);await play_task('foe '+tt['id'],2,'foe_'+tt['id']);MET.add(tt['id']);t0=time.time();continue
       if tt:return 'task'
       p=await E('G.P()')
       if p['x']>=xt:return 'ok'

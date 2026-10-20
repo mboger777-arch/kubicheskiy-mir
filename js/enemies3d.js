@@ -13,7 +13,7 @@ const FOES={
    P.forEach((tri,i)=>{const c=[(tri[0][0]+tri[1][0]+tri[2][0])/3,(tri[0][1]+tri[1][1]+tri[2][1])/3];const sp=t.won?ease(Math.min(1,(T-t.won)*1.5))*40:0;
     X.save();X.translate((c[0]-cx)/s*sp*2,(c[1]-cy)/s*sp*2+wob);X.beginPath();X.moveTo(...tri[0]);X.lineTo(...tri[1]);X.lineTo(...tri[2]);X.closePath();X.fillStyle=col[i%4];X.globalAlpha=.92;X.fill();X.globalAlpha=1;X.lineWidth=8;X.lineJoin='round';X.strokeStyle='#2a6a1e';X.stroke();X.restore()});
    const fx=cx-s*.12,fy=cy-s*.05;X.fillStyle='#1d3a14';X.fillRect(fx-s*.12,fy-s*.08,s*.07,s*.1);X.fillRect(fx+s*.17,fy-s*.08,s*.07,s*.1)}},
- tupik:{zone:'mine',when:p=>SV.mw>=2&&p.x>50.5&&p.x<54.5&&Math.abs(p.z-TZ-.5)<2,at:p=>[p.x+4.5,TZ+.5],n:2,inL:'tp_in',q2:'tp_q2',okL:'tp_ok',tab:'tab_grey',
+ tupik:{zone:'mine',when:p=>SV.mw>=2&&p.x>50.5&&p.x<54.5&&Math.abs(p.z-TZ-.5)<2,at:p=>[Math.min(p.x+3.8,54.6),TZ+.5],n:2,inL:'tp_in',q2:'tp_q2',okL:'tp_ok',tab:'tab_grey',
   q(t){let a;do{a=pick([30,40,50,60,70,110,120,130,140,150])}while(t.q&&t.q.ok===a);const o=[a,180-a,a+(a<90?20:-20)];return{a,ok:a,opts:shuffle(o),hint:'tp_bad',lab:v=>v+'°'}},
   draw(t,b){const[x,y,w,h]=b;const R=Math.min(w*.4,h*.7),cx=x+w/2,cy=y+h*.86;protractor(cx,cy,R,{alpha:.95});
    const a=t.won?t.q.a+Math.sin(T*20)*3:t.q.a;angleRays(cx,cy,R*1.02,0,a,{rod:'iron',th:20,arc:true,ar:R*.3});
