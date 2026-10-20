@@ -342,17 +342,22 @@ function groundTop(x,z){const X_=Math.floor(x),Z_=Math.floor(z);for(let y=WY-1;y
 function groundAt(x,z,fromY){const X_=Math.floor(x),Z_=Math.floor(z);for(let y=Math.min(WY-1,Math.floor(fromY));y>=0;y--)if(solidT(vget(X_,y,Z_)))return y+1;return GY+1}
 function collides(px,py,pz,hw,h){for(let x=Math.floor(px-hw);x<=Math.floor(px+hw-1e-4);x++)for(let z=Math.floor(pz-hw);z<=Math.floor(pz+hw-1e-4);z++)for(let y=Math.floor(py);y<=Math.floor(py+h-1e-4);y++)if(solidT(vget(x,y,z)))return true;return false}
 const GRAV=28,JUMPV=8.6;
-function physEnt(e,dt,mx,mz,jump){const sp=e.speed||4.3;e.v.x=mx*sp;e.v.z=mz*sp;e.v.y-=GRAV*dt;if(e.v.y<-30)e.v.y=-30;
+// физика шагами ≤1/120 с: прыжок, падение и столкновения одинаковы при любом fps
+function physEnt(e,dt,mx,mz,jump){if(!(dt>0))return;dt=Math.min(dt,.12);const n=Math.max(1,Math.ceil(dt*120-1e-6));for(let i=0;i<n;i++)physStep(e,dt/n,mx,mz,jump&&i===0||jump&&e.onG)}
+function physStep(e,dt,mx,mz,jump){const sp=e.speed||4.3;e.v.x=mx*sp;e.v.z=mz*sp;e.v.y-=GRAV*dt;if(e.v.y<-30)e.v.y=-30;
  // в воде — медленно и выталкивает
- const inW=BT[vget(Math.floor(e.p.x),Math.floor(e.p.y+.3),Math.floor(e.p.z))].fluid;if(inW){e.v.x*=.5;e.v.z*=.5;e.v.y=Math.max(e.v.y,-2);if(jump||e.swimUp)e.v.y=3.2}
+ const inW=BT[vget(Math.floor(e.p.x),Math.floor(e.p.y+.3),Math.floor(e.p.z))].fluid;if(inW){e.v.x*=.6;e.v.z*=.6;e.v.y=Math.max(e.v.y,-2);const hd=BT[vget(Math.floor(e.p.x),Math.floor(e.p.y+e.h*.8),Math.floor(e.p.z))].fluid;if(hd)e.v.y=Math.max(e.v.y,1.4);if(jump||e.swimUp)e.v.y=3.4;
+  if(mx||mz){const ax=e.p.x+Math.sign(mx)*(e.hw+.15),az=e.p.z+Math.sign(mz)*(e.hw+.15);const fx=mx?ax:e.p.x,fz=mz?az:e.p.z;if(e.v.y<2&&((mx&&collides(ax,e.p.y+.05,e.p.z,.05,.9))||(mz&&collides(e.p.x,e.p.y+.05,az,.05,.9)))){
+   // выбраться на берег: ищем верх берега в пределах 3 блоков и подпрыгиваем ровно на него
+   const by=Math.floor(e.p.y);for(let k=0;k<4;k++){if(solidT(vget(Math.floor(fx),by+k,Math.floor(fz)))&&!collides(fx,by+k+1,fz,.05,e.h)){const top=by+k+1;if(!collides(e.p.x,e.p.y,e.p.z,e.hw,top-e.p.y+e.h+.05))e.v.y=Math.sqrt(2*GRAV*(top-e.p.y+.22));break}}}}}
  if(jump&&e.onG){e.v.y=JUMPV;e.onG=false;if(e===PL)SFX.jump()}
  // автопрыжок: впереди ступенька в 1 блок, над ней свободно
  if(e.onG&&(mx||mz)){const ax=e.p.x+Math.sign(mx)*(e.hw+.12),az=e.p.z+Math.sign(mz)*(e.hw+.12);const by=Math.floor(e.p.y+.05);
   const blockAhead=(mx&&collides(ax,e.p.y+.05,e.p.z,.05,.9))||(mz&&collides(e.p.x,e.p.y+.05,az,.05,.9));
   if(blockAhead){const fx=mx?ax:e.p.x,fz=mz?az:e.p.z;if(!collides(fx,by+1.02,fz,.05,e.h)&&!collides(e.p.x,e.p.y+.05,e.p.z,e.hw,e.h+1.05)){e.v.y=JUMPV*.92;e.onG=false}}}
- const step=(ax,d)=>{if(!d)return;const n=Math.ceil(Math.abs(d)/.2);const s=d/n;for(let i=0;i<n;i++){const q=e.p.clone();q[ax]+=s;if(collides(q.x,q.y,q.z,e.hw,e.h)){if(ax==='y'){if(s<0)e.onG=true;e.v.y=0}return}e.p[ax]=q[ax]}};
+ const step=(ax,d)=>{if(!d)return;const n=Math.ceil(Math.abs(d)/.2);const s=d/n;for(let i=0;i<n;i++){const q=e.p.clone();q[ax]+=s;if(collides(q.x,q.y,q.z,e.hw,e.h)){if(ax==='y'){if(s<0){e.onG=true;const fy=Math.floor(q.y)+1;if(fy<=e.p.y+1e-6&&fy>e.p.y-.25&&!collides(e.p.x,fy,e.p.z,e.hw,e.h))e.p.y=fy}else{const cy=Math.floor(q.y+e.h)-e.h;if(cy>=e.p.y-1e-6&&!collides(e.p.x,cy,e.p.z,e.hw,e.h))e.p.y=cy}e.v.y=0}return}e.p[ax]=q[ax]}};
  e.onG=false;step('x',e.v.x*dt);step('z',e.v.z*dt);step('y',e.v.y*dt);
- if(!e.onG&&collides(e.p.x,e.p.y-.03,e.p.z,e.hw,.02))e.onG=true;
+ if(!e.onG&&e.v.y<=0&&collides(e.p.x,e.p.y-.03,e.p.z,e.hw,.02)){e.onG=true;const fy=Math.ceil(e.p.y-.031);if(fy<=e.p.y&&!collides(e.p.x,fy,e.p.z,e.hw,e.h))e.p.y=fy;e.v.y=0}
  e.p.x=clamp(e.p.x,.5,WX-.5);e.p.z=clamp(e.p.z,.5,WZ-.5);if(e.p.y<-5){const g=groundAt(e.p.x,e.p.z,WY-1);e.p.y=g;e.v.y=0}
  const mv=Math.hypot(mx,mz);if(mv>.05){e.ty=Math.atan2(mx,mz)}e.walk=mv>.05&&e.onG?Math.min(1,e.walk+dt*6):Math.max(0,e.walk-dt*6)}
 function animEnt(e,dt){e.ph+=dt*(e.kind==='spider'?14:9)*(.3+e.walk);let d=e.ty-e.yaw;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;e.yaw+=d*Math.min(1,dt*10);
@@ -380,7 +385,7 @@ function stepCam(dt,snap){if(!PL)return;const eye=new T3.Vector3(PL.p.x,PL.p.y+1
  if(CAMS.focus){tgt=new T3.Vector3(...CAMS.focus.t);yaw=CAMS.focus.yaw;pitch=CAMS.focus.pitch;dist=CAMS.focus.dist}
  const fp=CAMS.fp&&!CAMS.focus;PL.hide=fp;
  const dir=new T3.Vector3(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));
- let pos;if(fp){pos=eye}else{const back=dir.clone().multiplyScalar(-1);let d=dist;const cut=CAMS.focus&&CAMS.focus.near;const h=cut?null:rayVox(tgt,back,dist,b=>opaqueT(b));if(h)d=Math.max(.6,h.t-.25);CAMS.cur=snap?d:Math.min(d,CAMS.cur+dt*6);if(d<CAMS.cur)CAMS.cur=d;pos=tgt.clone().addScaledVector(back,CAMS.cur)}
+ let pos;if(fp){pos=eye}else{const back=dir.clone().multiplyScalar(-1);let d=dist;const cut=CAMS.focus&&CAMS.focus.near;const h=cut?null:rayVox(tgt,back,dist,b=>opaqueT(b));if(h)d=Math.max(.2,h.t-.22);CAMS.cur=snap?d:Math.min(d,CAMS.cur+dt*6);if(d<CAMS.cur)CAMS.cur=d;pos=tgt.clone().addScaledVector(back,CAMS.cur)}
  if(snap||!CAM._init){CAM.position.copy(pos);CAM._init=1}else CAM.position.lerp(pos,Math.min(1,dt*(CAMS.focus?3:14)));
  CAM.lookAt(CAM.position.clone().add(dir));const nn=CAMS.focus&&CAMS.focus.near||.08;if(CAM.near!==nn){CAM.near=nn;CAM.updateProjectionMatrix()}}
 G.cam=()=>({x:CAM.position.x,y:CAM.position.y,z:CAM.position.z,yaw:CAMS.yaw,pitch:CAMS.pitch,fp:CAMS.fp});

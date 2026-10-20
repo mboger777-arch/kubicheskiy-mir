@@ -11,10 +11,10 @@ INIT="""(()=>{const nraf=window.requestAnimationFrame.bind(window);window.__FPS=
 window.requestAnimationFrame=cb=>{if(!window.__FPS&&!window.__SPIKE)return nraf(cb);const f=window.__FPS||30;let iv=1000/f;if(window.__SPIKE&&Math.random()<.1)iv=150+Math.random()*250;return setTimeout(()=>cb(performance.now()),iv)}})()"""
 H=r"""
 window.PT={};const P_=PT;
-P_.waitT=s=>new Promise(r=>{const t0=T,w0=performance.now();const f=()=>(T-t0>=s||performance.now()-w0>s*1000*8+4000)?r():setTimeout(f,10);f()});
+P_.waitT=s=>new Promise(r=>{const t0=T,w0=performance.now();const f=()=>((T-t0>=s&&performance.now()-w0>5)||performance.now()-w0>s*1000*8+4000)?r():setTimeout(f,8);setTimeout(f,8)});
 P_.arena=()=>{for(let x=14;x<=34;x++)for(let z=30;z<=47;z++){for(let y=1;y<WY;y++)vsetRaw(x,y,z,y<GY?B.stone:y===GY?B.grass:0)}
  for(let cz=1;cz<3;cz++)for(let cx=0;cx<3;cx++)rebuildChunk(cx,cz);if(typeof scanTorches==='function'){}};
-P_.put=(x,y,z,t)=>{vsetRaw(x,y,z,t==null?B.stone:t);rebuildChunk(Math.floor(x/CH),Math.floor(z/CH))};
+P_.put=(x,y,z,t)=>{x=Math.floor(x);y=Math.floor(y);z=Math.floor(z);vsetRaw(x,y,z,t==null?B.stone:t);rebuildChunk(Math.floor(x/CH),Math.floor(z/CH))};
 P_.reset=(x,z,y)=>{if(TASK)G.close();talk=null;DAY.night=false;MON.slice().forEach(m=>{rmEnt(m)});MON.length=0;JOY.on=false;JOY.vx=JOY.vy=0;for(const k in KEYS)KEYS[k]=0;G.tp(x,z,y);PL.v.set(0,0,0)};
 P_.move=(yaw,vx,vy)=>{CAMS.yaw=yaw;JOY.on=!!(vx||vy);JOY.vx=vx;JOY.vy=vy};
 P_.stop=()=>{JOY.on=false;JOY.vx=JOY.vy=0;KEYS.jump=0};
@@ -22,16 +22,17 @@ P_.inBlock=e=>collides(e.p.x,e.p.y+.02,e.p.z,e.hw*.9,e.h*.95);
 P_.st=()=>({x:+PL.p.x.toFixed(3),y:+PL.p.y.toFixed(3),z:+PL.p.z.toFixed(3),onG:PL.onG,inB:P_.inBlock(PL)});
 """
 TESTS=r"""
-async(n)=>{const R={};const ok=(k,c,info)=>{R[k]={ok:!!c,info}};const E=PT;const X=20.5,Z=38.5,G0=GY+1;
+async(n)=>{const R={};const ok=(k,c,info)=>{R[k]={ok:!!c,info};console.log('PT '+k+' '+(c?'ok':'FAIL')+' '+JSON.stringify(info).slice(0,200))};const E=PT;const X=20.5,Z=38.5,G0=GY+1;
  SV.f.intro=1;SV.f.tut=1;Object.keys(FOES).forEach(k=>SV.f['fo_'+k]=1);SV.f.zb1=1;SV.f.sp1=1;
  E.arena();
  // 1 гравитация и приземление
- E.reset(X,Z,G0+6);await E.waitT(1.6);ok('gravity_land',Math.abs(PL.p.y-G0)<.01&&PL.onG,E.st());
+ {window.LOGP=[];const o=physEnt;window.physEnt=function(e,dt,mx,mz,j){const y0=e.p.y;o(e,dt,mx,mz,j);if(e===PL&&LOGP.length<400)LOGP.push([+dt.toFixed(3),+y0.toFixed(3),+e.p.y.toFixed(3),+e.v.y.toFixed(2),e.onG])}}
+ E.reset(X,Z,G0+6);await E.waitT(1.6);ok('gravity_land',Math.abs(PL.p.y-G0)<.01&&PL.onG,{...E.st(),log:LOGP.slice(-2),c:collides(PL.p.x,PL.p.y-.002,PL.p.z,PL.hw,PL.h),hw:PL.hw,h:PL.h,col:[11,12,13,14,15].map(y=>vget(20,y,38)),task:TASK&&TASK.id});
  // 2 высота прыжка
  E.reset(X,Z);await E.waitT(.3);let y0=PL.p.y,my=y0;KEYS.jump=1;const t0=T;while(T-t0<1.0){my=Math.max(my,PL.p.y);await E.waitT(0)}KEYS.jump=0;await E.waitT(.6);
- ok('jump_height',my-y0>1.15&&my-y0<1.6,{h:+(my-y0).toFixed(3)});
+ ok('jump_height',my-y0>1.15&&my-y0<1.45,{h:+(my-y0).toFixed(3)});
  // 3 прыжок на ступеньку и автоподъём
- for(const mode of['jump','auto']){E.arena();for(let z=30;z<=47;z++)E.put(23,G0,z);E.reset(X,Z);await E.waitT(.2);E.move(Math.PI/2,0,-1);if(mode==='jump')KEYS.jump=1;await E.waitT(2.2);E.stop();await E.waitT(.4);
+ for(const mode of['jump','auto']){E.arena();for(let z=30;z<=47;z++)for(let x=23;x<=34;x++)E.put(x,G0,z);E.reset(X,Z,G0);await E.waitT(.2);E.move(Math.PI/2,0,-1);if(mode==='jump')KEYS.jump=1;await E.waitT(2.2);E.stop();await E.waitT(.4);
   ok('step_'+mode,Math.abs(PL.p.y-(G0+1))<.02&&PL.p.x>23.3&&!E.inBlock(PL),E.st())}
  // 4 стена в 2 блока — не пройти, не застрять
  E.arena();for(let z=30;z<=47;z++){E.put(23,G0,z);E.put(23,G0+1,z)}E.reset(X,Z);E.move(Math.PI/2,0,-1);KEYS.jump=1;await E.waitT(2.5);E.stop();await E.waitT(.3);
@@ -45,10 +46,10 @@ async(n)=>{const R={};const ok=(k,c,info)=>{R[k]={ok:!!c,info}};const E=PT;const
  // 7 скольжение вдоль стены
  E.arena();for(let x=14;x<=34;x++){E.put(x,G0,Z+1);E.put(x,G0+1,Z+1)}E.reset(X,Z);E.move(Math.PI/4,0,-1);await E.waitT(1.2);E.stop();ok('slide_wall',PL.p.x-X>2.5&&!E.inBlock(PL),E.st());
  // 8 потолок
- E.arena();E.put(20,G0+2,38);E.reset(X,Z);await E.waitT(.3);KEYS.jump=1;let my2=0;const t1=T;while(T-t1<.8){my2=Math.max(my2,PL.p.y);await E.waitT(0)}KEYS.jump=0;await E.waitT(.5);
+ E.arena();E.put(20,G0+2,38);E.reset(X,Z,G0);await E.waitT(.3);KEYS.jump=1;let my2=0;const t1=T;while(T-t1<.8){my2=Math.max(my2,PL.p.y);await E.waitT(0)}KEYS.jump=0;await E.waitT(.5);
  ok('ceiling',my2<=G0+2-PL.h+.01&&Math.abs(PL.p.y-G0)<.02&&!E.inBlock(PL),{my:my2,h:PL.h,...E.st()});
  // 9 яма в 1 блок — выйти; яма в 2 — выйти прыжком нельзя, но не застрять внутри блока
- E.arena();vsetRaw(22,GY,38,0);rebuildChunk(1,2);E.reset(X,Z);E.move(Math.PI/2,0,-1);await E.waitT(2.4);E.stop();await E.waitT(.3);ok('hole1_out',PL.p.x>23&&Math.abs(PL.p.y-G0)<.02,E.st());
+ E.arena();vsetRaw(22,GY,38,0);rebuildChunk(1,2);E.reset(X,Z);E.move(Math.PI/2,0,-1);await E.waitT(2.4);E.stop();await E.waitT(.3);ok('hole1_out',PL.p.x>23&&Math.abs(PL.p.y-G0)<.01,E.st());
  E.arena();for(let x=21;x<=23;x++)for(let y=GY-1;y<=GY;y++)vsetRaw(x,y,38,0);rebuildChunk(1,2);E.reset(22.5,38.5);await E.waitT(.8);const inHole=PL.p.y;E.move(Math.PI/2,0,-1);KEYS.jump=1;await E.waitT(2.5);E.stop();
  ok('hole2_fall',Math.abs(inHole-(GY-1))<.02&&!E.inBlock(PL),{inHole,...E.st()});
  // 10 копаем блок под собой — падаем
@@ -69,19 +70,19 @@ async(n)=>{const R={};const ok=(k,c,info)=>{R[k]={ok:!!c,info}};const E=PT;const
  const fl=[GRN,DOG].map(f=>({k:f.kind,d:+Math.hypot(f.p.x-PL.p.x,f.p.z-PL.p.z).toFixed(2),inB:E.inBlock(f),fly:+(f.p.y-groundAt(f.p.x,f.p.z,f.p.y+.3)).toFixed(2)}));
  ok('followers',fl.every(f=>f.d<4.5&&!f.inB&&Math.abs(f.fly)<.05),fl);
  // 16 враг: идёт к игроку, на земле, не в стене, перешагивает ступеньку
- E.arena();for(let z=30;z<=47;z++)E.put(24,G0,z);E.reset(X,Z);const m=spawnMonster('zombie',29.5,38.5);m.fixed=1;m.task=1;let mon=[];for(let i=0;i<25;i++){m.task=0;await E.waitT(.12);m.task=1;if(TASK)G.close();mon.push(E.inBlock(m))}
- const mg=m.p.y-groundAt(m.p.x,m.p.z,m.p.y+.3);ok('enemy_ground',!mon.some(Boolean)&&Math.abs(mg)<.05,{x:m.p.x,y:m.p.y,mg});rmEnt(m);MON.length=0;
+ E.arena();for(let z=30;z<=47;z++)E.put(24,G0,z);E.reset(15.5,Z);const m=spawnMonster('zombie',30.5,38.5);m.fixed=1;let mon=[];for(let i=0;i<80&&m.p.x>20.5;i++){await E.waitT(.1);mon.push(E.inBlock(m))}m.task=1;
+ for(let i=0;i<30&&!m.onG;i++)await E.waitT(.05);const mg=m.p.y-groundAt(m.p.x,m.p.z,m.p.y+.3);ok('enemy_walk_step',!mon.some(Boolean)&&Math.abs(mg)<.05&&m.p.x<=21,{x:m.p.x,y:m.p.y,mg,inB:mon.filter(Boolean).length});rmEnt(m);MON.length=0;
  // 17 камера не внутри блока (тоннель в 3 блока)
  E.arena();for(let x=14;x<=34;x++)for(let y=G0;y<=G0+5;y++)for(const z of[36,37,40,41])vsetRaw(x,y,z,B.stone);for(let x=14;x<=34;x++)for(let z=36;z<=41;z++)vsetRaw(x,G0+3,z,B.stone);for(let cx=0;cx<3;cx++)rebuildChunk(cx,2);
  let cin=[];CAMS.fp=false;for(const yw of[0,Math.PI/2,Math.PI,-Math.PI/2,.8]){E.reset(X,Z);CAMS.yaw=yw;CAMS.pitch=-.3;await E.waitT(.6);const c=CAM.position;if(opaqueT(vget(Math.floor(c.x),Math.floor(c.y),Math.floor(c.z))))cin.push(yw)}
  CAMS.pitch=-.22;ok('camera_not_in_block',!cin.length,cin);
  // 18 вода: в реке не тонем и не застреваем, выходим на берег, держа джойстик к берегу
- SV.z=Math.max(SV.z,2);E.reset(RIV.x0+3.5,TZ+6.5,GY);await E.waitT(.5);const wy=PL.p.y;E.move(-Math.PI/2,0,-1);await E.waitT(5);E.stop();await E.waitT(.3);
+ SV.mw=3;SV.z=Math.max(SV.z,2);E.reset(RIV.x0+3.5,TZ+6.5,GY);await E.waitT(.5);const wy=PL.p.y;E.move(-Math.PI/2,0,-1);await E.waitT(5);E.stop();await E.waitT(.3);
  ok('water_exit',PL.p.x<RIV.x0&&PL.onG&&!E.inBlock(PL),{wy,...E.st()});
  // 19 лава — мягко возвращает на мост
  SV.z=Math.max(SV.z,4);E.reset(142.5,TZ+6.5,GY+1);await E.waitT(1);ok('lava_back',Math.abs(PL.p.x-139.5)<.6&&!E.inBlock(PL),E.st());
  // 20 мост через реку проходим
- E.reset(RIV.x0-1.5,TZ+.5);await E.waitT(.3);E.move(Math.PI/2,0,-1);await E.waitT(3.6);E.stop();ok('bridge_walk',PL.p.x>RIV.x1+1&&!E.inBlock(PL),{deck:vget(RIV.x0+2,GY,TZ),...E.st()});
+ SV.z=Math.max(SV.z,2);for(let s=0;s<3;s++)deckSpan(s,false);E.reset(RIV.x0-1.5,TZ+.5);await E.waitT(.3);E.move(Math.PI/2,0,-1);await E.waitT(3.6);E.stop();ok('bridge_walk',PL.p.x>RIV.x1+1&&!E.inBlock(PL),{deck:vget(RIV.x0+2,GY,TZ),...E.st()});
  // 21 возврат со вкладки: пауза 3 с — без телепорта
  E.arena();E.reset(X,Z);await E.waitT(.3);const pv=PL.p.clone();window.__STALL=1;await new Promise(r=>setTimeout(r,3000));window.__STALL=0;await E.waitT(.5);
  ok('tab_resume',PL.p.distanceTo(pv)<.05,{d:PL.p.distanceTo(pv)});
@@ -92,7 +93,7 @@ async def run(b,W,Hh,fps):
   ctx=await b.new_context(viewport={'width':W,'height':Hh},has_touch=True,is_mobile=True,device_scale_factor=2,
      user_agent='Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1')
   await ctx.add_init_script(INIT+";(()=>{const o=window.requestAnimationFrame;window.requestAnimationFrame=cb=>window.__STALL?setTimeout(()=>window.requestAnimationFrame(cb),50):o(cb)})()")
-  pg=await ctx.new_page();errs=[];pg.on('pageerror',lambda e:errs.append(str(e)))
+  pg=await ctx.new_page();errs=[];pg.on('pageerror',lambda e:errs.append(str(e)));pg.on('console',lambda m:print('   ',tag,m.text,flush=True) if m.text.startswith('PT ') else None)
   await pg.goto(URL);await pg.evaluate('localStorage.clear()');await pg.reload();await pg.wait_for_function('typeof G!=="undefined"&&G.scene==="title"',timeout=90000)
   await pg.evaluate("G.mute=true;SV.f.intro=1;G.go('world')");await pg.wait_for_timeout(1500)
   if fps=='spike':await pg.evaluate('window.__SPIKE=1')
