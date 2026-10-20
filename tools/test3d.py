@@ -93,6 +93,8 @@ async def run(b,W,H,F,R):
       tt=await task()
       if tt and tt['id'] in FOES:
         R.append(f'{tag} met {tt["id"]} on foot (walk {name})');await shot('foe_'+tt['id']);await play_task('foe '+tt['id'],2,'foe_'+tt['id']);MET.add(tt['id']);t0=time.time();continue
+      if tt and tt['id'] in ('zombie','spider') and name.startswith('across'):
+        R.append(f'{tag} {tt["id"]} met on foot ({name})');await play_task(tt['id']+' on foot',None);t0=time.time();continue
       if tt:return 'task'
       p=await E('G.P()')
       if p['x']>=xt:return 'ok'
@@ -144,7 +146,7 @@ async def run(b,W,H,F,R):
   await touch([]);await pg.wait_for_timeout(700)
   if y1-y0<.3:F.append(f'{tag} jump did not lift {y0}->{y1}')
   # ---- копать (держать), ставить, отменить
-  await E('G.tp(10.5,23.5);talk=null');await E('G.look(Math.PI/2,-0.5)');await pg.wait_for_timeout(300)
+  await E('G.tp(10.5,23.5);talk=null');await E('G.look(Math.PI/2,-0.5)');await pg.wait_for_timeout(1000)
   gy=int((await E('G.P()'))['y'])-1;await dig_block(12,gy,23)
   if await E(f'G.vget(12,{gy},23)')!=0:F.append(f'{tag} dig: block not removed')
   inv=(await E('G.P()'))['inv']
@@ -199,8 +201,8 @@ async def run(b,W,H,F,R):
   if not t or t['id']!='river':F.append(f'{tag} river not opened on foot ({t}) {await E("G.P()")}');await E("G.close();G.open('river')")
   await play_task('river',3,'river')
   if (await E('G.P()'))['z_']<2:F.append(f'{tag} river not completed')
-  await E('G.tp(64.2,23.5,13);talk=null');r=await walk_to(76,'across bridge',25)
-  if (await E('G.P()'))['x']<75:F.append(f'{tag} could not cross bridge {await E("G.P()")}')
+  await E('G.tp(64.2,23.5,13);talk=null');r=await walk_to(79,'across bridge',40)
+  if (await E('G.P()'))['x']<75 and r!='ok':F.append(f'{tag} could not cross bridge {await E("G.P()")}')
   await E('G.look(Math.PI*1.25,-0.3)');await pg.wait_for_timeout(500);await shot('bridge')
   # ---- 3. кузница + забрать предмет обратно
   await E("G.zone(3)");await pg.wait_for_timeout(800);await E("if(G.task())G.close();talk=null;G.tp(89,25.5)");r=await walk_to(92.5,'to forge',20,zt=26.5);t=await task()

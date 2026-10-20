@@ -369,10 +369,10 @@ function placeEnt(e){e.obj.position.copy(e.p);e.obj.rotation.y=e.yaw;e.obj.visib
 let HANDS=null,HAND=null;
 function makeHand(){HANDS=new T3.Scene();HANDS.add(new T3.HemisphereLight(0xffffff,0x8890a0,1.7));const dl=new T3.DirectionalLight(0xfff2dc,1.2);dl.position.set(-1,2,1);HANDS.add(dl);
  const b=CHARS.bloki();let arm=null;b.traverse(c=>{if(c.userData&&c.userData.tool)arm=c});HAND=new T3.Group();const piv=new T3.Group();arm.position.set(0,0,0);arm.rotation.set(0,0,0);piv.add(arm);
- piv.scale.setScalar(K3*1.1);piv.rotation.set(1.42,.32,.1);HAND.add(piv);HAND.userData.piv=piv;HANDS.add(HAND)}
+ let pk=null;piv.traverse(c=>{if(!pk&&Math.abs(c.rotation.x-Math.PI/2)<.01)pk=c});if(pk)pk.rotation.x=-Math.PI/2;piv.scale.setScalar(K3*1.1);piv.rotation.set(1.6,.3,.05);HAND.add(piv);HAND.userData.piv=piv;HANDS.add(HAND)}
 function renderHand(){if(!CAMS.fp||CAMS.focus||!PL||PL.hide===false)return;if(!HANDS)makeHand();
  const k=PL.swingT!=null?(T-PL.swingT)/SWD:1;const s=swingCurve(k);const bob=Math.sin(PL.ph*.5)*.025*PL.walk;
- HAND.position.set(.5+s*.03,-.46+bob,-.22+s*.04);HAND.rotation.set(-s*.9,0,s*.15);HAND.quaternion.premultiply(CAM.quaternion);HAND.position.applyQuaternion(CAM.quaternion).add(CAM.position);
+ HAND.position.set(.44+s*.03,-.44+bob,-.56+s*.06);HAND.rotation.set(-s*.9,0,s*.15);HAND.quaternion.premultiply(CAM.quaternion);HAND.position.applyQuaternion(CAM.quaternion).add(CAM.position);
  const lt=1-UNDER*.4-NIGHTK*.4;HANDS.children[0].intensity=1.7*lt;REN.autoClear=false;REN.clearDepth();REN.render(HANDS,CAM);REN.autoClear=true}
 // ---- камера: от третьего лица (за спиной Блоки) или его глазами ----
 const CAMS={yaw:Math.PI/2,pitch:-.22,fp:false,dist:5.2,cur:5.2,focus:null,fyaw:null};

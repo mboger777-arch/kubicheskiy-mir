@@ -43,7 +43,7 @@ const FOEK=Object.keys(FOES);
 // появление: один раз в своей зоне, днём, когда Блоки дошёл до места встречи
 function stepFoes(){if(TASK||!PL)return;const p=PL.p;for(const k of FOEK){const F=FOES[k];if(SV.f['fo_'+k]||MON.some(m=>m.kind===k))continue;
  if(zoneAt(Math.floor(p.x))!==F.zone&&!(k==='drowned'&&p.x>73))continue;if(!F.when(p))continue;const[x,z]=F.at(p);
- const e=spawnMonster(k,Math.min(x,barrierX()-1),z);e.fixed=1;e.foe=1;if(k==='slime'||k==='tupik'){e.hw=.45;e.h=1.1}}}
+ const sx=Math.min(x,barrierX()-1);const e=spawnMonster(k,sx,z,groundAt(sx,z,p.y+1.5));e.fixed=1;e.foe=1;if(k==='slime'||k==='tupik'){e.hw=.45;e.h=1.1}}}
 function foeCam(t){const e=t.ent;const d=new T3.Vector3(e.p.x-PL.p.x,0,e.p.z-PL.p.z);if(d.length()<.5)d.set(1,0,0);d.normalize();t.dir=d;
  const yaw=Math.atan2(d.x,d.z)+Math.PI/2,rx=-Math.cos(yaw),rz=Math.sin(yaw);const mid=PL.p.clone().addScaledVector(d,1.6);
  focusAt(mid.x+rx*1.9,PL.p.y+1.25,mid.z+rz*1.9,yaw,-.1,6.6,[yaw-Math.PI]);const f=CAMS.focus;if(f.yaw!==yaw){const ry=f.yaw,r2x=-Math.cos(ry),r2z=Math.sin(ry);f.t=[mid.x+r2x*1.9,PL.p.y+1.25,mid.z+r2z*1.9]}}
