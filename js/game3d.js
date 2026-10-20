@@ -174,7 +174,7 @@ SC.title={enter(){showScene(['bloki','gran','pixel'],12.5,TZ,6.4,1.3)},update(dt
  ui(){const s=safeV();const cx=s.x1-130,cy=s.y1-190;drawBtn('b_ok',cx,cy,180,{pulse:1});btn('play',cx,cy,180,180,()=>{go(SV.f.intro?'world':'intro')});
   const tb=nine('board',cx-120,cy+96,240,80);if(tb)fitText(SV.z||SV.f.intro?'Дальше':'Играть',tb,44,'#fff',{one:1});
   if(SV.f.intro){const rx=s.x0+120,ry=s.y1-90;tabBtn('reset',rx,ry,220,96,'Заново',()=>{SV=freshSV();save(1);go('intro')},{fs:36,one:1})}
-  tabBtn('quality',s.x0+150,s.y1-(SV.f.intro?206:90),280,96,QHI?'Графика: высокая':'Графика: быстрая',()=>setQuality(QHI?'lo':'hi'),{fs:30,one:1})}};
+  tabBtn('quality',s.x0+190,s.y1-(SV.f.intro?206:90),360,104,QHI?'Графика: высокая':'Графика: быстрая',()=>setQuality(QHI?'lo':'hi'),{fs:38,one:1})}};
 const INTRO=['i1','i2','i3','i4','i5','i6'];
 SC.intro={skipOnTalk:1,enter(){showScene(['bloki','gran','pixel'],12.5,TZ,6.4,1.3);const c=ctxNow();this.k=0;run(async()=>{for(let i=0;i<INTRO.length;i++){this.k=i;if(INTRO[i]==='i5')showScene(['bloki','gran','pixel','krivo'],12.5,TZ,7.4,1.4);await say(INTRO[i],c)}await wait(300,c);SV.f.intro=1;save(1);go('world')})},
  update(dt){idleScene(dt)},draw(){render3d(DT)},

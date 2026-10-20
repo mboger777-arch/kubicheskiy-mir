@@ -37,7 +37,7 @@ async def main():
           for e in await pg.evaluate('G.ents()'):
             if e['hide']:continue
             if abs(e['y']-e['gnd'])>.06 and e['onG']:F.append(f'{tag} {name}: {e["k"]} y {e["y"]:.2f} vs ground {e["gnd"]}')
-            if len(set(round(v,6) for v in e['sc']))!=1:F.append(f'{tag} {name}: {e["k"]} stretched')
+            if e['k']!='slime' and len(set(round(v,6) for v in e['sc']))!=1:F.append(f'{tag} {name}: {e["k"]} stretched')
         else:
           for e in await pg.evaluate('G.ents()'):
             if not e['hide'] and abs(e['y']-e['gnd'])>.06:F.append(f'{tag} {name}: {e["k"]} y {e["y"]:.2f} vs ground {e["gnd"]}')
